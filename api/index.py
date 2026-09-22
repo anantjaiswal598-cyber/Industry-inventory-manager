@@ -9,9 +9,20 @@ DATA_FILE = "/tmp/crusher_data.json"
 
 def load_data():
     if not os.path.exists(DATA_FILE):
-        return {"purchases": [], "usage": []}
+        return {"purchases": [], "usage": [], "suppliers": []}
     with open(DATA_FILE, "r") as f:
-        return json.load(f)
+        data = json.load(f)
+        
+        # Auto-migrate: If 'suppliers' list doesn't exist yet, build it from old purchases
+        if "suppliers" not in data:
+            unique_suppliers = {}
+            for p in data.get("purchases", []):
+                name = p.get("supplier")
+                if name and name not in unique_suppliers:
+                    unique_suppliers[name] = p.get("source", "")
+            data["suppliers"] = [{"name": k, "location": v} for k, v in unique_suppliers.items()]
+            
+        return data
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
@@ -36,12 +47,19 @@ def get_stock():
 def add_purchase():
     data = load_data()
     req = request.json
+    supplier_name = req.get("supplier")
+    source = req.get("source", "")
+    
+    # Auto-add supplier to master list if it's new
+    if supplier_name and not any(s["name"].lower() == supplier_name.lower() for s in data["suppliers"]):
+        data["suppliers"].append({"name": supplier_name, "location": source})
+        
     data["purchases"].append({
         "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
         "category": req.get("category", "Uncategorized"),
         "item": req.get("item"),
-        "supplier": req.get("supplier"),
-        "source": req.get("source"),
+        "supplier": supplier_name,
+        "source": source,
         "quantity": float(req.get("quantity", 0)),
         "unit": req.get("unit"),
         "price": float(req.get("price", 0)),
@@ -82,15 +100,40 @@ def get_history():
 @app.route('/api/suppliers', methods=['GET'])
 def get_suppliers():
     data = load_data()
-    suppliers = {}
+    stats = {}
+    # Count purchase totals for each supplier
     for p in data["purchases"]:
         name = p.get("supplier", "Unknown")
-        suppliers.setdefault(name, {"source": p.get("source", ""), "total": 0, "count": 0})
-        suppliers[name]["total"] += p.get("price", 0)
-        suppliers[name]["count"] += 1
+        stats.setdefault(name, {"count": 0, "total": 0})
+        stats[name]["count"] += 1
+        stats[name]["total"] += p.get("price", 0)
         
-    supplier_list = [
-        {"name": k, "source": v["source"], "count": v["count"], "total": v["total"]} 
-        for k, v in suppliers.items()
-    ]
-    return jsonify(supplier_list)
+    # Combine with master list
+    result = []
+    for s in data["suppliers"]:
+        name = s["name"]
+        result.append({
+            "name": name,
+            "location": s.get("location", ""),
+            "count": stats.get(name, {}).get("count", 0),
+            "total": stats.get(name, {}).get("total", 0)
+        })
+    return jsonify(result)
+
+@app.route('/api/supplier_action', methods=['POST'])
+def manage_supplier():
+    data = load_data()
+    req = request.json
+    action = req.get("action")
+    name = req.get("name")
+    
+    if action == "add":
+        location = req.get("location", "")
+        if not any(s["name"].lower() == name.lower() for s in data["suppliers"]):
+            data["suppliers"].append({"name": name, "location": location})
+    elif action == "delete":
+        # Removes supplier from master list (keeps old purchase records intact)
+        data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
+        
+    save_data(data)
+    return jsonify({"message": "Success"})
