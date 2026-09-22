@@ -5,19 +5,18 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Vercel allows writing ONLY to /tmp. 
-# Note: Data in /tmp will reset when the serverless function goes to sleep.
+# Vercel requires writing data to the /tmp folder for serverless functions
 DATA_FILE = "/tmp/crusher_data.json"
 
 def load_data():
-    """Load saved data from the JSON file[cite: 1]."""
+    """Load saved data from the JSON file."""
     if not os.path.exists(DATA_FILE):
         return {"purchases": [], "usage": []}
     with open(DATA_FILE, "r") as f:
         return json.load(f)
 
 def save_data(data):
-    """Write all data back to the JSON file[cite: 1]."""
+    """Write all data back to the JSON file."""
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
 
