@@ -4,70 +4,218 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Industory Inventory Manager</title>
+    <!-- Importing Chart.js for the graph -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1, h2 { color: #333; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
-        input, button { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
-        button:hover { background: #218838; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
+        :root {
+            --primary: #4F46E5;
+            --success: #10B981;
+            --bg: #F3F4F6;
+            --card-bg: #FFFFFF;
+            --text-main: #1F2937;
+            --text-muted: #6B7280;
+        }
+        
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 20px; 
+            color: var(--text-main);
+        }
+
+        .header {
+            max-width: 1200px;
+            margin: 0 auto 20px;
+            padding: 10px 0;
+            border-bottom: 2px solid #e5e7eb;
+        }
+
+        .header h1 { margin: 0; color: var(--primary); font-size: 28px; }
+
+        .dashboard-layout {
+            max-width: 1200px;
+            margin: auto;
+            display: grid;
+            grid-template-columns: 2fr 1fr; /* Left column wider, Right column for graph */
+            gap: 25px;
+            align-items: start;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+        .card { 
+            background: var(--card-bg); 
+            padding: 20px; 
+            border-radius: 12px; 
+            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); 
+            border: 1px solid #f3f4f6;
+            margin-bottom: 20px;
+        }
+
+        .card h2 { 
+            margin-top: 0; 
+            font-size: 18px; 
+            color: var(--text-main); 
+            border-bottom: 1px solid #e5e7eb; 
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+
+        input, select, button { 
+            width: 100%; 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            border: 1px solid #D1D5DB; 
+            border-radius: 8px; 
+            box-sizing: border-box; 
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2);
+        }
+
+        button { 
+            background: var(--success); 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 15px;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.4);
+        }
+
+        button:hover { 
+            background: #059669; 
+            transform: translateY(-1px);
+        }
+
+        .btn-blue {
+            background: var(--primary);
+            box-shadow: 0 4px 6px -1px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-blue:hover { background: #4338CA; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 5px; font-size: 14px; }
+        th, td { border-bottom: 1px solid #e5e7eb; padding: 12px 8px; text-align: left; }
+        th { color: var(--text-muted); font-weight: 600; text-transform: uppercase; font-size: 12px; }
+        
+        /* Hidden by default, shown via JS */
+        #u-purpose-other { display: none; }
+        
+        /* Graph Container */
+        .chart-container { position: relative; height: 350px; width: 100%; }
+        
+        @media (max-width: 768px) {
+            .dashboard-layout { grid-template-columns: 1fr; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
 
-<div class="container">
+<div class="header">
     <h1>Industory Inventory Manager</h1>
-    
-    <div class="grid">
-        <!-- Add Purchase Form -->
-        <div class="card">
-            <h2>Add Purchase</h2>
-            <input type="text" id="p-item" placeholder="Product name (e.g. Diesel)">
-            <input type="text" id="p-supplier" placeholder="Supplier">
-            <input type="text" id="p-source" placeholder="Source (city / place)">
-            <input type="number" id="p-qty" placeholder="Quantity">
-            <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
-            <input type="number" id="p-price" placeholder="Total Price">
-            <button onclick="addPurchase()">Save Purchase</button>
+</div>
+
+<div class="dashboard-layout">
+    <!-- LEFT COLUMN: Forms & Stock -->
+    <div class="left-column">
+        <div class="grid-2">
+            <!-- Add Purchase Form -->
+            <div class="card">
+                <h2>Add Purchase</h2>
+                
+                <select id="p-category">
+                    <option value="" disabled selected>Select Category...</option>
+                    <option value="Fuel">Fuel</option>
+                    <option value="Spare Parts">Spare Parts</option>
+                    <option value="Raw Material">Raw Material</option>
+                    <option value="Tools">Tools</option>
+                    <option value="Other">Other</option>
+                </select>
+
+                <input type="text" id="p-item" placeholder="Product name (e.g. Diesel)">
+                <input type="text" id="p-supplier" placeholder="Supplier">
+                <input type="text" id="p-source" placeholder="Source (city / place)">
+                <input type="number" id="p-qty" placeholder="Quantity">
+                <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
+                <input type="number" id="p-price" placeholder="Total Price">
+                <button onclick="addPurchase()">Save Purchase</button>
+            </div>
+
+            <!-- Add Usage Form -->
+            <div class="card">
+                <h2>Record Usage</h2>
+                <input type="text" id="u-item" placeholder="Product used (e.g. Diesel)">
+                <input type="number" id="u-qty" placeholder="Quantity">
+                
+                <select id="u-purpose-select" onchange="toggleOtherPurpose()">
+                    <option value="" disabled selected>Select Purpose...</option>
+                    <option value="Crusher">Crusher</option>
+                    <option value="Road construction">Road construction</option>
+                    <option value="Vehicles (JCB/Tipper)">Vehicles (JCB/Tipper)</option>
+                    <option value="Other">Other (Type below)</option>
+                </select>
+                <input type="text" id="u-purpose-other" placeholder="Please specify purpose...">
+                
+                <button onclick="addUsage()">Save Usage</button>
+            </div>
         </div>
 
-        <!-- Add Usage Form -->
+        <!-- Current Stock View -->
         <div class="card">
-            <h2>Record Usage</h2>
-            <input type="text" id="u-item" placeholder="Product used (e.g. Diesel)">
-            <input type="number" id="u-qty" placeholder="Quantity">
-            <input type="text" id="u-purpose" placeholder="Purpose (e.g. JCB, Tipper)">
-            <button onclick="addUsage()">Save Usage</button>
+            <h2>Current Stock</h2>
+            <button class="btn-blue" onclick="loadDashboardData()" style="width: auto; padding: 8px 16px; margin-bottom: 0;">Refresh Data</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Remaining</th>
+                        <th>Unit</th>
+                    </tr>
+                </thead>
+                <tbody id="stock-table">
+                    <!-- Data populated by JS -->
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <!-- Current Stock View -->
-    <div class="card" style="margin-top: 20px;">
-        <h2>Current Stock</h2>
-        <button onclick="loadStock()" style="background: #007bff;">Refresh Stock</button>
-        <table>
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Remaining</th>
-                    <th>Unit</th>
-                </tr>
-            </thead>
-            <tbody id="stock-table">
-                <!-- Data populated by JS -->
-            </tbody>
-        </table>
+    <!-- RIGHT COLUMN: Graphs -->
+    <div class="right-column">
+        <div class="card">
+            <h2>Monthly Usage Trend</h2>
+            <div class="chart-container">
+                <canvas id="monthlyChart"></canvas>
+            </div>
+            <p style="font-size: 12px; color: #6B7280; text-align: center; margin-top: 15px;">Shows total quantity of items consumed per month.</p>
+        </div>
     </div>
 </div>
 
 <script>
+    let usageChartInstance = null;
+
+    // Handle "Other" dropdown logic
+    function toggleOtherPurpose() {
+        const select = document.getElementById('u-purpose-select');
+        const otherInput = document.getElementById('u-purpose-other');
+        if (select.value === 'Other') {
+            otherInput.style.display = 'block';
+        } else {
+            otherInput.style.display = 'none';
+        }
+    }
+
     async function addPurchase() {
         const payload = {
+            category: document.getElementById('p-category').value,
             item: document.getElementById('p-item').value,
             supplier: document.getElementById('p-supplier').value,
             source: document.getElementById('p-source').value,
@@ -75,46 +223,100 @@
             unit: document.getElementById('p-unit').value,
             price: document.getElementById('p-price').value
         };
+        
+        if(!payload.category || !payload.item) {
+            alert("Please fill in at least Category and Product name.");
+            return;
+        }
+
         await fetch('/api/purchase', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         alert('Purchase saved!');
-        loadStock();
+        loadDashboardData();
     }
 
     async function addUsage() {
+        // Check if purpose is standard or custom typed
+        let purposeValue = document.getElementById('u-purpose-select').value;
+        if (purposeValue === 'Other') {
+            purposeValue = document.getElementById('u-purpose-other').value;
+        }
+
         const payload = {
             item: document.getElementById('u-item').value,
             quantity: document.getElementById('u-qty').value,
-            purpose: document.getElementById('u-purpose').value
+            purpose: purposeValue
         };
+
+        if(!payload.item || !payload.quantity || !payload.purpose) {
+            alert("Please fill in all Usage fields.");
+            return;
+        }
+
         await fetch('/api/usage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
         alert('Usage saved!');
-        loadStock();
+        loadDashboardData();
     }
 
-    async function loadStock() {
-        const res = await fetch('/api/stock');
-        const data = await res.json();
+    async function loadDashboardData() {
+        // 1. Load Stock Table
+        const stockRes = await fetch('/api/stock');
+        const stockData = await stockRes.json();
         const tbody = document.getElementById('stock-table');
         tbody.innerHTML = '';
-        data.forEach(item => {
+        stockData.forEach(item => {
             tbody.innerHTML += `<tr>
-                <td>${item.item}</td>
-                <td>${item.remaining.toFixed(2)}</td>
+                <td style="font-weight: 500;">${item.item}</td>
+                <td style="color: ${item.remaining < 0 ? 'red' : 'inherit'}">${item.remaining.toFixed(2)}</td>
                 <td>${item.unit}</td>
             </tr>`;
         });
+
+        // 2. Load Chart Data
+        const chartRes = await fetch('/api/monthly_usage');
+        const chartData = await chartRes.json();
+        
+        const ctx = document.getElementById('monthlyChart').getContext('2d');
+        
+        // Destroy old chart before rendering new one (prevents glitching)
+        if (usageChartInstance) {
+            usageChartInstance.destroy();
+        }
+
+        usageChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels, // Months (e.g., '2026-09')
+                datasets: [{
+                    label: 'Total Items Used',
+                    data: chartData.data, // Quantities
+                    backgroundColor: 'rgba(79, 70, 229, 0.7)',
+                    borderColor: 'rgba(79, 70, 229, 1)',
+                    borderWidth: 1,
+                    borderRadius: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: { beginAtZero: true, grid: { color: '#f3f4f6' } },
+                    x: { grid: { display: false } }
+                }
+            }
+        });
     }
 
-    // Load stock on initial page load
-    loadStock();
+    // Load data when page opens
+    loadDashboardData();
 </script>
 
 </body>
