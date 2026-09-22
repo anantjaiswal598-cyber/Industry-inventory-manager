@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Industory Inventory Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f4f9; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa; }
+        input, button { width: 100%; padding: 10px; margin: 5px 0 15px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button { background: #28a745; color: white; border: none; cursor: pointer; font-weight: bold; }
+        button:hover { background: #218838; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Industory Inventory Manager</h1>
+    
+    <div class="grid">
+        <!-- Add Purchase Form -->
+        <div class="card">
+            <h2>Add Purchase</h2>
+            <input type="text" id="p-item" placeholder="Product name (e.g. Diesel)">
+            <input type="text" id="p-supplier" placeholder="Supplier">
+            <input type="text" id="p-source" placeholder="Source (city / place)">
+            <input type="number" id="p-qty" placeholder="Quantity">
+            <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
+            <input type="number" id="p-price" placeholder="Total Price">
+            <button onclick="addPurchase()">Save Purchase</button>
+        </div>
+
+        <!-- Add Usage Form -->
+        <div class="card">
+            <h2>Record Usage</h2>
+            <input type="text" id="u-item" placeholder="Product used (e.g. Diesel)">
+            <input type="number" id="u-qty" placeholder="Quantity">
+            <input type="text" id="u-purpose" placeholder="Purpose (e.g. JCB, Tipper)">
+            <button onclick="addUsage()">Save Usage</button>
+        </div>
+    </div>
+
+    <!-- Current Stock View -->
+    <div class="card" style="margin-top: 20px;">
+        <h2>Current Stock</h2>
+        <button onclick="loadStock()" style="background: #007bff;">Refresh Stock</button>
+        <table>
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Remaining</th>
+                    <th>Unit</th>
+                </tr>
+            </thead>
+            <tbody id="stock-table">
+                <!-- Data populated by JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    async function addPurchase() {
+        const payload = {
+            item: document.getElementById('p-item').value,
+            supplier: document.getElementById('p-supplier').value,
+            source: document.getElementById('p-source').value,
+            quantity: document.getElementById('p-qty').value,
+            unit: document.getElementById('p-unit').value,
+            price: document.getElementById('p-price').value
+        };
+        await fetch('/api/purchase', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        alert('Purchase saved!');
+        loadStock();
+    }
+
+    async function addUsage() {
+        const payload = {
+            item: document.getElementById('u-item').value,
+            quantity: document.getElementById('u-qty').value,
+            purpose: document.getElementById('u-purpose').value
+        };
+        await fetch('/api/usage', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        alert('Usage saved!');
+        loadStock();
+    }
+
+    async function loadStock() {
+        const res = await fetch('/api/stock');
+        const data = await res.json();
+        const tbody = document.getElementById('stock-table');
+        tbody.innerHTML = '';
+        data.forEach(item => {
+            tbody.innerHTML += `<tr>
+                <td>${item.item}</td>
+                <td>${item.remaining.toFixed(2)}</td>
+                <td>${item.unit}</td>
+            </tr>`;
+        });
+    }
+
+    // Load stock on initial page load
+    loadStock();
+</script>
+
+</body>
+</html>
