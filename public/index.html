@@ -9,6 +9,7 @@
         :root {
             --primary: #4F46E5;
             --success: #10B981;
+            --danger: #EF4444;
             --bg: #F3F4F6;
             --card-bg: #FFFFFF;
             --text-main: #1F2937;
@@ -17,7 +18,6 @@
         
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); }
         
-        /* Navigation Menu */
         .navbar { background: var(--card-bg); padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
         .navbar h1 { color: var(--primary); font-size: 22px; margin-right: 40px; }
         .nav-links { display: flex; gap: 10px; }
@@ -42,25 +42,20 @@
         
         .btn-green { background: var(--success); color: white; border: none; cursor: pointer; font-weight: bold; }
         .btn-green:hover { background: #059669; }
-        .btn-blue { background: var(--primary); color: white; cursor: pointer; font-weight: bold; width: auto; padding: 8px 16px; margin-bottom: 15px; border: none;}
+        .btn-blue { background: var(--primary); color: white; cursor: pointer; font-weight: bold; width: auto; padding: 8px 16px; margin-bottom: 15px; border: none; border-radius: 6px;}
+        .btn-red { background: var(--danger); color: white; cursor: pointer; font-weight: bold; width: auto; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px;}
+        .btn-red:hover { background: #DC2626; }
         
         table { width: 100%; border-collapse: collapse; font-size: 14px; }
         th, td { border-bottom: 1px solid #e5e7eb; padding: 12px; text-align: left; }
         th { color: var(--text-muted); font-weight: 600; background: #f9fafb; }
         
-        #u-purpose-other { display: none; }
+        #u-purpose-other, #p-supplier-other { display: none; }
         .chart-container { position: relative; height: 300px; width: 100%; }
         
         .stat-box { background: #EEF2FF; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; border: 1px solid #C7D2FE;}
         .stat-box h3 { margin: 0; color: var(--primary); font-size: 24px; }
         .stat-box p { margin: 5px 0 0 0; color: #4338CA; font-size: 13px; font-weight: 600; }
-
-        @media (max-width: 768px) {
-            .dashboard-layout { grid-template-columns: 1fr; }
-            .grid-2 { grid-template-columns: 1fr; }
-            .navbar { flex-direction: column; align-items: flex-start; padding: 10px 20px; }
-            .nav-links { overflow-x: auto; width: 100%; padding-bottom: 5px; }
-        }
     </style>
 </head>
 <body>
@@ -77,7 +72,7 @@
 
 <div class="container">
     
-    <!-- TAB 1: DASHBOARD (Forms & Chart) -->
+    <!-- TAB 1: DASHBOARD -->
     <div id="tab-dashboard" class="tab-content active">
         <div class="dashboard-layout">
             <div class="grid-2">
@@ -92,7 +87,15 @@
                         <option value="Other">Other</option>
                     </select>
                     <input type="text" id="p-item" placeholder="Product name (e.g. Diesel)">
-                    <input type="text" id="p-supplier" placeholder="Supplier">
+                    
+                    <!-- New Dynamic Supplier Dropdown -->
+                    <select id="p-supplier-select" onchange="toggleOtherSupplier()">
+                        <option value="" disabled selected>Select Supplier...</option>
+                        <!-- Options populated by JS -->
+                        <option value="Other">Other (Type below)</option>
+                    </select>
+                    <input type="text" id="p-supplier-other" placeholder="Enter New Supplier Name">
+                    
                     <input type="text" id="p-source" placeholder="Source (city / place)">
                     <input type="number" id="p-qty" placeholder="Quantity">
                     <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
@@ -155,11 +158,20 @@
 
     <!-- TAB 4: SUPPLIERS -->
     <div id="tab-suppliers" class="tab-content">
+        <div class="card" style="background: #F8FAFC;">
+            <h2>Add New Supplier</h2>
+            <div class="grid-2">
+                <input type="text" id="new-sup-name" placeholder="Supplier Name">
+                <input type="text" id="new-sup-loc" placeholder="Location / City">
+            </div>
+            <button class="btn-green" onclick="addSupplierBtn()" style="width: 200px;">+ Add Supplier</button>
+        </div>
+
         <div class="card">
             <h2>Supplier List</h2>
-            <button class="btn-blue" onclick="loadSuppliers()">Refresh Suppliers</button>
+            <button class="btn-blue" onclick="loadSuppliers()">Refresh List</button>
             <table>
-                <thead><tr><th>Supplier Name</th><th>Location</th><th>Total Purchases</th><th>Total Spent (Rs)</th></tr></thead>
+                <thead><tr><th>Supplier Name</th><th>Location</th><th>Total Purchases</th><th>Total Spent (Rs)</th><th>Action</th></tr></thead>
                 <tbody id="supplier-table"></tbody>
             </table>
         </div>
@@ -169,8 +181,8 @@
 
 <script>
     let usageChartInstance = null;
+    let supplierListMaster = []; // Stores our suppliers globally
 
-    // Tab Navigation Logic
     function openTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -188,20 +200,70 @@
         otherInput.style.display = select.value === 'Other' ? 'block' : 'none';
     }
 
+    function toggleOtherSupplier() {
+        const select = document.getElementById('p-supplier-select');
+        const otherInput = document.getElementById('p-supplier-other');
+        const sourceInput = document.getElementById('p-source');
+        
+        if (select.value === 'Other') {
+            otherInput.style.display = 'block';
+            sourceInput.value = ''; // Let them type location manually
+        } else {
+            otherInput.style.display = 'none';
+            // Auto-fill location if they selected an existing supplier
+            const selectedOption = select.options[select.selectedIndex];
+            if(selectedOption && selectedOption.dataset.loc) {
+                sourceInput.value = selectedOption.dataset.loc;
+            }
+        }
+    }
+
+    // Fetches suppliers and populates both the dropdown and the table
+    async function loadSuppliers() {
+        const res = await fetch('/api/suppliers');
+        supplierListMaster = await res.json();
+        
+        // 1. Populate Dropdown in Dashboard
+        const dropdown = document.getElementById('p-supplier-select');
+        dropdown.innerHTML = '<option value="" disabled selected>Select Supplier...</option>';
+        supplierListMaster.forEach(s => {
+            dropdown.innerHTML += `<option value="${s.name}" data-loc="${s.location}">${s.name}</option>`;
+        });
+        dropdown.innerHTML += '<option value="Other">Other (Type below)</option>';
+        
+        // 2. Populate Table in Suppliers Tab
+        const tbody = document.getElementById('supplier-table');
+        if(tbody) {
+            tbody.innerHTML = supplierListMaster.map(s => `<tr>
+                <td style="font-weight: 500;">${s.name}</td>
+                <td>${s.location}</td>
+                <td>${s.count}</td>
+                <td>Rs ${parseFloat(s.total).toFixed(2)}</td>
+                <td><button class="btn-red" onclick="deleteSupplier('${s.name}')">Delete</button></td>
+            </tr>`).join('');
+        }
+    }
+
     async function addPurchase() {
+        let supplier = document.getElementById('p-supplier-select').value;
+        if (supplier === 'Other') supplier = document.getElementById('p-supplier-other').value;
+
         const payload = {
             category: document.getElementById('p-category').value || "Uncategorized",
             item: document.getElementById('p-item').value,
-            supplier: document.getElementById('p-supplier').value,
+            supplier: supplier,
             source: document.getElementById('p-source').value,
             quantity: document.getElementById('p-qty').value,
             unit: document.getElementById('p-unit').value,
             price: document.getElementById('p-price').value
         };
-        if(!payload.item) return alert("Product name required.");
+        if(!payload.item || !payload.supplier) return alert("Product name and Supplier are required.");
         await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         alert('Purchase saved!');
+        
+        // Refresh everything to show new stats and potentially a new auto-added supplier
         loadDashboardData();
+        loadSuppliers();
     }
 
     async function addUsage() {
@@ -214,11 +276,37 @@
         loadDashboardData();
     }
 
+    async function addSupplierBtn() {
+        const name = document.getElementById('new-sup-name').value;
+        const loc = document.getElementById('new-sup-loc').value;
+        if(!name) return alert("Supplier name required.");
+        
+        await fetch('/api/supplier_action', { 
+            method: 'POST', 
+            headers: { 'Content-Type': 'application/json' }, 
+            body: JSON.stringify({ action: "add", name: name, location: loc }) 
+        });
+        document.getElementById('new-sup-name').value = '';
+        document.getElementById('new-sup-loc').value = '';
+        alert("Supplier added!");
+        loadSuppliers();
+    }
+
+    async function deleteSupplier(name) {
+        if(confirm(`Are you sure you want to delete ${name} from your supplier list? (Past purchases will remain in history)`)) {
+            await fetch('/api/supplier_action', { 
+                method: 'POST', 
+                headers: { 'Content-Type': 'application/json' }, 
+                body: JSON.stringify({ action: "delete", name: name }) 
+            });
+            loadSuppliers();
+        }
+    }
+
     async function loadDashboardData() {
         const res = await fetch('/api/monthly_usage');
         const chartData = await res.json();
         
-        // Calculate Average
         const total = chartData.data.reduce((a, b) => a + b, 0);
         const avg = chartData.data.length > 0 ? (total / chartData.data.length).toFixed(1) : 0;
         document.getElementById('avg-usage').innerText = avg;
@@ -261,20 +349,9 @@
         </tr>`).join('');
     }
 
-    async function loadSuppliers() {
-        const res = await fetch('/api/suppliers');
-        const data = await res.json();
-        const tbody = document.getElementById('supplier-table');
-        tbody.innerHTML = data.map(s => `<tr>
-            <td style="font-weight: 500;">${s.name}</td>
-            <td>${s.source}</td>
-            <td>${s.count}</td>
-            <td>Rs ${parseFloat(s.total).toFixed(2)}</td>
-        </tr>`).join('');
-    }
-
-    // Initialize Dashboard
+    // Initialize Dashboard & Supplier Dropdowns on page load
     loadDashboardData();
+    loadSuppliers();
 </script>
 </body>
 </html>
