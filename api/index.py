@@ -5,7 +5,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Vercel requires writing data to the /tmp folder for serverless functions
 DATA_FILE = "/tmp/crusher_data.json"
 
 def load_data():
@@ -34,7 +33,6 @@ def get_stock():
         if u["item"] in stock:
             stock[u["item"]] -= u["quantity"]
 
-    # Format for JSON response
     stock_list = [{"item": k, "remaining": v, "unit": units.get(k, "")} for k, v in stock.items()]
     return jsonify(stock_list)
 
@@ -45,6 +43,7 @@ def add_purchase():
     
     data["purchases"].append({
         "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
+        "category": req.get("category", "Uncategorized"),  # NEW FIELD
         "item": req.get("item"),
         "supplier": req.get("supplier"),
         "source": req.get("source"),
@@ -68,6 +67,22 @@ def add_usage():
     })
     save_data(data)
     return jsonify({"message": "Usage saved successfully."})
+
+@app.route('/api/monthly_usage', methods=['GET'])
+def get_monthly_usage():
+    """Aggregates all usage quantities grouped by YYYY-MM for the chart."""
+    data = load_data()
+    monthly = {}
+    
+    for u in data["usage"]:
+        month = u["date"][:7]  # Extracts just "YYYY-MM" from "YYYY-MM-DD"
+        monthly[month] = monthly.get(month, 0) + u["quantity"]
+        
+    # Sort the months chronologically
+    labels = sorted(monthly.keys())
+    chart_data = [monthly[m] for m in labels]
+    
+    return jsonify({"labels": labels, "data": chart_data})
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
