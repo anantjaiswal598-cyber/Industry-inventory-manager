@@ -7,13 +7,17 @@ app = Flask(__name__)
 
 DATA_FILE = "/tmp/crusher_data.json"
 
+# Hardcoded Prototype Users
+USERS = {
+    "admin": {"password": "admin123", "role": "admin"},
+    "staff": {"password": "staff123", "role": "staff"}
+}
+
 def load_data():
     if not os.path.exists(DATA_FILE):
         return {"purchases": [], "usage": [], "suppliers": []}
     with open(DATA_FILE, "r") as f:
         data = json.load(f)
-        
-        # Auto-migrate: If 'suppliers' list doesn't exist yet, build it from old purchases
         if "suppliers" not in data:
             unique_suppliers = {}
             for p in data.get("purchases", []):
@@ -21,12 +25,22 @@ def load_data():
                 if name and name not in unique_suppliers:
                     unique_suppliers[name] = p.get("source", "")
             data["suppliers"] = [{"name": k, "location": v} for k, v in unique_suppliers.items()]
-            
         return data
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
         json.dump(data, f, indent=2)
+
+@app.route('/api/login', methods=['POST'])
+def login():
+    req = request.json
+    username = req.get("username", "").lower()
+    password = req.get("password", "")
+    
+    user = USERS.get(username)
+    if user and user["password"] == password:
+        return jsonify({"success": True, "role": user["role"]})
+    return jsonify({"success": False, "message": "Invalid credentials"}), 401
 
 @app.route('/api/stock', methods=['GET'])
 def get_stock():
@@ -50,7 +64,6 @@ def add_purchase():
     supplier_name = req.get("supplier")
     source = req.get("source", "")
     
-    # Auto-add supplier to master list if it's new
     if supplier_name and not any(s["name"].lower() == supplier_name.lower() for s in data["suppliers"]):
         data["suppliers"].append({"name": supplier_name, "location": source})
         
@@ -101,14 +114,12 @@ def get_history():
 def get_suppliers():
     data = load_data()
     stats = {}
-    # Count purchase totals for each supplier
     for p in data["purchases"]:
         name = p.get("supplier", "Unknown")
         stats.setdefault(name, {"count": 0, "total": 0})
         stats[name]["count"] += 1
         stats[name]["total"] += p.get("price", 0)
         
-    # Combine with master list
     result = []
     for s in data["suppliers"]:
         name = s["name"]
@@ -126,13 +137,16 @@ def manage_supplier():
     req = request.json
     action = req.get("action")
     name = req.get("name")
+    role = req.get("role")
     
     if action == "add":
         location = req.get("location", "")
         if not any(s["name"].lower() == name.lower() for s in data["suppliers"]):
             data["suppliers"].append({"name": name, "location": location})
     elif action == "delete":
-        # Removes supplier from master list (keeps old purchase records intact)
+        # Security layer: Reject deletion if the request does not come from an admin
+        if role != "admin":
+            return jsonify({"error": "Unauthorized"}), 403
         data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
         
     save_data(data)
