@@ -18,12 +18,22 @@
         
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); }
         
-        .navbar { background: var(--card-bg); padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
+        /* Login Screen Styles */
+        #login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: #EEF2FF; }
+        .login-card { background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; }
+        .login-card h2 { color: var(--primary); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
+        
+        /* Main App Styles (Hidden by default) */
+        #app-screen { display: none; }
+        
+        .navbar { background: var(--card-bg); padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #e5e7eb; position: sticky; top: 0; z-index: 100; }
+        .navbar-brand { display: flex; align-items: center; }
         .navbar h1 { color: var(--primary); font-size: 22px; margin-right: 40px; }
         .nav-links { display: flex; gap: 10px; }
         .tab-btn { background: none; border: none; padding: 15px 20px; font-size: 15px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; transition: 0.2s; }
         .tab-btn:hover { color: var(--primary); }
         .tab-btn.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
+        .logout-btn { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; }
 
         .container { max-width: 1200px; margin: 25px auto; padding: 0 20px; }
         .tab-content { display: none; }
@@ -60,129 +70,207 @@
 </head>
 <body>
 
-<div class="navbar">
-    <h1>Industory Inventory Manager</h1>
-    <div class="nav-links">
-        <button class="tab-btn active" onclick="openTab('tab-dashboard', this)">Dashboard</button>
-        <button class="tab-btn" onclick="openTab('tab-stock', this)">Current Stock</button>
-        <button class="tab-btn" onclick="openTab('tab-history', this)">Purchase History</button>
-        <button class="tab-btn" onclick="openTab('tab-suppliers', this)">Suppliers</button>
+<!-- LOGIN SCREEN -->
+<div id="login-screen">
+    <div class="login-card">
+        <h2>System Login</h2>
+        <input type="text" id="login-user" placeholder="Username">
+        <input type="password" id="login-pass" placeholder="Password">
+        <button class="btn-green" onclick="attemptLogin()" style="margin-top: 10px;">Login</button>
+        <p id="login-error" style="color: red; font-size: 13px; display: none;">Invalid credentials.</p>
     </div>
 </div>
 
-<div class="container">
-    
-    <!-- TAB 1: DASHBOARD -->
-    <div id="tab-dashboard" class="tab-content active">
-        <div class="dashboard-layout">
-            <div class="grid-2">
-                <div class="card">
-                    <h2>Add Purchase</h2>
-                    <select id="p-category">
-                        <option value="" disabled selected>Category...</option>
-                        <option value="Fuel">Fuel</option>
-                        <option value="Spare Parts">Spare Parts</option>
-                        <option value="Raw Material">Raw Material</option>
-                        <option value="Tools">Tools</option>
-                        <option value="Other">Other</option>
-                    </select>
-                    <input type="text" id="p-item" placeholder="Product name (e.g. Diesel)">
-                    
-                    <!-- New Dynamic Supplier Dropdown -->
-                    <select id="p-supplier-select" onchange="toggleOtherSupplier()">
-                        <option value="" disabled selected>Select Supplier...</option>
-                        <!-- Options populated by JS -->
-                        <option value="Other">Other (Type below)</option>
-                    </select>
-                    <input type="text" id="p-supplier-other" placeholder="Enter New Supplier Name">
-                    
-                    <input type="text" id="p-source" placeholder="Source (city / place)">
-                    <input type="number" id="p-qty" placeholder="Quantity">
-                    <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
-                    <input type="number" id="p-price" placeholder="Total Price (Rs)">
-                    <button class="btn-green" onclick="addPurchase()">Save Purchase</button>
+<!-- MAIN APPLICATION -->
+<div id="app-screen">
+    <div class="navbar">
+        <div class="navbar-brand">
+            <h1>Industory Inventory</h1>
+            <div class="nav-links">
+                <button class="tab-btn active" onclick="openTab('tab-dashboard', this)">Dashboard</button>
+                <button class="tab-btn" onclick="openTab('tab-stock', this)">Current Stock</button>
+                <!-- These tabs are hidden for staff -->
+                <button class="tab-btn admin-only" onclick="openTab('tab-history', this)">Purchase History</button>
+                <button class="tab-btn admin-only" onclick="openTab('tab-suppliers', this)">Suppliers</button>
+            </div>
+        </div>
+        <div>
+            <span id="user-greeting" style="margin-right: 15px; font-weight: 600; font-size: 14px;"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        
+        <!-- TAB 1: DASHBOARD -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="dashboard-layout">
+                <div class="grid-2">
+                    <div class="card">
+                        <h2>Add Purchase</h2>
+                        <select id="p-category">
+                            <option value="" disabled selected>Category...</option>
+                            <option value="Fuel">Fuel</option>
+                            <option value="Spare Parts">Spare Parts</option>
+                            <option value="Raw Material">Raw Material</option>
+                            <option value="Tools">Tools</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="text" id="p-item" placeholder="Product name (e.g. Diesel)">
+                        
+                        <select id="p-supplier-select" onchange="toggleOtherSupplier()">
+                            <option value="" disabled selected>Select Supplier...</option>
+                            <!-- Populated by JS -->
+                            <option value="Other">Other (Type below)</option>
+                        </select>
+                        <input type="text" id="p-supplier-other" placeholder="Enter New Supplier Name">
+                        
+                        <input type="text" id="p-source" placeholder="Source (city / place)">
+                        <input type="number" id="p-qty" placeholder="Quantity">
+                        <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
+                        <input type="number" id="p-price" placeholder="Total Price (Rs)">
+                        <button class="btn-green" onclick="addPurchase()">Save Purchase</button>
+                    </div>
+
+                    <div class="card">
+                        <h2>Record Usage</h2>
+                        <input type="text" id="u-item" placeholder="Product used (e.g. Diesel)">
+                        <input type="number" id="u-qty" placeholder="Quantity">
+                        <select id="u-purpose-select" onchange="toggleOtherPurpose()">
+                            <option value="" disabled selected>Purpose...</option>
+                            <option value="Crusher">Crusher</option>
+                            <option value="Road construction">Road construction</option>
+                            <option value="Vehicles (JCB/Tipper)">Vehicles (JCB/Tipper)</option>
+                            <option value="Other">Other (Type below)</option>
+                        </select>
+                        <input type="text" id="u-purpose-other" placeholder="Please specify purpose...">
+                        <button class="btn-green" onclick="addUsage()">Save Usage</button>
+                    </div>
                 </div>
 
                 <div class="card">
-                    <h2>Record Usage</h2>
-                    <input type="text" id="u-item" placeholder="Product used (e.g. Diesel)">
-                    <input type="number" id="u-qty" placeholder="Quantity">
-                    <select id="u-purpose-select" onchange="toggleOtherPurpose()">
-                        <option value="" disabled selected>Purpose...</option>
-                        <option value="Crusher">Crusher</option>
-                        <option value="Road construction">Road construction</option>
-                        <option value="Vehicles (JCB/Tipper)">Vehicles (JCB/Tipper)</option>
-                        <option value="Other">Other (Type below)</option>
-                    </select>
-                    <input type="text" id="u-purpose-other" placeholder="Please specify purpose...">
-                    <button class="btn-green" onclick="addUsage()">Save Usage</button>
+                    <h2>Monthly Usage & Average</h2>
+                    <div class="chart-container">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                    <div class="stat-box">
+                        <h3 id="avg-usage">0</h3>
+                        <p>Average Items Used Per Month</p>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: CURRENT STOCK -->
+        <div id="tab-stock" class="tab-content">
+            <div class="card">
+                <h2>Current Stock</h2>
+                <button class="btn-blue" onclick="loadStock()">Refresh Stock</button>
+                <table>
+                    <thead><tr><th>Product</th><th>Remaining</th><th>Unit</th></tr></thead>
+                    <tbody id="stock-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 3: PURCHASE HISTORY (Admin Only) -->
+        <div id="tab-history" class="tab-content">
+            <div class="card">
+                <h2>Purchase History</h2>
+                <button class="btn-blue" onclick="loadHistory()">Refresh History</button>
+                <table>
+                    <thead><tr><th>Date</th><th>Category</th><th>Item</th><th>Supplier</th><th>Location</th><th>Qty</th><th>Total (Rs)</th></tr></thead>
+                    <tbody id="history-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- TAB 4: SUPPLIERS (Admin Only) -->
+        <div id="tab-suppliers" class="tab-content">
+            <div class="card" style="background: #F8FAFC;">
+                <h2>Add New Supplier</h2>
+                <div class="grid-2">
+                    <input type="text" id="new-sup-name" placeholder="Supplier Name">
+                    <input type="text" id="new-sup-loc" placeholder="Location / City">
+                </div>
+                <button class="btn-green" onclick="addSupplierBtn()" style="width: 200px;">+ Add Supplier</button>
             </div>
 
             <div class="card">
-                <h2>Monthly Usage & Average</h2>
-                <div class="chart-container">
-                    <canvas id="monthlyChart"></canvas>
-                </div>
-                <div class="stat-box">
-                    <h3 id="avg-usage">0</h3>
-                    <p>Average Items Used Per Month</p>
-                </div>
+                <h2>Supplier List</h2>
+                <button class="btn-blue" onclick="loadSuppliers()">Refresh List</button>
+                <table>
+                    <thead><tr><th>Supplier Name</th><th>Location</th><th>Total Purchases</th><th>Total Spent (Rs)</th><th>Action</th></tr></thead>
+                    <tbody id="supplier-table"></tbody>
+                </table>
             </div>
         </div>
+
     </div>
-
-    <!-- TAB 2: CURRENT STOCK -->
-    <div id="tab-stock" class="tab-content">
-        <div class="card">
-            <h2>Current Stock</h2>
-            <button class="btn-blue" onclick="loadStock()">Refresh Stock</button>
-            <table>
-                <thead><tr><th>Product</th><th>Remaining</th><th>Unit</th></tr></thead>
-                <tbody id="stock-table"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- TAB 3: PURCHASE HISTORY -->
-    <div id="tab-history" class="tab-content">
-        <div class="card">
-            <h2>Purchase History</h2>
-            <button class="btn-blue" onclick="loadHistory()">Refresh History</button>
-            <table>
-                <thead><tr><th>Date</th><th>Category</th><th>Item</th><th>Supplier</th><th>Location</th><th>Qty</th><th>Total (Rs)</th></tr></thead>
-                <tbody id="history-table"></tbody>
-            </table>
-        </div>
-    </div>
-
-    <!-- TAB 4: SUPPLIERS -->
-    <div id="tab-suppliers" class="tab-content">
-        <div class="card" style="background: #F8FAFC;">
-            <h2>Add New Supplier</h2>
-            <div class="grid-2">
-                <input type="text" id="new-sup-name" placeholder="Supplier Name">
-                <input type="text" id="new-sup-loc" placeholder="Location / City">
-            </div>
-            <button class="btn-green" onclick="addSupplierBtn()" style="width: 200px;">+ Add Supplier</button>
-        </div>
-
-        <div class="card">
-            <h2>Supplier List</h2>
-            <button class="btn-blue" onclick="loadSuppliers()">Refresh List</button>
-            <table>
-                <thead><tr><th>Supplier Name</th><th>Location</th><th>Total Purchases</th><th>Total Spent (Rs)</th><th>Action</th></tr></thead>
-                <tbody id="supplier-table"></tbody>
-            </table>
-        </div>
-    </div>
-
 </div>
 
 <script>
     let usageChartInstance = null;
-    let supplierListMaster = []; // Stores our suppliers globally
+    let supplierListMaster = []; 
+    let currentRole = null;
 
+    // --- Authentication Logic ---
+    function checkAuth() {
+        const role = localStorage.getItem('userRole');
+        if (role) {
+            currentRole = role;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
+            
+            // UI Access Control
+            const adminElements = document.querySelectorAll('.admin-only');
+            if (role === 'staff') {
+                adminElements.forEach(el => el.style.display = 'none');
+            } else {
+                adminElements.forEach(el => el.style.display = 'block');
+            }
+            
+            // Initialize app data
+            loadDashboardData();
+            loadSuppliers();
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-screen').style.display = 'none';
+        }
+    }
+
+    async function attemptLogin() {
+        const u = document.getElementById('login-user').value;
+        const p = document.getElementById('login-pass').value;
+        
+        const res = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p })
+        });
+        
+        const data = await res.json();
+        if(data.success) {
+            localStorage.setItem('userRole', data.role);
+            document.getElementById('login-error').style.display = 'none';
+            checkAuth();
+        } else {
+            document.getElementById('login-error').style.display = 'block';
+        }
+    }
+
+    function logout() {
+        localStorage.removeItem('userRole');
+        currentRole = null;
+        document.getElementById('login-user').value = '';
+        document.getElementById('login-pass').value = '';
+        // Reset view to Dashboard tab
+        openTab('tab-dashboard', document.querySelector('.tab-btn'));
+        checkAuth();
+    }
+
+    // --- App Logic ---
     function openTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -190,8 +278,8 @@
         btnElement.classList.add('active');
         
         if(tabId === 'tab-stock') loadStock();
-        if(tabId === 'tab-history') loadHistory();
-        if(tabId === 'tab-suppliers') loadSuppliers();
+        if(tabId === 'tab-history' && currentRole === 'admin') loadHistory();
+        if(tabId === 'tab-suppliers' && currentRole === 'admin') loadSuppliers();
     }
 
     function toggleOtherPurpose() {
@@ -207,10 +295,9 @@
         
         if (select.value === 'Other') {
             otherInput.style.display = 'block';
-            sourceInput.value = ''; // Let them type location manually
+            sourceInput.value = ''; 
         } else {
             otherInput.style.display = 'none';
-            // Auto-fill location if they selected an existing supplier
             const selectedOption = select.options[select.selectedIndex];
             if(selectedOption && selectedOption.dataset.loc) {
                 sourceInput.value = selectedOption.dataset.loc;
@@ -218,12 +305,11 @@
         }
     }
 
-    // Fetches suppliers and populates both the dropdown and the table
     async function loadSuppliers() {
         const res = await fetch('/api/suppliers');
         supplierListMaster = await res.json();
         
-        // 1. Populate Dropdown in Dashboard
+        // Always populate dropdown for staff and admin
         const dropdown = document.getElementById('p-supplier-select');
         dropdown.innerHTML = '<option value="" disabled selected>Select Supplier...</option>';
         supplierListMaster.forEach(s => {
@@ -231,16 +317,18 @@
         });
         dropdown.innerHTML += '<option value="Other">Other (Type below)</option>';
         
-        // 2. Populate Table in Suppliers Tab
-        const tbody = document.getElementById('supplier-table');
-        if(tbody) {
-            tbody.innerHTML = supplierListMaster.map(s => `<tr>
-                <td style="font-weight: 500;">${s.name}</td>
-                <td>${s.location}</td>
-                <td>${s.count}</td>
-                <td>Rs ${parseFloat(s.total).toFixed(2)}</td>
-                <td><button class="btn-red" onclick="deleteSupplier('${s.name}')">Delete</button></td>
-            </tr>`).join('');
+        // Populate Admin Table
+        if (currentRole === 'admin') {
+            const tbody = document.getElementById('supplier-table');
+            if(tbody) {
+                tbody.innerHTML = supplierListMaster.map(s => `<tr>
+                    <td style="font-weight: 500;">${s.name}</td>
+                    <td>${s.location}</td>
+                    <td>${s.count}</td>
+                    <td>Rs ${parseFloat(s.total).toFixed(2)}</td>
+                    <td><button class="btn-red" onclick="deleteSupplier('${s.name}')">Delete</button></td>
+                </tr>`).join('');
+            }
         }
     }
 
@@ -261,7 +349,6 @@
         await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         alert('Purchase saved!');
         
-        // Refresh everything to show new stats and potentially a new auto-added supplier
         loadDashboardData();
         loadSuppliers();
     }
@@ -284,7 +371,7 @@
         await fetch('/api/supplier_action', { 
             method: 'POST', 
             headers: { 'Content-Type': 'application/json' }, 
-            body: JSON.stringify({ action: "add", name: name, location: loc }) 
+            body: JSON.stringify({ action: "add", name: name, location: loc, role: currentRole }) 
         });
         document.getElementById('new-sup-name').value = '';
         document.getElementById('new-sup-loc').value = '';
@@ -293,11 +380,11 @@
     }
 
     async function deleteSupplier(name) {
-        if(confirm(`Are you sure you want to delete ${name} from your supplier list? (Past purchases will remain in history)`)) {
+        if(confirm(`Are you sure you want to delete ${name} from your supplier list?`)) {
             await fetch('/api/supplier_action', { 
                 method: 'POST', 
                 headers: { 'Content-Type': 'application/json' }, 
-                body: JSON.stringify({ action: "delete", name: name }) 
+                body: JSON.stringify({ action: "delete", name: name, role: currentRole }) 
             });
             loadSuppliers();
         }
@@ -349,9 +436,8 @@
         </tr>`).join('');
     }
 
-    // Initialize Dashboard & Supplier Dropdowns on page load
-    loadDashboardData();
-    loadSuppliers();
+    // Check login state when page opens
+    checkAuth();
 </script>
 </body>
 </html>
