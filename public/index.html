@@ -403,21 +403,55 @@
         }
     }
     
-    async function attemptLogin() {
-        const u = document.getElementById('login-user').value;
-        const p = document.getElementById('login-pass').value;
+    function toggleRegister() {
+        const loginBox = document.getElementById('staff-login-box');
+        const regBox = document.getElementById('staff-register-box');
+        if (loginBox.style.display === 'none') {
+            loginBox.style.display = 'block';
+            regBox.style.display = 'none';
+        } else {
+            loginBox.style.display = 'none';
+            regBox.style.display = 'block';
+        }
+    }
+
+    async function attemptLogin(portalType) {
+        const u = portalType === 'admin' ? document.getElementById('admin-user').value : document.getElementById('staff-user').value;
+        const p = portalType === 'admin' ? document.getElementById('admin-pass').value : document.getElementById('staff-pass').value;
+        
         const res = await fetch('/api/login', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p, portal: portalType })
+        });
+        const data = await res.json();
+        
+        if(data.success) {
+            localStorage.setItem('userRole', data.role);
+            showNotification(`Welcome back, ${data.role}!`);
+            checkAuth();
+        } else {
+            showNotification(data.message || "Invalid credentials", true);
+        }
+    }
+
+    async function registerStaff() {
+        const u = document.getElementById('reg-user').value;
+        const p = document.getElementById('reg-pass').value;
+        if(!u || !p) return showNotification("Please enter a username and password.", true);
+
+        const res = await fetch('/api/register', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: u, password: p })
         });
         const data = await res.json();
+        
         if(data.success) {
-            localStorage.setItem('userRole', data.role);
-            document.getElementById('login-error').style.display = 'none';
-            showNotification(`Welcome back, ${data.role}!`);
-            checkAuth();
+            showNotification("Account created! You can now login.");
+            document.getElementById('reg-user').value = '';
+            document.getElementById('reg-pass').value = '';
+            toggleRegister();
         } else {
-            document.getElementById('login-error').style.display = 'block';
+            showNotification(data.message, true);
         }
     }
 
