@@ -15,15 +15,43 @@
         :root { --primary: #4F46E5; --success: #10B981; --danger: #EF4444; --warning: #F59E0B; --bg: #F3F4F6; --card-bg: #FFFFFF; --text-main: #1F2937; --text-muted: #6B7280; --border: #e5e7eb; }
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); transition: 0.3s; }
         
-        #login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: #EEF2FF; transition: 0.3s; padding: 20px; box-sizing: border-box; }
-        .split-login-container { display: flex; width: 100%; max-width: 800px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; flex-wrap: wrap; }
-        .login-half { flex: 1; padding: 40px; text-align: center; min-width: 300px; }
-        .admin-side { background: #EEF2FF; border-left: 1px solid var(--border); }
-        .user-side { background: #FFFFFF; }
-        .login-half h2 { color: var(--primary); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
-        .toggle-link { color: var(--primary); cursor: pointer; font-size: 13px; font-weight: bold; margin-top: 15px; display: inline-block; }
-        .toggle-link:hover { text-decoration: underline; }
+        /* ENTERPRISE LOGIN SCREEN */
+        #login-screen { background: #FFFFFF; height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
+        .modern-login-wrapper { display: flex; width: 100%; max-width: 950px; height: 600px; border-radius: 12px; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,0.08); border: 1px solid #E5E7EB; }
 
+        .brand-panel { flex: 1; background: #F6C844; padding: 50px; position: relative; color: #1F2937; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+        .quote-mark { font-size: 60px; font-family: Georgia, serif; line-height: 0; margin-top: 30px; color: #374151; }
+        .brand-quote { font-size: 28px; font-weight: 400; line-height: 1.3; margin-bottom: 40px; position: relative; z-index: 2; font-family: Georgia, serif; }
+
+        .testimonial { display: flex; align-items: center; gap: 15px; position: relative; z-index: 2; }
+        .testimonial .avatar { width: 50px; height: 50px; background: #1F2937; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .testimonial strong { font-size: 15px; }
+        .testimonial span { font-size: 13px; color: #4B5563; }
+        .bg-boxes { position: absolute; bottom: -40px; right: -20px; font-size: 280px; color: rgba(0,0,0,0.06); z-index: 1; transform: rotate(-5deg); }
+
+        .form-panel { flex: 1.2; background: #FFFFFF; padding: 50px 60px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+        .logo-header { display: flex; align-items: center; margin-bottom: 30px; }
+        .form-title { font-size: 24px; margin: 0 0 5px 0; color: #1F2937; font-weight: 600; }
+        .form-subtitle { font-size: 13px; color: #6B7280; margin-bottom: 25px; }
+
+        .z-input { width: 100%; padding: 14px 16px; margin-bottom: 15px; background: #F0F4F8; border: 1px solid transparent; border-radius: 6px; box-sizing: border-box; font-size: 14px; transition: 0.2s; }
+        .z-input:focus { background: #FFFFFF; border: 1px solid #4F46E5; outline: none; box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+
+        .z-btn-primary { background: #E1261C; color: white; border: none; width: 100%; padding: 14px; border-radius: 6px; font-weight: bold; font-size: 15px; cursor: pointer; transition: 0.2s; margin-top: 5px; }
+        .z-btn-primary:hover { background: #C81E15; }
+
+        .divider { text-align: center; margin: 25px 0; position: relative; }
+        .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: #E5E7EB; z-index: 1; }
+        .divider span { background: #FFFFFF; padding: 0 15px; color: #9CA3AF; font-size: 12px; position: relative; z-index: 2; }
+
+        .social-btn { background: white; border: 1px solid #E5E7EB; padding: 12px; width: 100%; border-radius: 6px; cursor: pointer; color: #374151; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; }
+        .social-btn:hover { background: #F9FAFB; border-color: #D1D5DB; }
+
+        .switch-form { text-align: center; font-size: 13px; margin-top: 25px; color: #4B5563; }
+        .switch-form span { color: #2563EB; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .switch-form span:hover { color: #1D4ED8; text-decoration: underline; }
+
+        /* APP SCREEN STYLES */
         #app-screen { display: none; }
         .navbar { background: var(--card-bg); padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; }
         .navbar h1 { color: var(--primary); font-size: 22px; margin-right: 40px; }
@@ -38,16 +66,22 @@
         .tab-content.active { display: block; animation: fadeIn 0.4s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        .dashboard-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; align-items: start; }
+        .dashboard-layout { display: grid; grid-template-columns: 2fr 1fr; gap: 25px; align-items: stretch; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); border: 1px solid var(--border); margin-bottom: 20px; transition: 0.2s; }
+        .card { background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: 0 12px 30px -5px rgba(0,0,0,0.08); border: none; margin-bottom: 20px; height: 100%; box-sizing: border-box; }
         .card h2 { margin-top: 0; font-size: 18px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-bottom: 15px; display: flex; align-items: center; gap: 8px; }
 
-        input, select, button { width: 100%; padding: 10px; margin-bottom: 12px; border: 1px solid #D1D5DB; border-radius: 6px; box-sizing: border-box; font-size: 14px; }
-        input:focus, select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
-        .btn-green { background: var(--success); color: white; border: none; cursor: pointer; font-weight: bold; transition: 0.2s; }
-        .btn-blue { background: var(--primary); color: white; cursor: pointer; font-weight: bold; width: auto; padding: 10px 16px; margin-bottom: 12px; border: none; border-radius: 6px; transition: 0.2s; }
+        input, select { width: 100%; padding: 12px 14px; margin-bottom: 15px; background-color: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; box-sizing: border-box; font-size: 14px; transition: 0.2s; }
+        input:focus, select:focus { background-color: #FFFFFF; border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15); }
+        
+        .btn-green { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 12px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; transition: 0.2s; }
+        .btn-green:hover { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3); }
+        
+        .btn-blue { background: linear-gradient(135deg, #4F46E5, #4338CA); color: white; cursor: pointer; font-weight: bold; width: auto; padding: 12px 16px; border: none; border-radius: 8px; transition: 0.2s; }
+        .btn-blue:hover { box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3); }
+        
         .btn-red { background: var(--danger); color: white; cursor: pointer; font-weight: bold; width: auto; padding: 6px 12px; border: none; border-radius: 4px; font-size: 12px; }
+        
         .input-group { display: flex; gap: 10px; align-items: flex-start; }
         .input-group input { margin-bottom: 0; }
         .search-bar { padding: 10px 15px; border-radius: 20px; width: 300px; border: 1px solid #cbd5e1; background: #f8fafc; margin-bottom: 15px; }
@@ -58,7 +92,7 @@
         tr:hover { background: #f3f4f6; }
         
         #u-purpose-other, #p-supplier-other { display: none; }
-        .chart-container { position: relative; height: 300px; width: 100%; }
+        .chart-container { position: relative; height: 260px; width: 100%; }
         .stat-box { background: #EEF2FF; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; border: 1px solid #C7D2FE; }
         .stat-box h3 { margin: 0; color: var(--primary); font-size: 24px; }
         .stat-box p { margin: 5px 0 0 0; color: #4338CA; font-size: 13px; font-weight: 600; }
@@ -73,15 +107,16 @@
 
         body.dark-mode { --bg: #111827; --card-bg: #1F2937; --text-main: #F9FAFB; --text-muted: #9CA3AF; --border: #374151; }
         body.dark-mode #login-screen { background: #111827; }
-        body.dark-mode .split-login-container { border: 1px solid #374151; }
-        body.dark-mode .admin-side { background: #111827; border-left-color: #374151; }
-        body.dark-mode .user-side { background: #1F2937; }
+        body.dark-mode .modern-login-wrapper { border-color: #374151; box-shadow: 0 10px 40px rgba(0,0,0,0.5); }
+        body.dark-mode .form-panel { background: #1F2937; }
+        body.dark-mode .form-title { color: #F9FAFB; }
+        body.dark-mode .z-input { background: #374151; color: white; }
+        body.dark-mode .social-btn { background: #374151; color: white; border-color: #4B5563; }
         body.dark-mode input, body.dark-mode select, body.dark-mode .search-bar { background: #374151; color: white; border-color: #4B5563; }
         body.dark-mode th { background: #374151; color: #D1D5DB; }
         body.dark-mode tr:hover { background: #374151; }
         body.dark-mode .stat-box { background: #374151; border-color: #4B5563; }
         body.dark-mode .stat-box p { color: #818CF8; }
-        body.dark-mode .card[style*="background: #F8FAFC;"] { background: #1F2937 !important; }
     </style>
 </head>
 <body>
@@ -94,37 +129,71 @@
     </div>
 </div>
 
+<!-- ENTERPRISE LOGIN SCREEN -->
 <div id="login-screen">
-    <div class="split-login-container">
-        <div class="login-half user-side">
-            <h2><i class="fa-solid fa-users-gear"></i> Staff Portal</h2>
-            <div id="staff-login-box">
-                <input type="text" id="staff-user" placeholder="Staff Username">
-                <input type="password" id="staff-pass" placeholder="Password">
-                <button class="btn-green" onclick="attemptLogin('staff')">Login as Staff</button>
-                <span class="toggle-link" onclick="toggleRegister()">Need an account? Register here</span>
+    <div class="modern-login-wrapper">
+        <div class="brand-panel">
+            <div class="quote-mark">“</div>
+            <h2 class="brand-quote">With Industry, you can actually organize your entire business.</h2>
+            <div class="testimonial">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div>
+                    <strong>Anant Jaiswal</strong><br>
+                    <span>Director, Industry Operations</span>
+                </div>
             </div>
-            <div id="staff-register-box" style="display: none;">
-                <input type="text" id="reg-user" placeholder="Choose Username">
-                <input type="password" id="reg-pass" placeholder="Choose Password">
-                <button class="btn-green" onclick="registerStaff()"><i class="fa-solid fa-user-plus"></i> Create Account</button>
-                <span class="toggle-link" onclick="toggleRegister()">Back to Login</span>
-            </div>
+            <div class="bg-boxes"><i class="fa-solid fa-boxes-stacked"></i></div>
         </div>
-        <div class="login-half admin-side">
-            <h2><i class="fa-solid fa-shield-halved"></i> Admin Portal</h2>
-            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Requires elevated privileges</p>
-            <input type="text" id="admin-user" placeholder="Admin Username">
-            <input type="password" id="admin-pass" placeholder="Password">
-            <button class="btn-blue" onclick="attemptLogin('admin')">Login as Admin <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+
+        <div class="form-panel">
+            <div class="logo-header">
+                <i class="fa-solid fa-boxes-stacked" style="color: #E1261C; font-size: 26px;"></i> 
+                <span style="font-weight: bold; font-size: 22px; margin-left: 10px; color: var(--text-main);">Industry</span>
+            </div>
+
+            <!-- STAFF LOGIN -->
+            <div id="staff-login-box">
+                <h3 class="form-title">Welcome back</h3>
+                <p class="form-subtitle">Login to your staff account</p>
+                <input type="text" id="staff-user" class="z-input" placeholder="Username">
+                <input type="password" id="staff-pass" class="z-input" placeholder="Password">
+                <button class="z-btn-primary" onclick="attemptLogin('staff')">Log in</button>
+                <div class="divider"><span>or switch view</span></div>
+                <button class="social-btn" onclick="toggleForm('admin')"><i class="fa-solid fa-shield-halved"></i> Admin Portal</button>
+                <p class="switch-form">Don't have an account? <span onclick="toggleForm('register')">Create one</span></p>
+            </div>
+
+            <!-- REGISTER -->
+            <div id="staff-register-box" style="display: none;">
+                <h3 class="form-title">Let's get started</h3>
+                <p class="form-subtitle">Your data is stored securely in the cloud.</p>
+                <input type="text" id="reg-user" class="z-input" placeholder="Choose Username">
+                <input type="password" id="reg-pass" class="z-input" placeholder="Choose Password">
+                <div style="font-size: 12px; margin-bottom: 15px; color: var(--text-muted); display: flex; align-items: center; gap: 8px;">
+                    <input type="checkbox" checked style="width: auto; margin: 0;"> I agree to terms and privacy policy.
+                </div>
+                <button class="z-btn-primary" onclick="registerStaff()">Create your account</button>
+                <p class="switch-form">Already have an account? <span onclick="toggleForm('staff')">Log in</span></p>
+            </div>
+
+            <!-- ADMIN LOGIN -->
+            <div id="admin-login-box" style="display: none;">
+                <h3 class="form-title">Admin Access</h3>
+                <p class="form-subtitle">Requires elevated system privileges</p>
+                <input type="text" id="admin-user" class="z-input" placeholder="Admin Username">
+                <input type="password" id="admin-pass" class="z-input" placeholder="Password">
+                <button class="z-btn-primary" onclick="attemptLogin('admin')">Verify & Login</button>
+                <p class="switch-form">Not an admin? <span onclick="toggleForm('staff')">Back to Staff Login</span></p>
+            </div>
         </div>
     </div>
 </div>
 
+<!-- MAIN APP SCREEN -->
 <div id="app-screen">
     <div class="navbar">
         <div class="navbar-brand">
-            <h1><i class="fa-solid fa-boxes-stacked"></i> Industry Inventory</h1>
+            <h1><i class="fa-solid fa-boxes-stacked"></i> Industry</h1>
             <div class="nav-links">
                 <button class="tab-btn active" onclick="openTab('tab-dashboard', this)"><i class="fa-solid fa-house"></i> Dashboard</button>
                 <button class="tab-btn" onclick="openTab('tab-stock', this)"><i class="fa-solid fa-cubes"></i> Stock</button>
@@ -144,13 +213,13 @@
             <div class="dashboard-layout">
                 <div class="grid-2">
                     <div class="card">
-                        <h2><i class="fa-solid fa-cart-plus text-success"></i> Add Purchase</h2>
+                        <h2><i class="fa-solid fa-cart-plus" style="color:var(--success);"></i> Add Purchase</h2>
                         <select id="p-category"><option value="" disabled selected>Category...</option><option value="Fuel">Fuel</option><option value="Spare Parts">Spare Parts</option><option value="Raw Material">Raw Material</option><option value="Tools">Tools</option><option value="Other">Other</option></select>
-                        <div class="input-group" style="margin-bottom: 12px;">
+                        <div class="input-group" style="margin-bottom: 15px;">
                             <input type="text" id="p-item" placeholder="Product name or Barcode">
                             <button class="btn-blue" onclick="openScanner('p-item')"><i class="fa-solid fa-camera"></i> Scan</button>
                         </div>
-                        <select id="p-supplier-select" onchange="toggleOtherSupplier()"><option value="" disabled selected>Select Supplier...</option><option value="Other">Other (Type below)</option></select>
+                        <select id="p-supplier-select" onchange="toggleOtherSupplier()"><option value="" disabled selected>Select Supplier...</option><option value="Other">Other</option></select>
                         <input type="text" id="p-supplier-other" placeholder="Enter New Supplier Name">
                         <input type="text" id="p-source" placeholder="Source (city / place)">
                         <input type="number" id="p-qty" placeholder="Quantity">
@@ -159,8 +228,8 @@
                         <button class="btn-green" onclick="addPurchase()"><i class="fa-solid fa-check"></i> Save Purchase</button>
                     </div>
                     <div class="card">
-                        <h2><i class="fa-solid fa-clipboard-user text-primary"></i> Record Usage</h2>
-                        <div class="input-group" style="margin-bottom: 12px;">
+                        <h2><i class="fa-solid fa-clipboard-user" style="color:var(--primary);"></i> Record Usage</h2>
+                        <div class="input-group" style="margin-bottom: 15px;">
                             <input type="text" id="u-item" placeholder="Product used or Barcode">
                             <button class="btn-blue" onclick="openScanner('u-item')"><i class="fa-solid fa-camera"></i> Scan</button>
                         </div>
@@ -191,13 +260,13 @@
                 <h2><i class="fa-solid fa-file-invoice"></i> Purchase History</h2>
                 <input type="text" id="history-search" class="search-bar" onkeyup="filterHistory()" placeholder="🔍 Search...">
                 <button class="btn-blue" onclick="loadHistory()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-                <button class="btn-green" onclick="exportToCSV('history-table', 'History')"><i class="fa-solid fa-file-csv"></i> Download CSV</button>
+                <button class="btn-green" onclick="exportToCSV('history-table', 'History')" style="width: auto; display: inline-block; padding: 10px 16px;"><i class="fa-solid fa-file-csv"></i> Download CSV</button>
                 <table><thead><tr><th>Date</th><th>Category</th><th>Item</th><th>Supplier</th><th>Location</th><th>Qty</th><th>Total (Rs)</th></tr></thead><tbody id="history-table"></tbody></table>
             </div>
         </div>
 
         <div id="tab-suppliers" class="tab-content">
-            <div class="card" style="background: #F8FAFC;">
+            <div class="card" style="background: var(--bg);">
                 <h2><i class="fa-solid fa-plus"></i> Add New Supplier</h2>
                 <div class="grid-2"><input type="text" id="new-sup-name" placeholder="Supplier Name"><input type="text" id="new-sup-loc" placeholder="Location"></div>
                 <button class="btn-green" onclick="addSupplierBtn()" style="width: 200px;"><i class="fa-solid fa-check"></i> Add</button>
@@ -240,21 +309,19 @@
     }
     function closeScanner() { if (html5QrcodeScanner) html5QrcodeScanner.clear(); document.getElementById('scanner-modal').style.display = 'none'; }
     
-    // NEW BARCODE MEMORY LOGIC
     async function onScanSuccess(decodedText, decodedResult) {
         closeScanner();
-        const res = await fetch(`/api/resolve_barcode?code=${decodedText}`);
-        const data = await res.json();
-        
+        let res = await fetch(`/api/resolve_barcode?code=${decodedText}`);
+        let data = await res.json();
         if (data.name) {
             document.getElementById(currentScanTarget).value = data.name;
             showNotification(`Barcode recognized: ${data.name}`);
         } else {
-            const itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's actual name? (e.g. Diesel)`);
+            let itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's actual name?`);
             if (itemName) {
                 await fetch('/api/link_barcode', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ barcode: decodedText, name: itemName }) });
                 document.getElementById(currentScanTarget).value = itemName;
-                showNotification("Barcode linked! It will be remembered next time.");
+                showNotification("Barcode linked and remembered!");
             } else {
                 document.getElementById(currentScanTarget).value = decodedText;
             }
@@ -262,9 +329,13 @@
         if (navigator.vibrate) navigator.vibrate(100);
     }
 
-    function toggleRegister() {
-        let l = document.getElementById('staff-login-box'), r = document.getElementById('staff-register-box');
-        l.style.display = l.style.display === 'none' ? 'block' : 'none'; r.style.display = r.style.display === 'none' ? 'block' : 'none';
+    function toggleForm(formType) {
+        document.getElementById('staff-login-box').style.display = 'none';
+        document.getElementById('staff-register-box').style.display = 'none';
+        document.getElementById('admin-login-box').style.display = 'none';
+        if (formType === 'staff') document.getElementById('staff-login-box').style.display = 'block';
+        if (formType === 'register') document.getElementById('staff-register-box').style.display = 'block';
+        if (formType === 'admin') document.getElementById('admin-login-box').style.display = 'block';
     }
 
     let currentRole = null, usageChartInstance = null;
@@ -294,7 +365,7 @@
         if(!u || !p) return showNotification("Missing fields.", true);
         let res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
         let data = await res.json();
-        if(data.success) { showNotification("Account created!"); toggleRegister(); } else showNotification(data.message, true);
+        if(data.success) { showNotification("Account created!"); toggleForm('staff'); } else showNotification(data.message, true);
     }
 
     function logout() { localStorage.removeItem('userRole'); currentRole = null; document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); openTab('tab-dashboard', document.querySelector('.tab-btn')); checkAuth(); }
