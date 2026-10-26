@@ -1,33 +1,45 @@
 from flask import Flask, request, jsonify
 import json
-import os
+import urllib.request
 from datetime import datetime
 
 app = Flask(__name__)
 
-DATA_FILE = "/tmp/crusher_data.json"
+# Your Firebase Database URL (Notice the added .json at the end for REST API access)
+FIREBASE_URL = "https://industry-e1b0b-default-rtdb.firebaseio.com/.json"
 
 def load_data():
     default_data = {
         "purchases": [], "usage": [], "suppliers": [], 
         "users": {"admin": {"password": "admin123", "role": "admin"}}
     }
-    if not os.path.exists(DATA_FILE):
-        return default_data
     try:
-        with open(DATA_FILE, "r") as f:
-            data = json.load(f)
-            if "suppliers" not in data:
-                data["suppliers"] = []
-            if "users" not in data:
-                data["users"] = {"admin": {"password": "admin123", "role": "admin"}}
+        req = urllib.request.Request(FIREBASE_URL)
+        with urllib.request.urlopen(req) as response:
+            data = json.loads(response.read().decode())
+            
+            # If database is brand new and empty (returns null)
+            if data is None:
+                return default_data
+                
+            # Ensure all sections exist to prevent crash errors
+            if "purchases" not in data or data["purchases"] is None: data["purchases"] = []
+            if "usage" not in data or data["usage"] is None: data["usage"] = []
+            if "suppliers" not in data or data["suppliers"] is None: data["suppliers"] = []
+            if "users" not in data or data["users"] is None: data["users"] = default_data["users"]
+            
             return data
-    except Exception:
+    except Exception as e:
+        print(f"Error loading from Firebase: {e}")
         return default_data
 
 def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    try:
+        req = urllib.request.Request(FIREBASE_URL, data=json.dumps(data).encode(), method='PUT')
+        req.add_header('Content-Type', 'application/json')
+        urllib.request.urlopen(req)
+    except Exception as e:
+        print(f"Error saving to Firebase: {e}")
 
 @app.route('/api/login', methods=['POST'])
 def login():
@@ -39,10 +51,8 @@ def login():
     
     user = data["users"].get(username)
     if user and user["password"] == password:
-        # Prevent staff from logging into the admin side
         if portal == "admin" and user["role"] != "admin":
             return jsonify({"success": False, "message": "Admin privileges required."}), 403
-            
         return jsonify({"success": True, "role": user["role"]})
     return jsonify({"success": False, "message": "Invalid username or password."}), 401
 
