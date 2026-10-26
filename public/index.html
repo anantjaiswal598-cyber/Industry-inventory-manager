@@ -27,23 +27,16 @@
         
         body { font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg); margin: 0; padding: 0; color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         
-        /* Login Screen */
-        #login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: #EEF2FF; transition: background-color 0.3s; }
         /* Split Login Screen */
-        .split-login-container { display: flex; width: 100%; max-width: 800px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; }
-        .login-half { flex: 1; padding: 40px; text-align: center; }
+        #login-screen { height: 100vh; display: flex; align-items: center; justify-content: center; background: #EEF2FF; transition: background-color 0.3s; padding: 20px; box-sizing: border-box; }
+        .split-login-container { display: flex; width: 100%; max-width: 800px; background: var(--card-bg); border-radius: 12px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); overflow: hidden; flex-wrap: wrap; }
+        .login-half { flex: 1; padding: 40px; text-align: center; min-width: 300px; }
         .admin-side { background: #EEF2FF; border-left: 1px solid var(--border); }
         .user-side { background: #FFFFFF; }
+        .login-half h2 { color: var(--primary); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
         .toggle-link { color: var(--primary); cursor: pointer; font-size: 13px; font-weight: bold; margin-top: 15px; display: inline-block; transition: 0.2s; }
         .toggle-link:hover { text-decoration: underline; }
 
-        /* Dark Mode Additions */
-        body.dark-mode .split-login-container { border: 1px solid #374151; }
-        body.dark-mode .admin-side { background: #111827; border-left-color: #374151; }
-        body.dark-mode .user-side { background: #1F2937; }
-        .login-card { background: var(--card-bg); padding: 40px; border-radius: 12px; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); width: 100%; max-width: 350px; text-align: center; transition: background-color 0.3s; }
-        .login-card h2 { color: var(--primary); margin-top: 0; margin-bottom: 20px; font-size: 24px; }
-        
         /* Navbar */
         #app-screen { display: none; }
         .navbar { background: var(--card-bg); padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; transition: background-color 0.3s, border-color 0.3s; }
@@ -110,6 +103,9 @@
         /* Dark Mode */
         body.dark-mode { --bg: #111827; --card-bg: #1F2937; --text-main: #F9FAFB; --text-muted: #9CA3AF; --border: #374151; }
         body.dark-mode #login-screen { background: #111827; }
+        body.dark-mode .split-login-container { border: 1px solid #374151; }
+        body.dark-mode .admin-side { background: #111827; border-left-color: #374151; }
+        body.dark-mode .user-side { background: #1F2937; }
         body.dark-mode input, body.dark-mode select, body.dark-mode .search-bar { background: #374151; color: white; border-color: #4B5563; }
         body.dark-mode th { background: #374151; color: #D1D5DB; }
         body.dark-mode tr:hover { background: #374151; }
@@ -129,18 +125,17 @@
     </div>
 </div>
 
-<!-- LOGIN SCREEN -->
+<!-- SPLIT LOGIN SCREEN -->
 <div id="login-screen">
     <div class="split-login-container">
-        
-        <!-- STAFF SIDE (Login / Register) -->
+        <!-- STAFF SIDE -->
         <div class="login-half user-side">
             <h2><i class="fa-solid fa-users-gear"></i> Staff Portal</h2>
             
             <div id="staff-login-box">
                 <input type="text" id="staff-user" placeholder="Staff Username">
                 <input type="password" id="staff-pass" placeholder="Password">
-                <button class="btn-blue" onclick="attemptLogin('staff')">Login as Staff</button>
+                <button class="btn-green" onclick="attemptLogin('staff')">Login as Staff</button>
                 <span class="toggle-link" onclick="toggleRegister()">Need an account? Register here</span>
             </div>
 
@@ -160,7 +155,6 @@
             <input type="password" id="admin-pass" placeholder="Password">
             <button class="btn-blue" onclick="attemptLogin('admin')">Login as Admin <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
         </div>
-
     </div>
 </div>
 
@@ -376,33 +370,7 @@
     }
     function onScanFailure(error) {}
 
-    // --- MAIN APP LOGIC ---
-    let usageChartInstance = null;
-    let supplierListMaster = []; 
-    let currentRole = null;
-
-    function checkAuth() {
-        const role = localStorage.getItem('userRole');
-        if (role) {
-            currentRole = role;
-            document.getElementById('login-screen').style.display = 'none';
-            document.getElementById('app-screen').style.display = 'block';
-            document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
-            
-            const adminElements = document.querySelectorAll('.admin-only');
-            if (role === 'staff') {
-                adminElements.forEach(el => el.style.display = 'none');
-            } else {
-                adminElements.forEach(el => el.style.display = 'block');
-            }
-            loadDashboardData();
-            loadSuppliers();
-        } else {
-            document.getElementById('login-screen').style.display = 'flex';
-            document.getElementById('app-screen').style.display = 'none';
-        }
-    }
-    
+    // --- AUTHENTICATION & LOGIN/REGISTER LOGIC ---
     function toggleRegister() {
         const loginBox = document.getElementById('staff-login-box');
         const regBox = document.getElementById('staff-register-box');
@@ -419,6 +387,8 @@
         const u = portalType === 'admin' ? document.getElementById('admin-user').value : document.getElementById('staff-user').value;
         const p = portalType === 'admin' ? document.getElementById('admin-pass').value : document.getElementById('staff-pass').value;
         
+        if(!u || !p) return showNotification("Please enter username and password.", true);
+
         const res = await fetch('/api/login', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ username: u, password: p, portal: portalType })
@@ -455,12 +425,40 @@
         }
     }
 
+    // --- MAIN APP LOGIC ---
+    let usageChartInstance = null;
+    let supplierListMaster = []; 
+    let currentRole = null;
+
+    function checkAuth() {
+        const role = localStorage.getItem('userRole');
+        if (role) {
+            currentRole = role;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
+            
+            const adminElements = document.querySelectorAll('.admin-only');
+            if (role === 'staff') {
+                adminElements.forEach(el => el.style.display = 'none');
+            } else {
+                adminElements.forEach(el => el.style.display = 'block');
+            }
+            loadDashboardData();
+            loadSuppliers();
+        } else {
+            document.getElementById('login-screen').style.display = 'flex';
+            document.getElementById('app-screen').style.display = 'none';
+        }
+    }
 
     function logout() {
         localStorage.removeItem('userRole');
         currentRole = null;
-        document.getElementById('login-user').value = '';
-        document.getElementById('login-pass').value = '';
+        document.getElementById('staff-user').value = '';
+        document.getElementById('staff-pass').value = '';
+        document.getElementById('admin-user').value = '';
+        document.getElementById('admin-pass').value = '';
         openTab('tab-dashboard', document.querySelector('.tab-btn'));
         checkAuth();
     }
