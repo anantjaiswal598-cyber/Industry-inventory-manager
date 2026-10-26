@@ -94,7 +94,10 @@ body.dark-mode td, body.dark-mode th, body.dark-mode .card h2 { border-bottom-co
 
 <!-- MAIN APPLICATION -->
 <div id="app-screen">
-    <div class="navbar">
+    <div class="navbar"><div>
+            <span id="user-greeting" style="margin-right: 15px; font-weight: 600; font-size: 14px;"></span>
+            <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-power-off"></i> Logout</button>
+        </div>
         <div class="navbar-brand">
             <h1>Industory Inventory</h1>
             <div class="nav-links">
