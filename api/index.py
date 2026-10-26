@@ -5,27 +5,24 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Your Firebase Database URL (Notice the added .json at the end for REST API access)
 FIREBASE_URL = "https://industry-e1b0b-default-rtdb.firebaseio.com/.json"
 
 def load_data():
     default_data = {
-        "purchases": [], "usage": [], "suppliers": [], 
+        "purchases": [], "usage": [], "suppliers": [], "barcodes": {},
         "users": {"admin": {"password": "admin123", "role": "admin"}}
     }
     try:
         req = urllib.request.Request(FIREBASE_URL)
         with urllib.request.urlopen(req) as response:
             data = json.loads(response.read().decode())
-            
-            # If database is brand new and empty (returns null)
             if data is None:
                 return default_data
                 
-            # Ensure all sections exist to prevent crash errors
             if "purchases" not in data or data["purchases"] is None: data["purchases"] = []
             if "usage" not in data or data["usage"] is None: data["usage"] = []
             if "suppliers" not in data or data["suppliers"] is None: data["suppliers"] = []
+            if "barcodes" not in data or data["barcodes"] is None: data["barcodes"] = {}
             if "users" not in data or data["users"] is None: data["users"] = default_data["users"]
             
             return data
@@ -65,13 +62,28 @@ def register():
     
     if not username or not password:
         return jsonify({"success": False, "message": "Missing fields"}), 400
-        
     if username in data["users"]:
         return jsonify({"success": False, "message": "Username already exists."}), 409
         
     data["users"][username] = {"password": password, "role": "staff"}
     save_data(data)
-    
+    return jsonify({"success": True})
+
+@app.route('/api/resolve_barcode', methods=['GET'])
+def resolve_barcode():
+    data = load_data()
+    code = request.args.get('code')
+    name = data["barcodes"].get(code, "")
+    return jsonify({"name": name})
+
+@app.route('/api/link_barcode', methods=['POST'])
+def link_barcode():
+    data = load_data()
+    req = request.json
+    barcode = req.get("barcode")
+    name = req.get("name")
+    data["barcodes"][barcode] = name
+    save_data(data)
     return jsonify({"success": True})
 
 @app.route('/api/stock', methods=['GET'])
@@ -89,17 +101,9 @@ def get_stock():
     stock_list = []
     for k, v in stock.items():
         status = "Normal"
-        if v < 50:
-            status = "Low Stock"
-        if v <= 0:
-            status = "Out of Stock"
-            
-        stock_list.append({
-            "item": k, 
-            "remaining": v, 
-            "unit": units.get(k, ""),
-            "status": status
-        })
+        if v < 50: status = "Low Stock"
+        if v <= 0: status = "Out of Stock"
+        stock_list.append({"item": k, "remaining": v, "unit": units.get(k, ""), "status": status})
     return jsonify(stock_list)
 
 @app.route('/api/purchase', methods=['POST'])
@@ -123,7 +127,7 @@ def add_purchase():
         "price": float(req.get("price", 0)),
     })
     save_data(data)
-    return jsonify({"message": "Purchase saved successfully."})
+    return jsonify({"message": "Purchase saved."})
 
 @app.route('/api/usage', methods=['POST'])
 def add_usage():
@@ -136,7 +140,7 @@ def add_usage():
         "purpose": req.get("purpose"),
     })
     save_data(data)
-    return jsonify({"message": "Usage saved successfully."})
+    return jsonify({"message": "Usage saved."})
 
 @app.route('/api/monthly_usage', methods=['GET'])
 def get_monthly_usage():
@@ -145,10 +149,7 @@ def get_monthly_usage():
     for u in data["usage"]:
         purpose = u.get("purpose", "Other") 
         monthly[purpose] = monthly.get(purpose, 0) + u["quantity"]
-        
-    labels = list(monthly.keys())
-    chart_data = list(monthly.values())
-    return jsonify({"labels": labels, "data": chart_data})
+    return jsonify({"labels": list(monthly.keys()), "data": list(monthly.values())})
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
@@ -168,12 +169,7 @@ def get_suppliers():
     result = []
     for s in data["suppliers"]:
         name = s["name"]
-        result.append({
-            "name": name,
-            "location": s.get("location", ""),
-            "count": stats.get(name, {}).get("count", 0),
-            "total": stats.get(name, {}).get("total", 0)
-        })
+        result.append({"name": name, "location": s.get("location", ""), "count": stats.get(name, {}).get("count", 0), "total": stats.get(name, {}).get("total", 0)})
     return jsonify(result)
 
 @app.route('/api/supplier_action', methods=['POST'])
@@ -182,15 +178,12 @@ def manage_supplier():
     req = request.json
     action = req.get("action")
     name = req.get("name")
-    role = req.get("role")
     
     if action == "add":
-        location = req.get("location", "")
         if not any(s["name"].lower() == name.lower() for s in data["suppliers"]):
-            data["suppliers"].append({"name": name, "location": location})
+            data["suppliers"].append({"name": name, "location": req.get("location", "")})
     elif action == "delete":
-        if role != "admin":
-            return jsonify({"error": "Unauthorized"}), 403
+        if req.get("role") != "admin": return jsonify({"error": "Unauthorized"}), 403
         data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
         
     save_data(data)
