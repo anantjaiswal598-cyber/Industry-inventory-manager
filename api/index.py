@@ -7,7 +7,6 @@ app = Flask(__name__)
 
 DATA_FILE = "/tmp/crusher_data.json"
 
-# Hardcoded Prototype Users
 USERS = {
     "admin": {"password": "admin123", "role": "admin"},
     "staff": {"password": "staff123", "role": "staff"}
@@ -16,16 +15,14 @@ USERS = {
 def load_data():
     if not os.path.exists(DATA_FILE):
         return {"purchases": [], "usage": [], "suppliers": []}
-    with open(DATA_FILE, "r") as f:
-        data = json.load(f)
-        if "suppliers" not in data:
-            unique_suppliers = {}
-            for p in data.get("purchases", []):
-                name = p.get("supplier")
-                if name and name not in unique_suppliers:
-                    unique_suppliers[name] = p.get("source", "")
-            data["suppliers"] = [{"name": k, "location": v} for k, v in unique_suppliers.items()]
-        return data
+    try:
+        with open(DATA_FILE, "r") as f:
+            data = json.load(f)
+            if "suppliers" not in data:
+                data["suppliers"] = []
+            return data
+    except Exception:
+        return {"purchases": [], "usage": [], "suppliers": []}
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
@@ -54,7 +51,20 @@ def get_stock():
         if u["item"] in stock:
             stock[u["item"]] -= u["quantity"]
     
-    stock_list = [{"item": k, "remaining": v, "unit": units.get(k, "")} for k, v in stock.items()]
+    stock_list = []
+    for k, v in stock.items():
+        status = "Normal"
+        if v < 50:
+            status = "Low Stock"
+        if v <= 0:
+            status = "Out of Stock"
+            
+        stock_list.append({
+            "item": k, 
+            "remaining": v, 
+            "unit": units.get(k, ""),
+            "status": status
+        })
     return jsonify(stock_list)
 
 @app.route('/api/purchase', methods=['POST'])
@@ -98,11 +108,11 @@ def get_monthly_usage():
     data = load_data()
     monthly = {}
     for u in data["usage"]:
-        month = u["date"][:7] 
-        monthly[month] = monthly.get(month, 0) + u["quantity"]
+        purpose = u.get("purpose", "Other") 
+        monthly[purpose] = monthly.get(purpose, 0) + u["quantity"]
         
-    labels = sorted(monthly.keys())
-    chart_data = [monthly[m] for m in labels]
+    labels = list(monthly.keys())
+    chart_data = list(monthly.values())
     return jsonify({"labels": labels, "data": chart_data})
 
 @app.route('/api/history', methods=['GET'])
@@ -144,7 +154,6 @@ def manage_supplier():
         if not any(s["name"].lower() == name.lower() for s in data["suppliers"]):
             data["suppliers"].append({"name": name, "location": location})
     elif action == "delete":
-        # Security layer: Reject deletion if the request does not come from an admin
         if role != "admin":
             return jsonify({"error": "Unauthorized"}), 403
         data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
