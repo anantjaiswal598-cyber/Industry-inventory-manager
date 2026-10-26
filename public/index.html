@@ -131,12 +131,36 @@
 
 <!-- LOGIN SCREEN -->
 <div id="login-screen">
-    <div class="login-card">
-        <h2><i class="fa-solid fa-helmet-safety"></i> System Login</h2>
-        <input type="text" id="login-user" placeholder="Username">
-        <input type="password" id="login-pass" placeholder="Password">
-        <button class="btn-green" onclick="attemptLogin()" style="margin-top: 10px;">Login <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
-        <p id="login-error" style="color: red; font-size: 13px; display: none;">Invalid credentials.</p>
+    <div class="split-login-container">
+        
+        <!-- STAFF SIDE (Login / Register) -->
+        <div class="login-half user-side">
+            <h2><i class="fa-solid fa-users-gear"></i> Staff Portal</h2>
+            
+            <div id="staff-login-box">
+                <input type="text" id="staff-user" placeholder="Staff Username">
+                <input type="password" id="staff-pass" placeholder="Password">
+                <button class="btn-blue" onclick="attemptLogin('staff')">Login as Staff</button>
+                <span class="toggle-link" onclick="toggleRegister()">Need an account? Register here</span>
+            </div>
+
+            <div id="staff-register-box" style="display: none;">
+                <input type="text" id="reg-user" placeholder="Choose Username">
+                <input type="password" id="reg-pass" placeholder="Choose Password">
+                <button class="btn-green" onclick="registerStaff()"><i class="fa-solid fa-user-plus"></i> Create Account</button>
+                <span class="toggle-link" onclick="toggleRegister()">Back to Login</span>
+            </div>
+        </div>
+
+        <!-- ADMIN SIDE -->
+        <div class="login-half admin-side">
+            <h2><i class="fa-solid fa-shield-halved"></i> Admin Portal</h2>
+            <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 20px;">Requires elevated privileges</p>
+            <input type="text" id="admin-user" placeholder="Admin Username">
+            <input type="password" id="admin-pass" placeholder="Password">
+            <button class="btn-blue" onclick="attemptLogin('admin')">Login as Admin <i class="fa-solid fa-arrow-right-to-bracket"></i></button>
+        </div>
+
     </div>
 </div>
 
