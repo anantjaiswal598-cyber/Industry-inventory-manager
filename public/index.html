@@ -66,6 +66,17 @@
         .stat-box { background: #EEF2FF; padding: 15px; border-radius: 8px; text-align: center; margin-top: 15px; border: 1px solid #C7D2FE;}
         .stat-box h3 { margin: 0; color: var(--primary); font-size: 24px; }
         .stat-box p { margin: 5px 0 0 0; color: #4338CA; font-size: 13px; font-weight: 600; }
+
+        body.dark-mode {
+    --bg: #111827;
+    --card-bg: #1F2937;
+    --text-main: #F9FAFB;
+    --text-muted: #9CA3AF;
+}
+body.dark-mode .navbar, body.dark-mode .login-card { border-color: #374151; background: var(--card-bg); }
+body.dark-mode input, body.dark-mode select { background: #374151; color: white; border-color: #4B5563; }
+body.dark-mode th { background: #374151; color: #D1D5DB; }
+body.dark-mode td, body.dark-mode th, body.dark-mode .card h2 { border-bottom-color: #374151; }
     </style>
 </head>
 <body>
