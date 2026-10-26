@@ -5,10 +5,9 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# File path for serverless storage on Vercel
-DATA_FILE = '/tmp/crusher_data.json'
+DATA_FILE = "/tmp/crusher_data.json"
 
-# Hardcoded roles for Phase 1
+# Hardcoded Prototype Users
 USERS = {
     "admin": {"password": "admin123", "role": "admin"},
     "staff": {"password": "staff123", "role": "staff"}
@@ -16,79 +15,95 @@ USERS = {
 
 def load_data():
     if not os.path.exists(DATA_FILE):
-        return {"purchases": [], "usage": [], "suppliers_deleted": []}
-    try:
-        with open(DATA_FILE, 'r') as f:
-            return json.load(f)
-    except Exception:
-        return {"purchases": [], "usage": [], "suppliers_deleted": []}
+        return {"purchases": [], "usage": [], "suppliers": []}
+    with open(DATA_FILE, "r") as f:
+        data = json.load(f)
+        if "suppliers" not in data:
+            unique_suppliers = {}
+            for p in data.get("purchases", []):
+                name = p.get("supplier")
+                if name and name not in unique_suppliers:
+                    unique_suppliers[name] = p.get("source", "")
+            data["suppliers"] = [{"name": k, "location": v} for k, v in unique_suppliers.items()]
+        return data
 
 def save_data(data):
-    with open(DATA_FILE, 'w') as f:
-        json.dump(data, f, indent=4)
+    with open(DATA_FILE, "w") as f:
+        json.dump(data, f, indent=2)
 
 @app.route('/api/login', methods=['POST'])
 def login():
     req = request.json
-    username = req.get('username')
-    password = req.get('password')
-    if username in USERS and USERS[username]['password'] == password:
-        return jsonify({"success": True, "role": USERS[username]['role']})
-    return jsonify({"success": False}), 401
-
-@app.route('/api/purchase', methods=['POST'])
-def add_purchase():
-    data = load_data()
-    req = request.json
-    purchase = {
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "category": req.get('category'),
-        "item": req.get('item'),
-        "supplier": req.get('supplier'),
-        "source": req.get('source'),
-        "quantity": float(req.get('quantity', 0)),
-        "unit": req.get('unit'),
-        "price": float(req.get('price', 0))
-    }
-    data["purchases"].append(purchase)
-    save_data(data)
-    return jsonify({"success": True})
-
-@app.route('/api/usage', methods=['POST'])
-def add_usage():
-    data = load_data()
-    req = request.json
-    usage = {
-        "date": datetime.now().strftime("%Y-%m-%d %H:%M"),
-        "item": req.get('item'),
-        "quantity": float(req.get('quantity', 0)),
-        "purpose": req.get('purpose')
-    }
-    data["usage"].append(usage)
-    save_data(data)
-    return jsonify({"success": True})
+    username = req.get("username", "").lower()
+    password = req.get("password", "")
+    
+    user = USERS.get(username)
+    if user and user["password"] == password:
+        return jsonify({"success": True, "role": user["role"]})
+    return jsonify({"success": False, "message": "Invalid credentials"}), 401
 
 @app.route('/api/stock', methods=['GET'])
 def get_stock():
     data = load_data()
     stock = {}
-    
-    # Add purchases
+    units = {}
     for p in data["purchases"]:
-        item = p["item"]
-        if item not in stock:
-            stock[item] = {"remaining": 0, "unit": p["unit"]}
-        stock[item]["remaining"] += p["quantity"]
-        
-    # Subtract usage
+        stock[p["item"]] = stock.get(p["item"], 0) + p["quantity"]
+        units[p["item"]] = p["unit"]
     for u in data["usage"]:
-        item = u["item"]
-        if item in stock:
-            stock[item]["remaining"] -= u["quantity"]
-            
-    # Format for frontend
-    result = [{"item": k, "remaining": v["remaining"], "unit": v["unit"]} for k, v in stock.items()]
-    return jsonify(result)
+        if u["item"] in stock:
+            stock[u["item"]] -= u["quantity"]
+    
+    stock_list = [{"item": k, "remaining": v, "unit": units.get(k, "")} for k, v in stock.items()]
+    return jsonify(stock_list)
+
+@app.route('/api/purchase', methods=['POST'])
+def add_purchase():
+    data = load_data()
+    req = request.json
+    supplier_name = req.get("supplier")
+    source = req.get("source", "")
+    
+    if supplier_name and not any(s["name"].lower() == supplier_name.lower() for s in data["suppliers"]):
+        data["suppliers"].append({"name": supplier_name, "location": source})
+        
+    data["purchases"].append({
+        "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
+        "category": req.get("category", "Uncategorized"),
+        "item": req.get("item"),
+        "supplier": supplier_name,
+        "source": source,
+        "quantity": float(req.get("quantity", 0)),
+        "unit": req.get("unit"),
+        "price": float(req.get("price", 0)),
+    })
+    save_data(data)
+    return jsonify({"message": "Purchase saved successfully."})
+
+@app.route('/api/usage', methods=['POST'])
+def add_usage():
+    data = load_data()
+    req = request.json
+    data["usage"].append({
+        "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
+        "item": req.get("item"),
+        "quantity": float(req.get("quantity", 0)),
+        "purpose": req.get("purpose"),
+    })
+    save_data(data)
+    return jsonify({"message": "Usage saved successfully."})
+
+@app.route('/api/monthly_usage', methods=['GET'])
+def get_monthly_usage():
+    data = load_data()
+    monthly = {}
+    for u in data["usage"]:
+        month = u["date"][:7] 
+        monthly[month] = monthly.get(month, 0) + u["quantity"]
+        
+    labels = sorted(monthly.keys())
+    chart_data = [monthly[m] for m in labels]
+    return jsonify({"labels": labels, "data": chart_data})
 
 @app.route('/api/history', methods=['GET'])
 def get_history():
@@ -98,52 +113,41 @@ def get_history():
 @app.route('/api/suppliers', methods=['GET'])
 def get_suppliers():
     data = load_data()
-    suppliers = {}
-    deleted_suppliers = data.get("suppliers_deleted", [])
-    
+    stats = {}
     for p in data["purchases"]:
-        name = p["supplier"]
-        if name and name not in deleted_suppliers:
-            if name not in suppliers:
-                suppliers[name] = {"name": name, "location": p["source"], "count": 0}
-            suppliers[name]["count"] += 1
-            
-    return jsonify(list(suppliers.values()))
+        name = p.get("supplier", "Unknown")
+        stats.setdefault(name, {"count": 0, "total": 0})
+        stats[name]["count"] += 1
+        stats[name]["total"] += p.get("price", 0)
+        
+    result = []
+    for s in data["suppliers"]:
+        name = s["name"]
+        result.append({
+            "name": name,
+            "location": s.get("location", ""),
+            "count": stats.get(name, {}).get("count", 0),
+            "total": stats.get(name, {}).get("total", 0)
+        })
+    return jsonify(result)
 
 @app.route('/api/supplier_action', methods=['POST'])
-def supplier_action():
-    req = request.json
-    if req.get('role') != 'admin':
-        return jsonify({"success": False, "error": "Unauthorized"}), 403
-        
-    if req.get('action') == 'delete':
-        data = load_data()
-        name = req.get('name')
-        if "suppliers_deleted" not in data:
-            data["suppliers_deleted"] = []
-        if name not in data["suppliers_deleted"]:
-            data["suppliers_deleted"].append(name)
-        save_data(data)
-        return jsonify({"success": True})
-        
-    return jsonify({"success": False}), 400
-
-@app.route('/api/monthly_usage', methods=['GET'])
-def get_monthly_usage():
+def manage_supplier():
     data = load_data()
-    usage_counts = {}
+    req = request.json
+    action = req.get("action")
+    name = req.get("name")
+    role = req.get("role")
     
-    for u in data["usage"]:
-        purpose = u.get("purpose", "Other")
-        if purpose not in usage_counts:
-            usage_counts[purpose] = 0
-        usage_counts[purpose] += 1
+    if action == "add":
+        location = req.get("location", "")
+        if not any(s["name"].lower() == name.lower() for s in data["suppliers"]):
+            data["suppliers"].append({"name": name, "location": location})
+    elif action == "delete":
+        # Security layer: Reject deletion if the request does not come from an admin
+        if role != "admin":
+            return jsonify({"error": "Unauthorized"}), 403
+        data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
         
-    labels = list(usage_counts.keys())
-    values = list(usage_counts.values())
-    
-    return jsonify({"labels": labels, "data": values})
-
-# For local testing
-if __name__ == '__main__':
-    app.run(debug=True)
+    save_data(data)
+    return jsonify({"message": "Success"})
