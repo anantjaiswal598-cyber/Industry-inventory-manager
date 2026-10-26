@@ -7,22 +7,23 @@ app = Flask(__name__)
 
 DATA_FILE = "/tmp/crusher_data.json"
 
-USERS = {
-    "admin": {"password": "admin123", "role": "admin"},
-    "staff": {"password": "staff123", "role": "staff"}
-}
-
 def load_data():
+    default_data = {
+        "purchases": [], "usage": [], "suppliers": [], 
+        "users": {"admin": {"password": "admin123", "role": "admin"}}
+    }
     if not os.path.exists(DATA_FILE):
-        return {"purchases": [], "usage": [], "suppliers": []}
+        return default_data
     try:
         with open(DATA_FILE, "r") as f:
             data = json.load(f)
             if "suppliers" not in data:
                 data["suppliers"] = []
+            if "users" not in data:
+                data["users"] = {"admin": {"password": "admin123", "role": "admin"}}
             return data
     except Exception:
-        return {"purchases": [], "usage": [], "suppliers": []}
+        return default_data
 
 def save_data(data):
     with open(DATA_FILE, "w") as f:
@@ -30,14 +31,38 @@ def save_data(data):
 
 @app.route('/api/login', methods=['POST'])
 def login():
+    data = load_data()
+    req = request.json
+    username = req.get("username", "").lower()
+    password = req.get("password", "")
+    portal = req.get("portal", "") 
+    
+    user = data["users"].get(username)
+    if user and user["password"] == password:
+        # Prevent staff from logging into the admin side
+        if portal == "admin" and user["role"] != "admin":
+            return jsonify({"success": False, "message": "Admin privileges required."}), 403
+            
+        return jsonify({"success": True, "role": user["role"]})
+    return jsonify({"success": False, "message": "Invalid username or password."}), 401
+
+@app.route('/api/register', methods=['POST'])
+def register():
+    data = load_data()
     req = request.json
     username = req.get("username", "").lower()
     password = req.get("password", "")
     
-    user = USERS.get(username)
-    if user and user["password"] == password:
-        return jsonify({"success": True, "role": user["role"]})
-    return jsonify({"success": False, "message": "Invalid credentials"}), 401
+    if not username or not password:
+        return jsonify({"success": False, "message": "Missing fields"}), 400
+        
+    if username in data["users"]:
+        return jsonify({"success": False, "message": "Username already exists."}), 409
+        
+    data["users"][username] = {"password": password, "role": "staff"}
+    save_data(data)
+    
+    return jsonify({"success": True})
 
 @app.route('/api/stock', methods=['GET'])
 def get_stock():
