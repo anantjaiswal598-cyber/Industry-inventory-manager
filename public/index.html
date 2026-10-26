@@ -402,7 +402,7 @@
             document.getElementById('app-screen').style.display = 'none';
         }
     }
-
+    
     async function attemptLogin() {
         const u = document.getElementById('login-user').value;
         const p = document.getElementById('login-pass').value;
@@ -420,6 +420,7 @@
             document.getElementById('login-error').style.display = 'block';
         }
     }
+
 
     function logout() {
         localStorage.removeItem('userRole');
