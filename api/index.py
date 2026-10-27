@@ -8,9 +8,11 @@ app = Flask(__name__)
 
 FIREBASE_URL = "https://industry-e1b0b-default-rtdb.firebaseio.com/.json"
 
-# TWILIO CONFIG (Replace with your actual Twilio Account credentials)
-TWILIO_ACCOUNT_SID = "YOUR_TWILIO_SID"
-TWILIO_AUTH_TOKEN = "YOUR_TWILIO_AUTH_TOKEN"
+import os
+
+# TWILIO CONFIG (Loaded securely from Vercel Environment Variables)
+TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
 TWILIO_WHATSAPP_FROM = "whatsapp:+14155238886"  # Twilio sandbox number
 
 def send_whatsapp_alert(message_body, phone_number):
