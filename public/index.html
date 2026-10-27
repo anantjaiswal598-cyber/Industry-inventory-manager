@@ -50,7 +50,6 @@
         .switch-form span { color: #2563EB; font-weight: bold; cursor: pointer; transition: 0.2s; }
         .switch-form span:hover { color: #1D4ED8; text-decoration: underline; }
 
-        /* APP SCREEN STYLES */
         #app-screen { display: none; }
         .navbar { background: var(--card-bg); padding: 0 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; flex-wrap: wrap; }
         .navbar h1 { color: var(--primary); font-size: 20px; margin-right: 20px; }
@@ -265,6 +264,16 @@
         </div>
 
         <div id="tab-suppliers" class="tab-content">
+            <!-- ADMIN WHATSAPP CONFIGURATION CARD -->
+            <div class="card" style="background: var(--bg);">
+                <h2><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> WhatsApp Alert Configuration</h2>
+                <p style="font-size: 13px; color: var(--text-muted);">Set the WhatsApp number to receive low stock alerts (format: whatsapp:+919876543210)</p>
+                <div class="input-group">
+                    <input type="text" id="admin-wa-input" placeholder="whatsapp:+919876543210">
+                    <button class="btn-green" onclick="saveAdminWhatsApp()" style="width: 220px; margin-bottom: 12px;"><i class="fa-solid fa-check"></i> Save Number</button>
+                </div>
+            </div>
+
             <div class="card" style="background: var(--bg);">
                 <h2><i class="fa-solid fa-plus"></i> Add New Supplier</h2>
                 <div class="grid-2"><input type="text" id="new-sup-name" placeholder="Supplier Name"><input type="text" id="new-sup-loc" placeholder="Location"></div>
@@ -344,7 +353,7 @@
             currentRole = role; document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'block';
             document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'staff' ? 'none' : 'block');
-            loadDashboardData(); loadSuppliers();
+            loadDashboardData(); loadSuppliers(); loadAdminWhatsApp();
         } else {
             document.getElementById('login-screen').style.display = 'flex'; document.getElementById('app-screen').style.display = 'none';
         }
@@ -371,7 +380,7 @@
     function openTab(tabId, btn) {
         document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
         document.getElementById(tabId).classList.add('active'); btn.classList.add('active');
-        if(tabId === 'tab-stock') loadStock(); if(tabId === 'tab-history') loadHistory(); if(tabId === 'tab-suppliers') loadSuppliers();
+        if(tabId === 'tab-stock') loadStock(); if(tabId === 'tab-history') loadHistory(); if(tabId === 'tab-suppliers') { loadSuppliers(); loadAdminWhatsApp(); }
     }
 
     function toggleOtherPurpose() { document.getElementById('u-purpose-other').style.display = document.getElementById('u-purpose-select').value === 'Other' ? 'block' : 'none'; }
@@ -381,6 +390,30 @@
         if (sel.value !== 'Other') document.getElementById('p-source').value = sel.options[sel.selectedIndex]?.dataset.loc || '';
     }
 
+    async function loadAdminWhatsApp() {
+        let res = await fetch('/api/get_admin_whatsapp');
+        let data = await res.json();
+        if (data.whatsapp) {
+            document.getElementById('admin-wa-input').value = data.whatsapp;
+        }
+    }
+
+    async function saveAdminWhatsApp() {
+        let wa = document.getElementById('admin-wa-input').value;
+        if(!wa) return showNotification("Please enter a WhatsApp number.", true);
+        let res = await fetch('/api/set_admin_whatsapp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ whatsapp: wa, role: currentRole })
+        });
+        let data = await res.json();
+        if (data.success) {
+            showNotification("WhatsApp alert number saved successfully!");
+        } else {
+            showNotification(data.message || "Failed to save", true);
+        }
+    }
+
     async function loadSuppliers() {
         let res = await fetch('/api/suppliers'), data = await res.json();
         let drop = document.getElementById('p-supplier-select');
@@ -388,7 +421,6 @@
         if (currentRole === 'admin') document.getElementById('supplier-table').innerHTML = data.map(s => `<tr><td>${s.name}</td><td>${s.location}</td><td>${s.count}</td><td>Rs ${s.total.toFixed(2)}</td><td><button class="btn-red" onclick="deleteSupplier('${s.name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
     }
 
-    // OFFLINE QUEUE HELPERS
     function saveOfflineQueue(type, data) {
         let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
         queue.push({ type, data, timestamp: new Date().toISOString() });
