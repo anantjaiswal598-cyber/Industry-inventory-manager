@@ -99,7 +99,6 @@
         .scanner-box { background: var(--card-bg); padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; }
         #reader { width: 100%; margin-bottom: 15px; }
 
-        /* RESPONSIVE MOBILE FIXES */
         @media (max-width: 850px) {
             .modern-login-wrapper { flex-direction: column; height: auto; max-width: 450px; }
             .brand-panel { display: none; }
@@ -134,7 +133,6 @@
     </div>
 </div>
 
-<!-- ENTERPRISE LOGIN SCREEN -->
 <div id="login-screen">
     <div class="modern-login-wrapper">
         <div class="brand-panel">
@@ -156,7 +154,6 @@
                 <span style="font-weight: bold; font-size: 22px; margin-left: 10px; color: var(--text-main);">Industry</span>
             </div>
 
-            <!-- STAFF LOGIN -->
             <div id="staff-login-box">
                 <h3 class="form-title">Welcome back</h3>
                 <p class="form-subtitle">Login to your staff account</p>
@@ -168,7 +165,6 @@
                 <p class="switch-form">Don't have an account? <span onclick="toggleForm('register')">Create one</span></p>
             </div>
 
-            <!-- REGISTER -->
             <div id="staff-register-box" style="display: none;">
                 <h3 class="form-title">Let's get started</h3>
                 <p class="form-subtitle">Your data is stored securely in the cloud.</p>
@@ -181,7 +177,6 @@
                 <p class="switch-form">Already have an account? <span onclick="toggleForm('staff')">Log in</span></p>
             </div>
 
-            <!-- ADMIN LOGIN -->
             <div id="admin-login-box" style="display: none;">
                 <h3 class="form-title">Admin Access</h3>
                 <p class="form-subtitle">Requires elevated system privileges</p>
@@ -194,7 +189,6 @@
     </div>
 </div>
 
-<!-- MAIN APP SCREEN -->
 <div id="app-screen">
     <div class="navbar">
         <div class="navbar-brand" style="display: flex; align-items: center;">
@@ -394,20 +388,82 @@
         if (currentRole === 'admin') document.getElementById('supplier-table').innerHTML = data.map(s => `<tr><td>${s.name}</td><td>${s.location}</td><td>${s.count}</td><td>Rs ${s.total.toFixed(2)}</td><td><button class="btn-red" onclick="deleteSupplier('${s.name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
     }
 
+    // OFFLINE QUEUE HELPERS
+    function saveOfflineQueue(type, data) {
+        let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+        queue.push({ type, data, timestamp: new Date().toISOString() });
+        localStorage.setItem('offlineQueue', JSON.stringify(queue));
+    }
+
+    window.addEventListener('online', async () => {
+        let queue = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
+        if (queue.length === 0) return;
+        showNotification('🌐 Back online! Syncing offline records...', false);
+        let remainingQueue = [];
+        for (let item of queue) {
+            let endpoint = item.type === 'purchase' ? '/api/purchase' : '/api/usage';
+            try {
+                let res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(item.data)
+                });
+                if (!res.ok) remainingQueue.push(item);
+            } catch (err) {
+                remainingQueue.push(item);
+            }
+        }
+        localStorage.setItem('offlineQueue', JSON.stringify(remainingQueue));
+        if (remainingQueue.length === 0) {
+            showNotification('✨ All offline data synced to Cloud!', false);
+            loadDashboardData();
+        }
+    });
+
     async function addPurchase() {
         let sup = document.getElementById('p-supplier-select').value; if(sup === 'Other') sup = document.getElementById('p-supplier-other').value;
         let payload = { category: document.getElementById('p-category').value, item: document.getElementById('p-item').value, supplier: sup, source: document.getElementById('p-source').value, quantity: document.getElementById('p-qty').value, unit: document.getElementById('p-unit').value, price: document.getElementById('p-price').value };
         if(!payload.item || !payload.supplier) return showNotification("Missing data.", true);
-        await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        showNotification('✅ Saved!'); document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = ''; loadDashboardData(); loadSuppliers();
+
+        if (!navigator.onLine) {
+            saveOfflineQueue('purchase', payload);
+            showNotification('📴 No internet! Saved offline. Will sync when online.', false);
+            document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = '';
+            return;
+        }
+
+        try {
+            await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            showNotification('✅ Saved to Cloud!');
+            document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = '';
+            loadDashboardData(); loadSuppliers();
+        } catch (e) {
+            saveOfflineQueue('purchase', payload);
+            showNotification('📴 Connection lost. Saved offline.', true);
+        }
     }
 
     async function addUsage() {
         let purp = document.getElementById('u-purpose-select').value; if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
         let payload = { item: document.getElementById('u-item').value, quantity: document.getElementById('u-qty').value, purpose: purp };
         if(!payload.item || !payload.quantity) return showNotification("Missing data.", true);
-        await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        showNotification('✅ Saved!'); document.getElementById('u-item').value = ''; document.getElementById('u-qty').value = ''; loadDashboardData();
+
+        if (!navigator.onLine) {
+            saveOfflineQueue('usage', payload);
+            showNotification('📴 No internet! Saved offline. Will sync when online.', false);
+            document.getElementById('u-item').value = ''; document.getElementById('u-qty').value = '';
+            return;
+        }
+
+        try {
+            await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            showNotification('✅ Saved to Cloud!');
+            document.getElementById('u-item').value = ''; document.getElementById('u-qty').value = '';
+            loadDashboardData();
+        } catch (e) {
+            saveOfflineQueue('usage', payload);
+            showNotification('📴 Connection lost. Saved offline.', true);
+        }
     }
 
     async function addSupplierBtn() {
