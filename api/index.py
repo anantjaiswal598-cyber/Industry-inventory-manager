@@ -2,29 +2,62 @@ from flask import Flask, request, jsonify
 import json
 import urllib.request
 from datetime import datetime
+from twilio.rest import Client
 
 app = Flask(__name__)
 
 FIREBASE_URL = "https://industry-e1b0b-default-rtdb.firebaseio.com/.json"
 
+# TWILIO CONFIG (Replace with your actual Twilio Account credentials)
+TWILIO_ACCOUNT_SID = "YOUR_TWILIO_SID"
+TWILIO_AUTH_TOKEN = "YOUR_TWILIO_AUTH_TOKEN"
+TWILIO_WHATSAPP_FROM = "whatsapp:+14155238886"  # Twilio sandbox number
+
+def send_whatsapp_alert(message_body, phone_number):
+    if not phone_number:
+        return
+    try:
+        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
+        client.messages.create(
+            body=message_body,
+            from_=TWILIO_WHATSAPP_FROM,
+            to=phone_number
+        )
+    except Exception as e:
+        print(f"Twilio WhatsApp Error: {e}")
+
+def check_low_stock_and_alert(data):
+    stock = {}
+    for p in data["purchases"]:
+        stock[p["item"]] = stock.get(p["item"], 0) + p["quantity"]
+    for u in data["usage"]:
+        if u["item"] in stock:
+            stock[u["item"]] -= u["quantity"]
+            
+    low_stock_items = [item for item, qty in stock.items() if qty < 50]
+    
+    admin_phone = data.get("admin_whatsapp")
+    if low_stock_items and admin_phone:
+        msg = f"🚨 *Industry Alert: Low Stock Warning!*\n\nThe following items have dropped below 50 units:\n• " + "\n• ".join(low_stock_items) + "\n\nPlease restock soon!"
+        send_whatsapp_alert(msg, admin_phone)
+
 def load_data():
     default_data = {
         "purchases": [], "usage": [], "suppliers": [], "barcodes": {},
+        "admin_whatsapp": "",
         "users": {"admin": {"password": "admin123", "role": "admin"}}
     }
     try:
         req = urllib.request.Request(FIREBASE_URL)
         with urllib.request.urlopen(req) as response:
             data = json.loads(response.read().decode())
-            if data is None:
-                return default_data
-                
+            if data is None: return default_data
             if "purchases" not in data or data["purchases"] is None: data["purchases"] = []
             if "usage" not in data or data["usage"] is None: data["usage"] = []
             if "suppliers" not in data or data["suppliers"] is None: data["suppliers"] = []
             if "barcodes" not in data or data["barcodes"] is None: data["barcodes"] = {}
+            if "admin_whatsapp" not in data: data["admin_whatsapp"] = ""
             if "users" not in data or data["users"] is None: data["users"] = default_data["users"]
-            
             return data
     except Exception as e:
         print(f"Error loading from Firebase: {e}")
@@ -35,6 +68,7 @@ def save_data(data):
         req = urllib.request.Request(FIREBASE_URL, data=json.dumps(data).encode(), method='PUT')
         req.add_header('Content-Type', 'application/json')
         urllib.request.urlopen(req)
+        check_low_stock_and_alert(data)
     except Exception as e:
         print(f"Error saving to Firebase: {e}")
 
@@ -45,7 +79,6 @@ def login():
     username = req.get("username", "").lower()
     password = req.get("password", "")
     portal = req.get("portal", "") 
-    
     user = data["users"].get(username)
     if user and user["password"] == password:
         if portal == "admin" and user["role"] != "admin":
@@ -59,12 +92,8 @@ def register():
     req = request.json
     username = req.get("username", "").lower()
     password = req.get("password", "")
-    
-    if not username or not password:
-        return jsonify({"success": False, "message": "Missing fields"}), 400
-    if username in data["users"]:
-        return jsonify({"success": False, "message": "Username already exists."}), 409
-        
+    if not username or not password: return jsonify({"success": False, "message": "Missing fields"}), 400
+    if username in data["users"]: return jsonify({"success": False, "message": "Username already exists."}), 409
     data["users"][username] = {"password": password, "role": "staff"}
     save_data(data)
     return jsonify({"success": True})
@@ -73,30 +102,40 @@ def register():
 def resolve_barcode():
     data = load_data()
     code = request.args.get('code')
-    name = data["barcodes"].get(code, "")
-    return jsonify({"name": name})
+    return jsonify({"name": data["barcodes"].get(code, "")})
 
 @app.route('/api/link_barcode', methods=['POST'])
 def link_barcode():
     data = load_data()
     req = request.json
-    barcode = req.get("barcode")
-    name = req.get("name")
-    data["barcodes"][barcode] = name
+    data["barcodes"][req.get("barcode")] = req.get("name")
     save_data(data)
     return jsonify({"success": True})
+
+@app.route('/api/set_admin_whatsapp', methods=['POST'])
+def set_admin_whatsapp():
+    data = load_data()
+    req = request.json
+    if req.get("role") != "admin":
+        return jsonify({"success": False, "message": "Unauthorized"}), 403
+    data["admin_whatsapp"] = req.get("whatsapp", "")
+    save_data(data)
+    return jsonify({"success": True})
+
+@app.route('/api/get_admin_whatsapp', methods=['GET'])
+def get_admin_whatsapp():
+    data = load_data()
+    return jsonify({"whatsapp": data.get("admin_whatsapp", "")})
 
 @app.route('/api/stock', methods=['GET'])
 def get_stock():
     data = load_data()
-    stock = {}
-    units = {}
+    stock, units = {}, {}
     for p in data["purchases"]:
         stock[p["item"]] = stock.get(p["item"], 0) + p["quantity"]
         units[p["item"]] = p["unit"]
     for u in data["usage"]:
-        if u["item"] in stock:
-            stock[u["item"]] -= u["quantity"]
+        if u["item"] in stock: stock[u["item"]] -= u["quantity"]
     
     stock_list = []
     for k, v in stock.items():
@@ -112,10 +151,8 @@ def add_purchase():
     req = request.json
     supplier_name = req.get("supplier")
     source = req.get("source", "")
-    
     if supplier_name and not any(s["name"].lower() == supplier_name.lower() for s in data["suppliers"]):
         data["suppliers"].append({"name": supplier_name, "location": source})
-        
     data["purchases"].append({
         "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
         "category": req.get("category", "Uncategorized"),
@@ -165,7 +202,6 @@ def get_suppliers():
         stats.setdefault(name, {"count": 0, "total": 0})
         stats[name]["count"] += 1
         stats[name]["total"] += p.get("price", 0)
-        
     result = []
     for s in data["suppliers"]:
         name = s["name"]
@@ -176,15 +212,12 @@ def get_suppliers():
 def manage_supplier():
     data = load_data()
     req = request.json
-    action = req.get("action")
-    name = req.get("name")
-    
+    action, name = req.get("action"), req.get("name")
     if action == "add":
         if not any(s["name"].lower() == name.lower() for s in data["suppliers"]):
             data["suppliers"].append({"name": name, "location": req.get("location", "")})
     elif action == "delete":
         if req.get("role") != "admin": return jsonify({"error": "Unauthorized"}), 403
         data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
-        
     save_data(data)
     return jsonify({"message": "Success"})
