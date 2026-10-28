@@ -148,120 +148,190 @@
         body.dark-mode .stat-box { background: #334151; border-color: #475569; }
         body.dark-mode .stat-box p { color: #818CF8; }
 
-/* ===== MODERN DESIGNER BACKGROUND ===== */
+
+/* ===== MINIMAL LUXURY DESIGN ===== */
 
 body:not(.dark-mode) {
+    --bg: #F6F3ED;
+    --card-bg: #FFFEFC;
+    --text-main: #292820;
+    --text-muted: #817D72;
+    --border: #E9E3D9;
+    --input-bg: #FAF8F3;
+    
     background:
         radial-gradient(
-            circle at 8% 8%,
-            rgba(125, 211, 252, 0.38),
-            transparent 30%
+            circle at 5% 5%,
+            rgba(224, 210, 183, 0.28),
+            transparent 32%
         ),
         radial-gradient(
-            circle at 92% 85%,
-            rgba(196, 181, 253, 0.42),
-            transparent 32%
+            circle at 95% 90%,
+            rgba(205, 196, 178, 0.22),
+            transparent 30%
         ),
         linear-gradient(
             135deg,
-            #f5fbff 0%,
-            #f4f3ff 50%,
-            #f0edff 100%
+            #FAF8F3 0%,
+            #F5F1E9 55%,
+            #F0ECE3 100%
         );
     background-attachment: fixed;
     min-height: 100vh;
 }
 
-/* Soft decorative background shapes */
-body:not(.dark-mode)::before {
-    content: "";
-    position: fixed;
-    width: 280px;
-    height: 280px;
-    top: 100px;
-    right: -100px;
-    border-radius: 50%;
-    background: rgba(129, 140, 248, 0.10);
-    filter: blur(3px);
-    pointer-events: none;
-    z-index: -1;
-}
-
+/* Soft decorative shapes */
+body:not(.dark-mode)::before,
 body:not(.dark-mode)::after {
     content: "";
     position: fixed;
-    width: 240px;
-    height: 240px;
-    bottom: -80px;
-    left: -70px;
     border-radius: 50%;
-    background: rgba(56, 189, 248, 0.12);
-    filter: blur(3px);
     pointer-events: none;
     z-index: -1;
 }
 
-/* Keep the app background transparent */
+body:not(.dark-mode)::before {
+    width: 300px;
+    height: 300px;
+    top: 80px;
+    right: -140px;
+    background: rgba(196, 178, 143, 0.12);
+    filter: blur(25px);
+}
+
+body:not(.dark-mode)::after {
+    width: 260px;
+    height: 260px;
+    bottom: -100px;
+    left: -100px;
+    background: rgba(217, 207, 187, 0.20);
+    filter: blur(25px);
+}
+
+/* App background */
 #app-screen {
     background: transparent;
     min-height: 100vh;
 }
 
-/* Modern translucent navbar */
-.navbar {
-    background: rgba(255, 255, 255, 0.88);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    box-shadow: 0 4px 25px rgba(79, 70, 229, 0.06);
+/* Elegant navbar */
+body:not(.dark-mode) .navbar {
+    background: rgba(255, 254, 252, 0.92);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid #E9E3D9;
+    box-shadow: 0 4px 20px rgba(65, 54, 35, 0.04);
 }
 
-/* Floating white dashboard cards */
-.kpi-card,
-.card {
-    background: rgba(255, 255, 255, 0.92);
-    border: 1px solid rgba(255, 255, 255, 0.9);
-    box-shadow: 0 10px 35px rgba(79, 70, 229, 0.07);
+body:not(.dark-mode) .navbar h1 {
+    color: #37352C;
+}
+
+body:not(.dark-mode) .tab-btn:hover,
+body:not(.dark-mode) .tab-btn.active {
+    color: #8A6D3B;
+    border-bottom-color: #A68A56;
+}
+
+/* Premium white cards */
+body:not(.dark-mode) .kpi-card,
+body:not(.dark-mode) .card {
+    background: rgba(255, 254, 252, 0.94);
+    border: 1px solid rgba(224, 216, 202, 0.9);
+    border-radius: 16px;
+    box-shadow: 0 8px 28px rgba(65, 54, 35, 0.055);
     transition: transform 0.25s ease,
                 box-shadow 0.25s ease;
 }
 
-/* Subtle hover effect on desktop */
 @media (hover: hover) {
-    .kpi-card:hover,
-    .card:hover {
+    body:not(.dark-mode) .kpi-card:hover,
+    body:not(.dark-mode) .card:hover {
         transform: translateY(-3px);
-        box-shadow: 0 16px 40px rgba(79, 70, 229, 0.12);
+        box-shadow: 0 14px 32px rgba(65, 54, 35, 0.09);
     }
 }
 
-/* Softer input fields */
-input,
-select,
-.search-bar {
-    transition: border-color 0.2s ease,
-                box-shadow 0.2s ease;
+/* Refined form fields */
+body:not(.dark-mode) input,
+body:not(.dark-mode) select,
+body:not(.dark-mode) .search-bar {
+    background: #FAF8F3;
+    border: 1px solid #E5DED1;
+    border-radius: 9px;
+    color: #292820;
 }
 
-/* Modern login page background */
-#login-screen {
+body:not(.dark-mode) input:focus,
+body:not(.dark-mode) select:focus,
+body:not(.dark-mode) .search-bar:focus {
+    background: #FFFFFF;
+    border-color: #A68A56;
+    box-shadow: 0 0 0 3px rgba(166, 138, 86, 0.12);
+}
+
+/* Elegant buttons */
+body:not(.dark-mode) .btn-blue {
+    background: linear-gradient(135deg, #82704F, #65573E);
+    box-shadow: 0 3px 8px rgba(101, 87, 62, 0.12);
+}
+
+body:not(.dark-mode) .btn-blue:hover {
+    background: #554832;
+}
+
+body:not(.dark-mode) .btn-green {
+    background: linear-gradient(135deg, #657B60, #4F664A);
+}
+
+body:not(.dark-mode) .btn-red,
+body:not(.dark-mode) .logout-btn {
+    background: #A94F43;
+}
+
+/* Tables */
+body:not(.dark-mode) th {
+    background: #F4F0E7;
+    color: #777064;
+}
+
+body:not(.dark-mode) tr:hover {
+    background: #FAF7F0;
+}
+
+/* Login screen */
+body:not(.dark-mode) #login-screen {
     background: transparent;
 }
 
-/* Preserve the dark mode appearance */
+body:not(.dark-mode) .modern-login-wrapper {
+    box-shadow: 0 20px 60px rgba(65, 54, 35, 0.08);
+    border-color: #E9E3D9;
+}
+
+body:not(.dark-mode) .brand-panel {
+    background: linear-gradient(145deg, #E9DDC5, #D6C5A5);
+}
+
+body:not(.dark-mode) .form-panel {
+    background: #FFFEFC;
+}
+
+/* Keep dark mode separate */
 body.dark-mode {
-    background: #0f172a;
+    background: #0F172A;
 }
 
 body.dark-mode .navbar {
-    background: rgba(30, 41, 59, 0.94);
+    background: #1E293B;
 }
 
 body.dark-mode .kpi-card,
 body.dark-mode .card {
-    background: #1e293b;
+    background: #1E293B;
     border-color: #334155;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
 }
+
 
     </style>
 </head>
