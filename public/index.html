@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Viewport updated to lock scaling and fit the screen edge-to-edge -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
     <title>Industry Inventory Manager</title>
@@ -18,8 +17,6 @@
             --danger: #EF4444; --warning: #F59E0B; --bg: #F8FAFC; --card-bg: #FFFFFF; 
             --text-main: #0F172A; --text-muted: #64748B; --border: #E2E8F0; --input-bg: #F8FAFC;
         }
-        
-        /* Disable pinch-zooming and pull-to-refresh bounce via CSS */
         html, body {
             font-family: 'Inter', system-ui, sans-serif; 
             background: var(--bg); margin: 0; padding: 0; color: var(--text-main); 
@@ -51,7 +48,6 @@
         .switch-form { text-align: center; font-size: 13px; margin-top: 20px; color: var(--text-muted); }
         .switch-form span { color: var(--primary); font-weight: 600; cursor: pointer; }
 
-        /* APP SCREEN & NAVBAR */
         #app-screen { display: none; }
         .navbar { background: var(--card-bg); padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; height: 70px; }
         .navbar h1 { color: var(--primary); font-size: 20px; margin: 0; display: flex; align-items: center; gap: 10px; font-weight: 700; }
@@ -59,13 +55,12 @@
         .nav-links-desktop { display: flex; gap: 5px; height: 100%; }
         .menu-toggle-btn { display: none; background: none; border: none; font-size: 22px; color: var(--text-main); cursor: pointer; }
 
-        /* SLIDE-OUT MOBILE DRAWER */
         .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.5); z-index: 1000; backdrop-filter: blur(2px); }
         .mobile-drawer { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--card-bg); z-index: 1001; box-shadow: -5px 0 25px rgba(0,0,0,0.1); transition: right 0.3s ease-in-out; display: flex; flex-direction: column; }
         .mobile-drawer.open { right: 0; }
         .drawer-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
         .drawer-links { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; flex: 1; }
-        .drawer-item { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); text-decoration: none; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--border); background: none; border-left: none; border-right: none; border-top: none; width: 100%; text-align: left; cursor: pointer; transition: 0.2s; }
+        .drawer-item { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); text-decoration: none; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--border); background: none; width: 100%; text-align: left; cursor: pointer; transition: 0.2s; }
         .drawer-item:hover { background: var(--bg); color: var(--primary); }
         .drawer-item i { width: 24px; color: var(--primary); }
 
@@ -117,24 +112,15 @@
         .scanner-box { background: var(--card-bg); padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; }
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; }
 
-        /* RESPONSIVE BREAKPOINT FOR MOBILE FIXES */
         @media (max-width: 900px) {
             .nav-links-desktop { display: none; }
             .menu-toggle-btn { display: block; }
             .navbar { padding: 0 16px; }
-            
-            /* Force grids to stack vertically on phones */
             .dashboard-layout, .grid-2, .kpi-grid { grid-template-columns: 1fr; }
-            
-            /* Fix login screen for mobile */
             .modern-login-wrapper { flex-direction: column; height: auto; max-width: 100%; border-radius: 0; box-shadow: none; border: none; }
             .brand-panel { display: none; }
             .form-panel { padding: 20px 15px; }
-            
-            /* Hide the role greeting text to save space on small screens */
             #user-greeting { display: none; }
-            
-            /* Make tables scrollable horizontally so they don't stretch the screen */
             table { display: block; overflow-x: auto; white-space: nowrap; }
         }
 
@@ -147,192 +133,6 @@
         body.dark-mode tr:hover { background: #334151; }
         body.dark-mode .stat-box { background: #334151; border-color: #475569; }
         body.dark-mode .stat-box p { color: #818CF8; }
-
-
-/* ===== MINIMAL LUXURY DESIGN ===== */
-
-body:not(.dark-mode) {
-    --bg: #F6F3ED;
-    --card-bg: #FFFEFC;
-    --text-main: #292820;
-    --text-muted: #817D72;
-    --border: #E9E3D9;
-    --input-bg: #FAF8F3;
-    
-    background:
-        radial-gradient(
-            circle at 5% 5%,
-            rgba(224, 210, 183, 0.28),
-            transparent 32%
-        ),
-        radial-gradient(
-            circle at 95% 90%,
-            rgba(205, 196, 178, 0.22),
-            transparent 30%
-        ),
-        linear-gradient(
-            135deg,
-            #FAF8F3 0%,
-            #F5F1E9 55%,
-            #F0ECE3 100%
-        );
-    background-attachment: fixed;
-    min-height: 100vh;
-}
-
-/* Soft decorative shapes */
-body:not(.dark-mode)::before,
-body:not(.dark-mode)::after {
-    content: "";
-    position: fixed;
-    border-radius: 50%;
-    pointer-events: none;
-    z-index: -1;
-}
-
-body:not(.dark-mode)::before {
-    width: 300px;
-    height: 300px;
-    top: 80px;
-    right: -140px;
-    background: rgba(196, 178, 143, 0.12);
-    filter: blur(25px);
-}
-
-body:not(.dark-mode)::after {
-    width: 260px;
-    height: 260px;
-    bottom: -100px;
-    left: -100px;
-    background: rgba(217, 207, 187, 0.20);
-    filter: blur(25px);
-}
-
-/* App background */
-#app-screen {
-    background: transparent;
-    min-height: 100vh;
-}
-
-/* Elegant navbar */
-body:not(.dark-mode) .navbar {
-    background: rgba(255, 254, 252, 0.92);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    border-bottom: 1px solid #E9E3D9;
-    box-shadow: 0 4px 20px rgba(65, 54, 35, 0.04);
-}
-
-body:not(.dark-mode) .navbar h1 {
-    color: #37352C;
-}
-
-body:not(.dark-mode) .tab-btn:hover,
-body:not(.dark-mode) .tab-btn.active {
-    color: #8A6D3B;
-    border-bottom-color: #A68A56;
-}
-
-/* Premium white cards */
-body:not(.dark-mode) .kpi-card,
-body:not(.dark-mode) .card {
-    background: rgba(255, 254, 252, 0.94);
-    border: 1px solid rgba(224, 216, 202, 0.9);
-    border-radius: 16px;
-    box-shadow: 0 8px 28px rgba(65, 54, 35, 0.055);
-    transition: transform 0.25s ease,
-                box-shadow 0.25s ease;
-}
-
-@media (hover: hover) {
-    body:not(.dark-mode) .kpi-card:hover,
-    body:not(.dark-mode) .card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 14px 32px rgba(65, 54, 35, 0.09);
-    }
-}
-
-/* Refined form fields */
-body:not(.dark-mode) input,
-body:not(.dark-mode) select,
-body:not(.dark-mode) .search-bar {
-    background: #FAF8F3;
-    border: 1px solid #E5DED1;
-    border-radius: 9px;
-    color: #292820;
-}
-
-body:not(.dark-mode) input:focus,
-body:not(.dark-mode) select:focus,
-body:not(.dark-mode) .search-bar:focus {
-    background: #FFFFFF;
-    border-color: #A68A56;
-    box-shadow: 0 0 0 3px rgba(166, 138, 86, 0.12);
-}
-
-/* Elegant buttons */
-body:not(.dark-mode) .btn-blue {
-    background: linear-gradient(135deg, #82704F, #65573E);
-    box-shadow: 0 3px 8px rgba(101, 87, 62, 0.12);
-}
-
-body:not(.dark-mode) .btn-blue:hover {
-    background: #554832;
-}
-
-body:not(.dark-mode) .btn-green {
-    background: linear-gradient(135deg, #657B60, #4F664A);
-}
-
-body:not(.dark-mode) .btn-red,
-body:not(.dark-mode) .logout-btn {
-    background: #A94F43;
-}
-
-/* Tables */
-body:not(.dark-mode) th {
-    background: #F4F0E7;
-    color: #777064;
-}
-
-body:not(.dark-mode) tr:hover {
-    background: #FAF7F0;
-}
-
-/* Login screen */
-body:not(.dark-mode) #login-screen {
-    background: transparent;
-}
-
-body:not(.dark-mode) .modern-login-wrapper {
-    box-shadow: 0 20px 60px rgba(65, 54, 35, 0.08);
-    border-color: #E9E3D9;
-}
-
-body:not(.dark-mode) .brand-panel {
-    background: linear-gradient(145deg, #E9DDC5, #D6C5A5);
-}
-
-body:not(.dark-mode) .form-panel {
-    background: #FFFEFC;
-}
-
-/* Keep dark mode separate */
-body.dark-mode {
-    background: #0F172A;
-}
-
-body.dark-mode .navbar {
-    background: #1E293B;
-}
-
-body.dark-mode .kpi-card,
-body.dark-mode .card {
-    background: #1E293B;
-    border-color: #334155;
-}
-
-
     </style>
 </head>
 <body>
@@ -345,7 +145,6 @@ body.dark-mode .card {
     </div>
 </div>
 
-<!-- SLIDE-OUT MOBILE NAVIGATION DRAWER -->
 <div id="drawer-overlay" class="mobile-drawer-overlay" onclick="toggleMobileDrawer()"></div>
 <div id="mobile-drawer" class="mobile-drawer">
     <div class="drawer-header">
@@ -510,7 +309,18 @@ body.dark-mode .card {
             <div class="card">
                 <h2><i class="fa-solid fa-layer-group"></i> Current Stock</h2>
                 <button class="btn-blue" onclick="loadStock()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh Stock</button>
-                <table><thead><tr><th>Product / Barcode</th><th>Remaining</th><th>Unit</th><th>Status</th></tr></thead><tbody id="stock-table"></tbody></table>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product / Barcode</th>
+                            <th>Remaining</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                            <th id="stock-action-th" style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-table"></tbody>
+                </table>
             </div>
         </div>
 
@@ -554,7 +364,6 @@ body.dark-mode .card {
 <script>
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
     
-    // MOBILE DRAWER CONTROLS
     function toggleMobileDrawer() {
         document.getElementById('mobile-drawer').classList.toggle('open');
         document.getElementById('drawer-overlay').style.display = document.getElementById('mobile-drawer').classList.contains('open') ? 'block' : 'none';
@@ -600,7 +409,6 @@ body.dark-mode .card {
     }
     function closeScanner() { if (html5QrcodeScanner) html5QrcodeScanner.clear(); document.getElementById('scanner-modal').style.display = 'none'; }
     
-    // UPDATED BARCODE AUTO-FILL (NAME, PRICE, UNIT)
     async function onScanSuccess(decodedText, decodedResult) {
         closeScanner();
         let res = await fetch(`/api/resolve_barcode?code=${decodedText}`);
@@ -658,7 +466,6 @@ body.dark-mode .card {
             document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'staff' ? 'none' : 'flex');
             
-            // Adjust mobile logout visibility based on screens
             if (window.innerWidth > 900) { document.querySelector('.desktop-logout').style.display = 'block'; }
             
             loadDashboardData(); loadSuppliers(); loadStockKPI(); loadAdminWhatsApp();
@@ -736,6 +543,36 @@ body.dark-mode .card {
         if (currentRole === 'admin') document.getElementById('supplier-table').innerHTML = data.map(s => `<tr><td>${s.name}</td><td>${s.location}</td><td>${s.count}</td><td>Rs ${s.total.toFixed(2)}</td><td><button class="btn-red" onclick="deleteSupplier('${s.name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
     }
 
+    async function loadStock() {
+        let res = await fetch('/api/stock'), data = await res.json();
+        let actionTh = document.getElementById('stock-action-th');
+        if (currentRole === 'admin') {
+            actionTh.style.display = '';
+            document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td><td><button class="btn-red" onclick="deleteStockItem('${i.item}')"><i class="fa-solid fa-trash"></i> Delete</button></td></tr>`).join('');
+        } else {
+            actionTh.style.display = 'none';
+            document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td></tr>`).join('');
+        }
+    }
+
+    async function deleteStockItem(itemName) {
+        if(confirm(`Are you sure you want to delete "${itemName}" and all its history/stock records?`)) {
+            let res = await fetch('/api/delete_stock_item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: itemName, role: currentRole })
+            });
+            let data = await res.json();
+            if(data.success) {
+                showNotification(`Stock item "${itemName}" deleted successfully!`);
+                loadStock();
+                loadStockKPI();
+            } else {
+                showNotification(data.message || "Failed to delete item", true);
+            }
+        }
+    }
+
     async function loadAnalyticsCharts() {
         let usageRes = await fetch('/api/monthly_usage'), usageData = await usageRes.json();
         let lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
@@ -804,45 +641,26 @@ body.dark-mode .card {
         loadStockKPI();
     }
 
-    async function loadStock() {
-        let res = await fetch('/api/stock'), data = await res.json();
-        document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td></tr>`).join('');
-    }
-
     async function loadHistory() {
         let res = await fetch('/api/history'), data = await res.json();
         document.getElementById('history-table').innerHTML = data.reverse().map(p => `<tr><td>${p.date}</td><td><span style="background:var(--input-bg); border: 1px solid var(--border); padding:2px 8px; border-radius:10px; font-size:12px;">${p.category || 'N/A'}</span></td><td>${p.item}</td><td>${p.supplier}</td><td>${p.source}</td><td>${p.quantity} ${p.unit}</td><td>Rs ${parseFloat(p.price).toFixed(2)}</td></tr>`).join('');
     }
 
-    /* ----------------------------------------------------
-       HARD-LOCK MOBILE ZOOM SCRIPT FOR MODERN BROWSERS 
-    ---------------------------------------------------- */
-    
-    // 1. Prevent Pinch-to-Zoom
     document.addEventListener('touchmove', function (event) {
-        if (event.touches.length > 1) {
-            event.preventDefault(); // Block multi-touch gestures (pinching)
-        }
+        if (event.touches.length > 1) { event.preventDefault(); }
     }, { passive: false });
 
-    // 2. Prevent Double-Tap-to-Zoom
     let lastTouchEnd = 0;
     document.addEventListener('touchend', function (event) {
         let now = (new Date()).getTime();
-        if (now - lastTouchEnd <= 300) {
-            event.preventDefault(); // Block quick double taps
-        }
+        if (now - lastTouchEnd <= 300) { event.preventDefault(); }
         lastTouchEnd = now;
     }, { passive: false });
 
-    // 3. Prevent zooming with Ctrl + Mouse Wheel (if testing on PC trackpads)
     document.addEventListener('wheel', function (event) {
-        if (event.ctrlKey) {
-            event.preventDefault();
-        }
+        if (event.ctrlKey) { event.preventDefault(); }
     }, { passive: false });
 
-    // Start App
     checkAuth();
 </script>
 </body>
