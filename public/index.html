@@ -108,11 +108,25 @@
         .scanner-box { background: var(--card-bg); padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; }
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; }
 
-        /* RESPONSIVE BREAKPOINT FOR MOBILE DRAWER */
+/* RESPONSIVE BREAKPOINT FOR MOBILE DRAWER */
         @media (max-width: 900px) {
             .nav-links-desktop { display: none; }
             .menu-toggle-btn { display: block; }
             .navbar { padding: 0 16px; }
+            
+            /* Force grids to stack vertically on phones */
+            .dashboard-layout, .grid-2, .kpi-grid { grid-template-columns: 1fr; }
+            
+            /* Fix login screen for mobile */
+            .modern-login-wrapper { flex-direction: column; height: auto; max-width: 100%; border-radius: 0; box-shadow: none; border: none; }
+            .brand-panel { display: none; }
+            .form-panel { padding: 20px 15px; }
+            
+            /* Hide the role greeting text to save space on small screens */
+            #user-greeting { display: none; }
+            
+            /* Make tables scrollable horizontally so they don't break the screen width */
+            table { display: block; overflow-x: auto; white-space: nowrap; }
         }
 
         body.dark-mode { --bg: #0F172A; --card-bg: #1E293B; --text-main: #F8FAFC; --text-muted: #94A3B8; --border: #334155; --input-bg: #0F172A; }
