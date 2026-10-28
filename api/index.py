@@ -95,13 +95,34 @@ def register():
 def resolve_barcode():
     data = load_data()
     code = request.args.get('code')
-    return jsonify({"name": data["barcodes"].get(code, "")})
+    item_info = data["barcodes"].get(code)
+    
+    name, price, unit = "", 0, ""
+    if isinstance(item_info, dict):
+        name = item_info.get("name", "")
+        price = item_info.get("price", 0)
+        unit = item_info.get("unit", "")
+    elif isinstance(item_info, str):
+        name = item_info
+    
+    if name and price == 0:
+        for p in reversed(data["purchases"]):
+            if p.get("item", "").lower() == name.lower():
+                price = p.get("price", 0)
+                unit = p.get("unit", "")
+                break
+                
+    return jsonify({"name": name, "price": price, "unit": unit})
 
 @app.route('/api/link_barcode', methods=['POST'])
 def link_barcode():
     data = load_data()
     req = request.json
-    data["barcodes"][req.get("barcode")] = req.get("name")
+    code = req.get("barcode")
+    name = req.get("name")
+    price = float(req.get("price", 0))
+    unit = req.get("unit", "")
+    data["barcodes"][code] = {"name": name, "price": price, "unit": unit}
     save_data(data)
     return jsonify({"success": True})
 
@@ -136,6 +157,26 @@ def get_stock():
         if v <= 0: status = "Out of Stock"
         stock_list.append({"item": k, "remaining": v, "unit": units.get(k, ""), "status": status})
     return jsonify(stock_list)
+
+@app.route('/api/delete_stock_item', methods=['POST'])
+def delete_stock_item():
+    data = load_data()
+    req = request.json
+    item_name = req.get("item")
+    role = req.get("role")
+    
+    if role != "admin":
+        return jsonify({"success": False, "message": "Unauthorized. Admin privileges required."}), 403
+        
+    data["purchases"] = [p for p in data["purchases"] if p.get("item", "").lower() != item_name.lower()]
+    data["usage"] = [u for u in data["usage"] if u.get("item", "").lower() != item_name.lower()]
+    
+    codes_to_remove = [code for code, info in data["barcodes"].items() if (isinstance(info, dict) and info.get("name", "").lower() == item_name.lower()) or (isinstance(info, str) and info.lower() == item_name.lower())]
+    for code in codes_to_remove:
+        del data["barcodes"][code]
+        
+    save_data(data)
+    return jsonify({"success": True})
 
 @app.route('/api/category_distribution', methods=['GET'])
 def get_category_distribution():
