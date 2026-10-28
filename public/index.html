@@ -42,10 +42,24 @@
         .switch-form { text-align: center; font-size: 13px; margin-top: 20px; color: var(--text-muted); }
         .switch-form span { color: var(--primary); font-weight: 600; cursor: pointer; }
 
+        /* APP SCREEN & NAVBAR */
         #app-screen { display: none; }
         .navbar { background: var(--card-bg); padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; height: 70px; }
-        .navbar h1 { color: var(--primary); font-size: 20px; margin-right: 30px; display: flex; align-items: center; gap: 10px; font-weight: 700; }
-        .nav-links { display: flex; gap: 5px; height: 100%; }
+        .navbar h1 { color: var(--primary); font-size: 20px; margin: 0; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        
+        .nav-links-desktop { display: flex; gap: 5px; height: 100%; }
+        .menu-toggle-btn { display: none; background: none; border: none; font-size: 22px; color: var(--text-main); cursor: pointer; }
+
+        /* SLIDE-OUT MOBILE DRAWER (Indeed Style) */
+        .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.5); z-index: 1000; backdrop-filter: blur(2px); }
+        .mobile-drawer { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--card-bg); z-index: 1001; box-shadow: -5px 0 25px rgba(0,0,0,0.1); transition: right 0.3s ease-in-out; display: flex; flex-direction: column; }
+        .mobile-drawer.open { right: 0; }
+        .drawer-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .drawer-links { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; flex: 1; }
+        .drawer-item { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); text-decoration: none; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--border); background: none; border-left: none; border-right: none; border-top: none; width: 100%; text-align: left; cursor: pointer; transition: 0.2s; }
+        .drawer-item:hover { background: var(--bg); color: var(--primary); }
+        .drawer-item i { width: 24px; color: var(--primary); }
+
         .tab-btn { background: none; border: none; padding: 0 18px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; display: flex; align-items: center; gap: 8px; height: 100%; }
         .tab-btn:hover, .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
         .logout-btn { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
@@ -94,6 +108,13 @@
         .scanner-box { background: var(--card-bg); padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; }
         #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; }
 
+        /* RESPONSIVE BREAKPOINT FOR MOBILE DRAWER */
+        @media (max-width: 900px) {
+            .nav-links-desktop { display: none; }
+            .menu-toggle-btn { display: block; }
+            .navbar { padding: 0 16px; }
+        }
+
         body.dark-mode { --bg: #0F172A; --card-bg: #1E293B; --text-main: #F8FAFC; --text-muted: #94A3B8; --border: #334155; --input-bg: #0F172A; }
         body.dark-mode #login-screen { background: #0F172A; }
         body.dark-mode .form-panel { background: #1E293B; }
@@ -112,6 +133,25 @@
         <h2 style="margin-top: 0; color: var(--primary); font-size: 18px;"><i class="fa-solid fa-qrcode"></i> Scan Barcode/QR</h2>
         <div id="reader"></div>
         <button class="btn-red" onclick="closeScanner()" style="width: 100%; font-size: 14px; padding: 10px;"><i class="fa-solid fa-xmark"></i> Cancel</button>
+    </div>
+</div>
+
+<!-- SLIDE-OUT MOBILE NAVIGATION DRAWER -->
+<div id="drawer-overlay" class="mobile-drawer-overlay" onclick="toggleMobileDrawer()"></div>
+<div id="mobile-drawer" class="mobile-drawer">
+    <div class="drawer-header">
+        <h2 style="margin: 0; font-size: 18px; color: var(--primary); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-boxes-stacked"></i> Industry Menu</h2>
+        <button onclick="toggleMobileDrawer()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="drawer-links">
+        <button class="drawer-item" onclick="selectTabMobile('tab-dashboard')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-house"></i> Dashboard</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item" onclick="selectTabMobile('tab-stock')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-cubes"></i> Stock</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-analytics')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-chart-line"></i> Analytics</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-history')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-clock-rotate-left"></i> History</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-suppliers')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-truck-field"></i> Suppliers</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+    </div>
+    <div style="padding: 20px; border-top: 1px solid var(--border);">
+        <button class="logout-btn" onclick="logout()" style="width: 100%; padding: 12px;"><i class="fa-solid fa-power-off"></i> Logout</button>
     </div>
 </div>
 
@@ -166,20 +206,25 @@
 
 <div id="app-screen">
     <div class="navbar">
-        <div class="navbar-brand" style="display: flex; align-items: center; height: 100%;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <!-- HAMBURGER MENU BUTTON FOR MOBILE -->
+            <button class="menu-toggle-btn" onclick="toggleMobileDrawer()"><i class="fa-solid fa-bars"></i></button>
             <h1><i class="fa-solid fa-boxes-stacked" style="color: #E1261C;"></i> Industry</h1>
-            <div class="nav-links">
-                <button class="tab-btn active" onclick="openTab('tab-dashboard', this)"><i class="fa-solid fa-house"></i> Dashboard</button>
-                <button class="tab-btn" onclick="openTab('tab-stock', this)"><i class="fa-solid fa-cubes"></i> Stock</button>
-                <button class="tab-btn admin-only" onclick="openTab('tab-analytics', this)"><i class="fa-solid fa-chart-line"></i> Analytics</button>
-                <button class="tab-btn admin-only" onclick="openTab('tab-history', this)"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
-                <button class="tab-btn admin-only" onclick="openTab('tab-suppliers', this)"><i class="fa-solid fa-truck-field"></i> Suppliers</button>
-            </div>
         </div>
+
+        <!-- DESKTOP NAVBAR LINKS -->
+        <div class="nav-links-desktop">
+            <button class="tab-btn active" onclick="openTab('tab-dashboard', this)"><i class="fa-solid fa-house"></i> Dashboard</button>
+            <button class="tab-btn" onclick="openTab('tab-stock', this)"><i class="fa-solid fa-cubes"></i> Stock</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-analytics', this)"><i class="fa-solid fa-chart-line"></i> Analytics</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-history', this)"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-suppliers', this)"><i class="fa-solid fa-truck-field"></i> Suppliers</button>
+        </div>
+
         <div style="display: flex; align-items: center; gap: 10px;">
             <span id="user-greeting" style="font-weight: 600; font-size: 13px; color: var(--text-muted); background: var(--input-bg); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);"></span>
             <button class="btn-blue" onclick="toggleDarkMode()" style="padding: 8px 12px; font-size: 13px;"><i class="fa-solid fa-moon"></i></button>
-            <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-power-off"></i> Logout</button>
+            <button class="logout-btn desktop-logout" onclick="logout()"><i class="fa-solid fa-power-off"></i> Logout</button>
         </div>
     </div>
 
@@ -237,7 +282,6 @@
             </div>
         </div>
 
-        <!-- NEW DEDICATED ANALYTICS TAB -->
         <div id="tab-analytics" class="tab-content">
             <div class="card" style="margin-bottom: 24px;">
                 <h2 style="font-size: 18px;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Stock History & Advanced Analytics</h2>
@@ -302,6 +346,27 @@
 
 <script>
     function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    
+    // MOBILE DRAWER CONTROLS
+    function toggleMobileDrawer() {
+        document.getElementById('mobile-drawer').classList.toggle('open');
+        document.getElementById('drawer-overlay').style.display = document.getElementById('mobile-drawer').classList.contains('open') ? 'block' : 'none';
+    }
+    function selectTabMobile(tabId) {
+        toggleMobileDrawer();
+        let btn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
+        if(btn) openTab(tabId, btn);
+        else {
+            // Fallback for admin tabs if needed
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(tabId === 'tab-stock') loadStock(); 
+            if(tabId === 'tab-history') loadHistory(); 
+            if(tabId === 'tab-suppliers') { loadSuppliers(); loadAdminWhatsApp(); }
+            if(tabId === 'tab-analytics') loadAnalyticsCharts();
+        }
+    }
+
     function exportToCSV(tableId, filename) {
         let rows = document.getElementById(tableId).parentNode.querySelectorAll('tr'), csvData = [];
         for (let i = 0; i < rows.length; i++) {
@@ -333,15 +398,35 @@
         closeScanner();
         let res = await fetch(`/api/resolve_barcode?code=${decodedText}`);
         let data = await res.json();
+        
         if (data.name) {
-            document.getElementById(currentScanTarget).value = data.name;
-            showNotification(`Barcode recognized: ${data.name}`);
+            if (currentScanTarget === 'p-item') {
+                document.getElementById('p-item').value = data.name;
+                if (data.price) document.getElementById('p-price').value = data.price;
+                if (data.unit) document.getElementById('p-unit').value = data.unit;
+                showNotification(`Barcode recognized: ${data.name} (Rs ${data.price})`);
+            } else {
+                document.getElementById(currentScanTarget).value = data.name;
+                showNotification(`Barcode recognized: ${data.name}`);
+            }
         } else {
-            let itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's actual name?`);
+            let itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's name?`);
             if (itemName) {
-                await fetch('/api/link_barcode', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ barcode: decodedText, name: itemName }) });
+                let itemPrice = prompt("Enter standard unit price (Rs):", "0");
+                let itemUnit = prompt("Enter unit (e.g. litre, ton, pcs):", "pcs");
+                
+                await fetch('/api/link_barcode', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ barcode: decodedText, name: itemName, price: parseFloat(itemPrice || 0), unit: itemUnit }) 
+                });
+                
                 document.getElementById(currentScanTarget).value = itemName;
-                showNotification("Barcode linked and remembered!");
+                if (currentScanTarget === 'p-item') {
+                    document.getElementById('p-price').value = itemPrice;
+                    document.getElementById('p-unit').value = itemUnit;
+                }
+                showNotification("Barcode linked with price and remembered!");
             } else {
                 document.getElementById(currentScanTarget).value = decodedText;
             }
@@ -364,7 +449,7 @@
         if (role) {
             currentRole = role; document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'block';
             document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
-            document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'staff' ? 'none' : 'block');
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'staff' ? 'none' : 'flex');
             loadDashboardData(); loadSuppliers(); loadStockKPI(); loadAdminWhatsApp();
         } else {
             document.getElementById('login-screen').style.display = 'flex'; document.getElementById('app-screen').style.display = 'none';
@@ -391,7 +476,8 @@
     function logout() { localStorage.removeItem('userRole'); currentRole = null; document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); openTab('tab-dashboard', document.querySelector('.tab-btn')); checkAuth(); }
     function openTab(tabId, btn) {
         document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
-        document.getElementById(tabId).classList.add('active'); btn.classList.add('active');
+        document.getElementById(tabId).classList.add('active'); 
+        if(btn) btn.classList.add('active');
         if(tabId === 'tab-stock') loadStock(); 
         if(tabId === 'tab-history') loadHistory(); 
         if(tabId === 'tab-suppliers') { loadSuppliers(); loadAdminWhatsApp(); }
@@ -443,7 +529,6 @@
     }
 
     async function loadAnalyticsCharts() {
-        // Line Chart
         let usageRes = await fetch('/api/monthly_usage'), usageData = await usageRes.json();
         let lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
         if (analyticsLineInstance) analyticsLineInstance.destroy();
@@ -451,19 +536,11 @@
             type: 'line',
             data: {
                 labels: usageData.labels.length ? usageData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
-                datasets: [{
-                    label: 'Current Consumption',
-                    data: usageData.data.length ? usageData.data : [12, 19, 8, 15],
-                    borderColor: '#4F46E5',
-                    backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                    fill: true,
-                    tension: 0.3
-                }]
+                datasets: [{ label: 'Current Consumption', data: usageData.data.length ? usageData.data : [12, 19, 8, 15], borderColor: '#4F46E5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.3 }]
             },
             options: { responsive: true, maintainAspectRatio: false }
         });
 
-        // Donut Chart
         let catRes = await fetch('/api/category_distribution'), catData = await catRes.json();
         let donutCtx = document.getElementById('analyticsDonutChart').getContext('2d');
         if (analyticsDonutInstance) analyticsDonutInstance.destroy();
@@ -471,10 +548,7 @@
             type: 'doughnut',
             data: {
                 labels: catData.labels.length ? catData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
-                datasets: [{
-                    data: catData.data.length ? catData.data : [35, 25, 20, 20],
-                    backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6']
-                }]
+                datasets: [{ data: catData.data.length ? catData.data : [35, 25, 20, 20], backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'] }]
             },
             options: { responsive: true, maintainAspectRatio: false }
         });
@@ -485,18 +559,9 @@
         let payload = { category: document.getElementById('p-category').value, item: document.getElementById('p-item').value, supplier: sup, source: document.getElementById('p-source').value, quantity: document.getElementById('p-qty').value, unit: document.getElementById('p-unit').value, price: document.getElementById('p-price').value };
         if(!payload.item || !payload.supplier) return showNotification("Missing data.", true);
 
-        if (!navigator.onLine) {
-            let q = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-            q.push({ type: 'purchase', data: payload, timestamp: new Date().toISOString() });
-            localStorage.setItem('offlineQueue', JSON.stringify(q));
-            showNotification('📴 Saved offline. Will sync when online.', false);
-            document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = '';
-            return;
-        }
-
         await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         showNotification('✅ Saved to Cloud!');
-        document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = '';
+        document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-unit').value = '';
         loadDashboardData(); loadSuppliers(); loadStockKPI();
     }
 
@@ -504,15 +569,6 @@
         let purp = document.getElementById('u-purpose-select').value; if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
         let payload = { item: document.getElementById('u-item').value, quantity: document.getElementById('u-qty').value, purpose: purp };
         if(!payload.item || !payload.quantity) return showNotification("Missing data.", true);
-
-        if (!navigator.onLine) {
-            let q = JSON.parse(localStorage.getItem('offlineQueue') || '[]');
-            q.push({ type: 'usage', data: payload, timestamp: new Date().toISOString() });
-            localStorage.setItem('offlineQueue', JSON.stringify(q));
-            showNotification('📴 Saved offline. Will sync when online.', false);
-            document.getElementById('u-item').value = ''; document.getElementById('u-qty').value = '';
-            return;
-        }
 
         await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
         showNotification('✅ Saved to Cloud!');
