@@ -134,203 +134,110 @@
         body.dark-mode .stat-box { background: #334151; border-color: #475569; }
         body.dark-mode .stat-box p { color: #818CF8; }
 
-/* ===== MINIMAL LUXURY DESIGN ===== */
+        /* ===== MINIMAL LUXURY DESIGN ===== */
+        :root {
+            --luxury-bg: #f7f4ee;
+            --luxury-card: rgba(255, 255, 255, 0.78);
+            --luxury-text: #292720;
+            --luxury-muted: #777267;
+            --luxury-accent: #8b6f47;
+            --luxury-green: #536b50;
+            --luxury-border: rgba(113, 100, 77, 0.16);
+            --luxury-shadow: 0 12px 35px rgba(61, 49, 30, 0.07);
+        }
 
-:root {
-    --luxury-bg: #f7f4ee;
-    --luxury-card: rgba(255, 255, 255, 0.78);
-    --luxury-text: #292720;
-    --luxury-muted: #777267;
-    --luxury-accent: #8b6f47;
-    --luxury-green: #536b50;
-    --luxury-border: rgba(113, 100, 77, 0.16);
-    --luxury-shadow: 0 12px 35px rgba(61, 49, 30, 0.07);
-}
+        body {
+            background:
+                radial-gradient(circle at 10% 10%, rgba(214, 198, 168, 0.28), transparent 35%),
+                radial-gradient(circle at 90% 85%, rgba(184, 195, 171, 0.22), transparent 35%),
+                var(--luxury-bg);
+            color: var(--luxury-text);
+            font-family: "Inter", "Segoe UI", sans-serif;
+            transition: background 0.3s ease, color 0.3s ease;
+        }
 
-/* Main background */
-body {
-    background:
-        radial-gradient(circle at 10% 10%,
-            rgba(214, 198, 168, 0.28), transparent 35%),
-        radial-gradient(circle at 90% 85%,
-            rgba(184, 195, 171, 0.22), transparent 35%),
-        var(--luxury-bg);
-    color: var(--luxury-text);
-    font-family: "Inter", "Segoe UI", sans-serif;
-    transition: background 0.3s ease, color 0.3s ease;
-}
+        nav, .navbar, header {
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border-bottom: 1px solid var(--luxury-border);
+        }
 
-/* Navbar */
-nav,
-.navbar,
-header {
-    background: rgba(255, 255, 255, 0.72);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
-    border-bottom: 1px solid var(--luxury-border);
-}
+        h1, h2, h3 { color: var(--luxury-text); letter-spacing: -0.6px; font-weight: 650; }
+        h1 { letter-spacing: -1.2px; }
 
-/* Main headings */
-h1, h2, h3 {
-    color: var(--luxury-text);
-    letter-spacing: -0.6px;
-    font-weight: 650;
-}
+        .card, .panel, .stat-card, .dashboard-card, .login-card {
+            background: var(--luxury-card);
+            border: 1px solid var(--luxury-border);
+            border-radius: 18px;
+            box-shadow: var(--luxury-shadow);
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
 
-h1 {
-    letter-spacing: -1.2px;
-}
+        .card:hover, .stat-card:hover, .dashboard-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 42px rgba(61, 49, 30, 0.11);
+        }
 
-/* Premium cards and panels */
-.card,
-.panel,
-.stat-card,
-.dashboard-card,
-.login-card {
-    background: var(--luxury-card);
-    border: 1px solid var(--luxury-border);
-    border-radius: 18px;
-    box-shadow: var(--luxury-shadow);
-    transition: transform 0.25s ease,
-                box-shadow 0.25s ease;
-}
+        input, select, textarea {
+            background: rgba(255, 255, 255, 0.8);
+            color: var(--luxury-text);
+            border: 1px solid var(--luxury-border);
+            border-radius: 10px;
+            padding: 11px 14px;
+            outline: none;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
 
-.card:hover,
-.stat-card:hover,
-.dashboard-card:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 18px 42px rgba(61, 49, 30, 0.11);
-}
+        input:focus, select:focus, textarea:focus {
+            border-color: var(--luxury-accent);
+            box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.12);
+        }
 
-/* Form fields */
-input,
-select,
-textarea {
-    background: rgba(255, 255, 255, 0.8);
-    color: var(--luxury-text);
-    border: 1px solid var(--luxury-border);
-    border-radius: 10px;
-    padding: 11px 14px;
-    outline: none;
-    transition: border-color 0.2s ease,
-                box-shadow 0.2s ease;
-}
+        button, .btn {
+            border: none;
+            border-radius: 10px;
+            padding: 11px 18px;
+            background: var(--luxury-accent);
+            color: #fff;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.2s ease;
+        }
 
-input:focus,
-select:focus,
-textarea:focus {
-    border-color: var(--luxury-accent);
-    box-shadow: 0 0 0 3px rgba(139, 111, 71, 0.12);
-}
+        button:hover, .btn:hover {
+            filter: brightness(1.07);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 16px rgba(139, 111, 71, 0.18);
+        }
 
-/* Buttons */
-button,
-.btn {
-    border: none;
-    border-radius: 10px;
-    padding: 11px 18px;
-    background: var(--luxury-accent);
-    color: #fff;
-    font-weight: 600;
-    cursor: pointer;
-    transition: transform 0.2s ease,
-                filter 0.2s ease,
-                box-shadow 0.2s ease;
-}
+        .btn-success, .success-btn, button.success { background: var(--luxury-green); color: white; }
 
-button:hover,
-.btn:hover {
-    filter: brightness(1.07);
-    transform: translateY(-1px);
-    box-shadow: 0 6px 16px rgba(139, 111, 71, 0.18);
-}
+        table { width: 100%; border-collapse: collapse; background: transparent; border-radius: 12px; overflow: hidden; }
+        th { background: rgba(139, 111, 71, 0.09); color: var(--luxury-text); font-weight: 650; text-align: left; }
+        th, td { padding: 13px 15px; border-bottom: 1px solid var(--luxury-border); }
+        tr:hover td { background: rgba(139, 111, 71, 0.045); }
 
-.btn-success,
-.success-btn,
-button.success {
-    background: var(--luxury-green);
-    color: white;
-}
+        p, small, .text-muted { color: var(--luxury-muted); }
+        .login-card { padding: 32px; max-width: 440px; margin: auto; border-radius: 22px; }
+        html { scroll-behavior: smooth; }
 
-/* Tables */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: transparent;
-    border-radius: 12px;
-    overflow: hidden;
-}
+        body.dark-mode {
+            --luxury-bg: #171815;
+            --luxury-card: rgba(37, 38, 33, 0.92);
+            --luxury-text: #f0eee6;
+            --luxury-muted: #b4b0a4;
+            --luxury-accent: #b99a6b;
+            --luxury-green: #71886b;
+            --luxury-border: rgba(255, 255, 255, 0.10);
+            --luxury-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+            background: radial-gradient(circle at 10% 10%, rgba(139, 111, 71, 0.12), transparent 35%), var(--luxury-bg);
+            color: var(--luxury-text);
+        }
 
-th {
-    background: rgba(139, 111, 71, 0.09);
-    color: var(--luxury-text);
-    font-weight: 650;
-    text-align: left;
-}
-
-th, td {
-    padding: 13px 15px;
-    border-bottom: 1px solid var(--luxury-border);
-}
-
-tr:hover td {
-    background: rgba(139, 111, 71, 0.045);
-}
-
-/* Secondary text */
-p, small, .text-muted {
-    color: var(--luxury-muted);
-}
-
-/* Login area */
-.login-card {
-    padding: 32px;
-    max-width: 440px;
-    margin: auto;
-    border-radius: 22px;
-}
-
-/* Smooth scrolling */
-html {
-    scroll-behavior: smooth;
-}
-
-/* Separate dark mode */
-body.dark-mode {
-    --luxury-bg: #171815;
-    --luxury-card: rgba(37, 38, 33, 0.92);
-    --luxury-text: #f0eee6;
-    --luxury-muted: #b4b0a4;
-    --luxury-accent: #b99a6b;
-    --luxury-green: #71886b;
-    --luxury-border: rgba(255, 255, 255, 0.10);
-    --luxury-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
-
-    background:
-        radial-gradient(circle at 10% 10%,
-            rgba(139, 111, 71, 0.12), transparent 35%),
-        var(--luxury-bg);
-    color: var(--luxury-text);
-}
-
-body.dark-mode nav,
-body.dark-mode .navbar,
-body.dark-mode header {
-    background: rgba(30, 31, 27, 0.85);
-}
-
-body.dark-mode input,
-body.dark-mode select,
-body.dark-mode textarea {
-    background: #24251f;
-    color: var(--luxury-text);
-}
-
-body.dark-mode th {
-    background: rgba(255, 255, 255, 0.05);
-    color: var(--luxury-text);
-}
-
+        body.dark-mode nav, body.dark-mode .navbar, body.dark-mode header { background: rgba(30, 31, 27, 0.85); }
+        body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #24251f; color: var(--luxury-text); }
+        body.dark-mode th { background: rgba(255, 255, 255, 0.05); color: var(--luxury-text); }
     </style>
 </head>
 <body>
@@ -566,6 +473,7 @@ body.dark-mode th {
         document.getElementById('mobile-drawer').classList.toggle('open');
         document.getElementById('drawer-overlay').style.display = document.getElementById('mobile-drawer').classList.contains('open') ? 'block' : 'none';
     }
+
     function selectTabMobile(tabId) {
         toggleMobileDrawer();
         let btn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
@@ -591,9 +499,11 @@ body.dark-mode th {
         link.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvData.join('\n'));
         link.download = filename + '.csv'; link.click();
     }
+
     function showNotification(msg, isError = false) {
         Toastify({ text: msg, duration: 3000, gravity: "bottom", position: "right", style: { background: isError ? "#EF4444" : "#10B981", borderRadius: "8px", fontWeight: "bold" } }).showToast();
     }
+
     function filterHistory() {
         let input = document.getElementById("history-search").value.toLowerCase(), rows = document.querySelectorAll("#history-table tr");
         rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(input) ? "" : "none");
@@ -601,50 +511,62 @@ body.dark-mode th {
 
     let html5QrcodeScanner = null, currentScanTarget = ''; 
     function openScanner(targetInputId) {
-        currentScanTarget = targetInputId; document.getElementById('scanner-modal').style.display = 'flex';
+        currentScanTarget = targetInputId; 
+        document.getElementById('scanner-modal').style.display = 'flex';
         html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
         html5QrcodeScanner.render(onScanSuccess, () => {});
     }
-    function closeScanner() { if (html5QrcodeScanner) html5QrcodeScanner.clear(); document.getElementById('scanner-modal').style.display = 'none'; }
+
+    function closeScanner() { 
+        if (html5QrcodeScanner) {
+            html5QrcodeScanner.clear().catch(error => console.error("Failed to clear scanner. ", error));
+        } 
+        document.getElementById('scanner-modal').style.display = 'none'; 
+    }
     
     async function onScanSuccess(decodedText, decodedResult) {
         closeScanner();
-        let res = await fetch(`/api/resolve_barcode?code=${decodedText}`);
-        let data = await res.json();
-        
-        if (data.name) {
-            if (currentScanTarget === 'p-item') {
-                document.getElementById('p-item').value = data.name;
-                if (data.price) document.getElementById('p-price').value = data.price;
-                if (data.unit) document.getElementById('p-unit').value = data.unit;
-                showNotification(`Barcode recognized: ${data.name} (Rs ${data.price})`);
-            } else {
-                document.getElementById(currentScanTarget).value = data.name;
-                showNotification(`Barcode recognized: ${data.name}`);
-            }
-        } else {
-            let itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's name?`);
-            if (itemName) {
-                let itemPrice = prompt("Enter standard unit price (Rs):", "0");
-                let itemUnit = prompt("Enter unit (e.g. litre, ton, pcs):", "pcs");
-                
-                await fetch('/api/link_barcode', { 
-                    method: 'POST', 
-                    headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ barcode: decodedText, name: itemName, price: parseFloat(itemPrice || 0), unit: itemUnit }) 
-                });
-                
-                document.getElementById(currentScanTarget).value = itemName;
+        try {
+            let res = await fetch(`/api/resolve_barcode?code=${decodedText}`);
+            let data = await res.json();
+            
+            if (data.name) {
                 if (currentScanTarget === 'p-item') {
-                    document.getElementById('p-price').value = itemPrice;
-                    document.getElementById('p-unit').value = itemUnit;
+                    document.getElementById('p-item').value = data.name;
+                    if (data.price) document.getElementById('p-price').value = data.price;
+                    if (data.unit) document.getElementById('p-unit').value = data.unit;
+                    showNotification(`Barcode recognized: ${data.name} (Rs ${data.price})`);
+                } else {
+                    document.getElementById(currentScanTarget).value = data.name;
+                    showNotification(`Barcode recognized: ${data.name}`);
                 }
-                showNotification("Barcode linked with price and remembered!");
             } else {
-                document.getElementById(currentScanTarget).value = decodedText;
+                let itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's name?`);
+                if (itemName) {
+                    let itemPrice = prompt("Enter standard unit price (Rs):", "0");
+                    let itemUnit = prompt("Enter unit (e.g. litre, ton, pcs):", "pcs");
+                    
+                    await fetch('/api/link_barcode', { 
+                        method: 'POST', 
+                        headers: {'Content-Type': 'application/json'}, 
+                        body: JSON.stringify({ barcode: decodedText, name: itemName, price: parseFloat(itemPrice || 0), unit: itemUnit }) 
+                    });
+                    
+                    document.getElementById(currentScanTarget).value = itemName;
+                    if (currentScanTarget === 'p-item') {
+                        document.getElementById('p-price').value = itemPrice;
+                        document.getElementById('p-unit').value = itemUnit;
+                    }
+                    showNotification("Barcode linked with price and remembered!");
+                } else {
+                    document.getElementById(currentScanTarget).value = decodedText;
+                }
             }
+            if (navigator.vibrate) navigator.vibrate(100);
+        } catch(e) {
+            console.error(e);
+            showNotification("Error resolving barcode", true);
         }
-        if (navigator.vibrate) navigator.vibrate(100);
     }
 
     function toggleForm(formType) {
@@ -660,7 +582,9 @@ body.dark-mode th {
     function checkAuth() {
         let role = localStorage.getItem('userRole');
         if (role) {
-            currentRole = role; document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'block';
+            currentRole = role; 
+            document.getElementById('login-screen').style.display = 'none'; 
+            document.getElementById('app-screen').style.display = 'block';
             document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'staff' ? 'none' : 'flex');
             
@@ -668,28 +592,43 @@ body.dark-mode th {
             
             loadDashboardData(); loadSuppliers(); loadStockKPI(); loadAdminWhatsApp();
         } else {
-            document.getElementById('login-screen').style.display = 'flex'; document.getElementById('app-screen').style.display = 'none';
+            document.getElementById('login-screen').style.display = 'flex'; 
+            document.getElementById('app-screen').style.display = 'none';
         }
     }
 
     async function attemptLogin(portalType) {
         let u = document.getElementById(portalType+'-user').value, p = document.getElementById(portalType+'-pass').value;
         if(!u || !p) return showNotification("Please enter username and password.", true);
-        let res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p, portal: portalType }) });
-        let data = await res.json();
-        if(data.success) { localStorage.setItem('userRole', data.role); showNotification(`Welcome back!`); checkAuth(); } 
-        else showNotification(data.message, true);
+        try {
+            let res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p, portal: portalType }) });
+            let data = await res.json();
+            if(data.success) { localStorage.setItem('userRole', data.role); showNotification(`Welcome back!`); checkAuth(); } 
+            else showNotification(data.message, true);
+        } catch(e) {
+            showNotification("Network error during login", true);
+        }
     }
 
     async function registerStaff() {
         let u = document.getElementById('reg-user').value, p = document.getElementById('reg-pass').value;
         if(!u || !p) return showNotification("Missing fields.", true);
-        let res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
-        let data = await res.json();
-        if(data.success) { showNotification("Account created!"); toggleForm('staff'); } else showNotification(data.message, true);
+        try {
+            let res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+            let data = await res.json();
+            if(data.success) { showNotification("Account created!"); toggleForm('staff'); } else showNotification(data.message, true);
+        } catch(e) {
+            showNotification("Registration failed", true);
+        }
     }
 
-    function logout() { localStorage.removeItem('userRole'); currentRole = null; document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); openTab('tab-dashboard', document.querySelector('.tab-btn')); checkAuth(); }
+    function logout() { 
+        localStorage.removeItem('userRole'); 
+        currentRole = null; 
+        document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); 
+        openTab('tab-dashboard', document.querySelector('.tab-btn')); 
+        checkAuth(); 
+    }
     
     function openTab(tabId, btn) {
         document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
@@ -709,18 +648,24 @@ body.dark-mode th {
     }
 
     async function loadAdminWhatsApp() {
-        let res = await fetch('/api/get_admin_whatsapp');
-        let data = await res.json();
-        if (data.whatsapp) document.getElementById('admin-wa-input').value = data.whatsapp;
+        try {
+            let res = await fetch('/api/get_admin_whatsapp');
+            let data = await res.json();
+            if (data.whatsapp) document.getElementById('admin-wa-input').value = data.whatsapp;
+        } catch(e) { console.error(e); }
     }
 
     async function saveAdminWhatsApp() {
         let wa = document.getElementById('admin-wa-input').value;
         if(!wa) return showNotification("Please enter a WhatsApp number.", true);
-        let res = await fetch('/api/set_admin_whatsapp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ whatsapp: wa, role: currentRole }) });
-        let data = await res.json();
-        if (data.success) showNotification("WhatsApp alert number saved successfully!");
-        else showNotification(data.message || "Failed to save", true);
+        try {
+            let res = await fetch('/api/set_admin_whatsapp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ whatsapp: wa, role: currentRole }) });
+            let data = await res.json();
+            if (data.success) showNotification("WhatsApp alert number saved successfully!");
+            else showNotification(data.message || "Failed to save", true);
+        } catch(e) {
+            showNotification("Failed to connect to server", true);
+        }
     }
 
     async function loadStockKPI() {
@@ -735,113 +680,166 @@ body.dark-mode th {
     }
 
     async function loadSuppliers() {
-        let res = await fetch('/api/suppliers'), data = await res.json();
-        let drop = document.getElementById('p-supplier-select');
-        drop.innerHTML = '<option value="" disabled selected>Select...</option>' + data.map(s => `<option value="${s.name}" data-loc="${s.location}">${s.name}</option>`).join('') + '<option value="Other">Other</option>';
-        if (currentRole === 'admin') document.getElementById('supplier-table').innerHTML = data.map(s => `<tr><td>${s.name}</td><td>${s.location}</td><td>${s.count}</td><td>Rs ${s.total.toFixed(2)}</td><td><button class="btn-red" onclick="deleteSupplier('${s.name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+        try {
+            let res = await fetch('/api/suppliers'), data = await res.json();
+            let drop = document.getElementById('p-supplier-select');
+            drop.innerHTML = '<option value="" disabled selected>Select...</option>' + data.map(s => `<option value="${s.name}" data-loc="${s.location}">${s.name}</option>`).join('') + '<option value="Other">Other</option>';
+            if (currentRole === 'admin') {
+                document.getElementById('supplier-table').innerHTML = data.map(s => `<tr><td>${s.name}</td><td>${s.location}</td><td>${s.count}</td><td>Rs ${s.total.toFixed(2)}</td><td><button class="btn-red" onclick="deleteSupplier('${s.name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+            }
+        } catch(e) { console.error(e); }
     }
 
     async function loadStock() {
-        let res = await fetch('/api/stock'), data = await res.json();
-        let actionTh = document.getElementById('stock-action-th');
-        if (currentRole === 'admin') {
-            actionTh.style.display = '';
-            document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td><td><button class="btn-red" onclick="deleteStockItem('${i.item}')"><i class="fa-solid fa-trash"></i> Delete</button></td></tr>`).join('');
-        } else {
-            actionTh.style.display = 'none';
-            document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td></tr>`).join('');
-        }
+        try {
+            let res = await fetch('/api/stock'), data = await res.json();
+            let actionTh = document.getElementById('stock-action-th');
+            if (currentRole === 'admin') {
+                actionTh.style.display = '';
+                document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td><td><button class="btn-red" onclick="deleteStockItem('${i.item}')"><i class="fa-solid fa-trash"></i> Delete</button></td></tr>`).join('');
+            } else {
+                actionTh.style.display = 'none';
+                document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td></tr>`).join('');
+            }
+        } catch(e) { console.error(e); }
     }
 
     async function deleteStockItem(itemName) {
         if(confirm(`Are you sure you want to delete "${itemName}" and all its history/stock records?`)) {
-            let res = await fetch('/api/delete_stock_item', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ item: itemName, role: currentRole })
-            });
-            let data = await res.json();
-            if(data.success) {
-                showNotification(`Stock item "${itemName}" deleted successfully!`);
-                loadStock();
-                loadStockKPI();
-            } else {
-                showNotification(data.message || "Failed to delete item", true);
+            try {
+                let res = await fetch('/api/delete_stock_item', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ item: itemName, role: currentRole })
+                });
+                let data = await res.json();
+                if(data.success) {
+                    showNotification(`Stock item "${itemName}" deleted successfully!`);
+                    loadStock();
+                    loadStockKPI();
+                } else {
+                    showNotification(data.message || "Failed to delete item", true);
+                }
+            } catch(e) {
+                showNotification("Error deleting item", true);
             }
         }
     }
 
     async function loadAnalyticsCharts() {
-        let usageRes = await fetch('/api/monthly_usage'), usageData = await usageRes.json();
-        let lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
-        if (analyticsLineInstance) analyticsLineInstance.destroy();
-        analyticsLineInstance = new Chart(lineCtx, {
-            type: 'line',
-            data: {
-                labels: usageData.labels.length ? usageData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
-                datasets: [{ label: 'Current Consumption', data: usageData.data.length ? usageData.data : [12, 19, 8, 15], borderColor: '#4F46E5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.3 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
+        try {
+            let usageRes = await fetch('/api/monthly_usage'), usageData = await usageRes.json();
+            let lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
+            if (analyticsLineInstance) analyticsLineInstance.destroy();
+            analyticsLineInstance = new Chart(lineCtx, {
+                type: 'line',
+                data: {
+                    labels: usageData.labels.length ? usageData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
+                    datasets: [{ label: 'Current Consumption', data: usageData.data.length ? usageData.data : [12, 19, 8, 15], borderColor: '#4F46E5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.3 }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
 
-        let catRes = await fetch('/api/category_distribution'), catData = await catRes.json();
-        let donutCtx = document.getElementById('analyticsDonutChart').getContext('2d');
-        if (analyticsDonutInstance) analyticsDonutInstance.destroy();
-        analyticsDonutInstance = new Chart(donutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: catData.labels.length ? catData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
-                datasets: [{ data: catData.data.length ? catData.data : [35, 25, 20, 20], backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'] }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
+            let catRes = await fetch('/api/category_distribution'), catData = await catRes.json();
+            let donutCtx = document.getElementById('analyticsDonutChart').getContext('2d');
+            if (analyticsDonutInstance) analyticsDonutInstance.destroy();
+            analyticsDonutInstance = new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: catData.labels.length ? catData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
+                    datasets: [{ data: catData.data.length ? catData.data : [35, 25, 20, 20], backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'] }]
+                },
+                options: { responsive: true, maintainAspectRatio: false }
+            });
+        } catch(e) { console.error(e); }
     }
 
     async function addPurchase() {
-        let sup = document.getElementById('p-supplier-select').value; if(sup === 'Other') sup = document.getElementById('p-supplier-other').value;
-        let payload = { category: document.getElementById('p-category').value, item: document.getElementById('p-item').value, supplier: sup, source: document.getElementById('p-source').value, quantity: document.getElementById('p-qty').value, unit: document.getElementById('p-unit').value, price: document.getElementById('p-price').value };
+        let sup = document.getElementById('p-supplier-select').value; 
+        if(sup === 'Other') sup = document.getElementById('p-supplier-other').value;
+        let payload = { 
+            category: document.getElementById('p-category').value, 
+            item: document.getElementById('p-item').value, 
+            supplier: sup, 
+            source: document.getElementById('p-source').value, 
+            quantity: document.getElementById('p-qty').value, 
+            unit: document.getElementById('p-unit').value, 
+            price: document.getElementById('p-price').value 
+        };
         if(!payload.item || !payload.supplier) return showNotification("Missing data.", true);
 
-        await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        showNotification('✅ Saved to Cloud!');
-        document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-unit').value = '';
-        loadDashboardData(); loadSuppliers(); loadStockKPI();
+        try {
+            await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            showNotification('✅ Saved to Cloud!');
+            document.getElementById('p-item').value = ''; 
+            document.getElementById('p-qty').value = ''; 
+            document.getElementById('p-price').value = ''; 
+            document.getElementById('p-unit').value = '';
+            loadDashboardData(); loadSuppliers(); loadStockKPI();
+        } catch(e) {
+            showNotification("Failed to save purchase", true);
+        }
     }
 
     async function addUsage() {
-        let purp = document.getElementById('u-purpose-select').value; if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
+        let purp = document.getElementById('u-purpose-select').value; 
+        if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
         let payload = { item: document.getElementById('u-item').value, quantity: document.getElementById('u-qty').value, purpose: purp };
         if(!payload.item || !payload.quantity) return showNotification("Missing data.", true);
 
-        await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-        showNotification('✅ Saved to Cloud!');
-        document.getElementById('u-item').value = ''; document.getElementById('u-qty').value = '';
-        loadDashboardData(); loadStockKPI();
+        try {
+            await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+            showNotification('✅ Saved to Cloud!');
+            document.getElementById('u-item').value = ''; 
+            document.getElementById('u-qty').value = '';
+            loadDashboardData(); loadStockKPI();
+        } catch(e) {
+            showNotification("Failed to record usage", true);
+        }
     }
 
     async function addSupplierBtn() {
         let n = document.getElementById('new-sup-name').value, l = document.getElementById('new-sup-loc').value;
         if(!n) return showNotification("Name required.", true);
-        await fetch('/api/supplier_action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "add", name: n, location: l, role: currentRole }) });
-        document.getElementById('new-sup-name').value = ''; document.getElementById('new-sup-loc').value = ''; showNotification("Added!"); loadSuppliers(); loadStockKPI();
+        try {
+            await fetch('/api/supplier_action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "add", name: n, location: l, role: currentRole }) });
+            document.getElementById('new-sup-name').value = ''; 
+            document.getElementById('new-sup-loc').value = ''; 
+            showNotification("Added!"); 
+            loadSuppliers(); loadStockKPI();
+        } catch(e) {
+            showNotification("Failed to add supplier", true);
+        }
     }
+
     async function deleteSupplier(n) {
-        if(confirm(`Delete ${n}?`)) { await fetch('/api/supplier_action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "delete", name: n, role: currentRole }) }); loadSuppliers(); loadStockKPI(); }
+        if(confirm(`Delete ${n}?`)) { 
+            try {
+                await fetch('/api/supplier_action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "delete", name: n, role: currentRole }) }); 
+                loadSuppliers(); loadStockKPI(); 
+            } catch(e) {
+                showNotification("Failed to delete supplier", true);
+            }
+        }
     }
 
     async function loadDashboardData() {
-        let res = await fetch('/api/monthly_usage'), data = await res.json();
-        let total = data.data.reduce((a, b) => a + b, 0);
-        document.getElementById('avg-usage').innerText = data.data.length > 0 ? (total / data.data.length).toFixed(1) : 0;
-        let ctx = document.getElementById('monthlyChart').getContext('2d');
-        if (usageChartInstance) usageChartInstance.destroy();
-        usageChartInstance = new Chart(ctx, { type: 'bar', data: { labels: data.labels, datasets: [{ label: 'Items Used', data: data.data, backgroundColor: '#4F46E5', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false } });
-        loadStockKPI();
+        try {
+            let res = await fetch('/api/monthly_usage'), data = await res.json();
+            let total = data.data.reduce((a, b) => a + b, 0);
+            document.getElementById('avg-usage').innerText = data.data.length > 0 ? (total / data.data.length).toFixed(1) : 0;
+            let ctx = document.getElementById('monthlyChart').getContext('2d');
+            if (usageChartInstance) usageChartInstance.destroy();
+            usageChartInstance = new Chart(ctx, { type: 'bar', data: { labels: data.labels, datasets: [{ label: 'Items Used', data: data.data, backgroundColor: '#4F46E5', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false } });
+            loadStockKPI();
+        } catch(e) { console.error(e); }
     }
 
     async function loadHistory() {
-        let res = await fetch('/api/history'), data = await res.json();
-        document.getElementById('history-table').innerHTML = data.reverse().map(p => `<tr><td>${p.date}</td><td><span style="background:var(--input-bg); border: 1px solid var(--border); padding:2px 8px; border-radius:10px; font-size:12px;">${p.category || 'N/A'}</span></td><td>${p.item}</td><td>${p.supplier}</td><td>${p.source}</td><td>${p.quantity} ${p.unit}</td><td>Rs ${parseFloat(p.price).toFixed(2)}</td></tr>`).join('');
+        try {
+            let res = await fetch('/api/history'), data = await res.json();
+            document.getElementById('history-table').innerHTML = data.reverse().map(p => `<tr><td>${p.date}</td><td><span style="background:var(--input-bg); border: 1px solid var(--border); padding:2px 8px; border-radius:10px; font-size:12px;">${p.category || 'N/A'}</span></td><td>${p.item}</td><td>${p.supplier}</td><td>${p.source}</td><td>${p.quantity} ${p.unit}</td><td>Rs ${parseFloat(p.price).toFixed(2)}</td></tr>`).join('');
+        } catch(e) { console.error(e); }
     }
 
     document.addEventListener('touchmove', function (event) {
