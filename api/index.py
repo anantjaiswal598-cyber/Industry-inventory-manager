@@ -91,6 +91,23 @@ def register():
     save_data(data)
     return jsonify({"success": True})
 
+@app.route('/api/create_admin', methods=['POST'])
+def create_admin():
+    data = load_data()
+    req = request.json
+    if req.get("role") != "admin": 
+        return jsonify({"success": False, "message": "Unauthorized. Admin privileges required."}), 403
+        
+    username = req.get("username", "").lower()
+    password = req.get("password", "")
+    
+    if not username or not password: return jsonify({"success": False, "message": "Missing fields"}), 400
+    if username in data["users"]: return jsonify({"success": False, "message": "Username already exists."}), 409
+    
+    data["users"][username] = {"password": password, "role": "admin"}
+    save_data(data)
+    return jsonify({"success": True, "message": "Admin account created successfully!"})
+
 @app.route('/api/resolve_barcode', methods=['GET'])
 def resolve_barcode():
     data = load_data()
