@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>Arvind Stone Crusher | Inventory Manager</title>
+    <title>Arvind Stone Crusher | Inventory & Operations</title>
     
     <!-- Transparent ASC Logo Favicon -->
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 220'%3E%3Cpath d='M85 20 L118 20 L182 195 L146 195 L133 156 L69 156 L56 195 L20 195 Z M80 126 L122 126 L101 60 Z' fill='%23102A4C'/%3E%3Cpath d='M210 52 C178 24, 128 32, 122 68 C116 105, 222 100, 216 155 C210 190, 165 198, 136 176' fill='none' stroke='%236C757D' stroke-width='28' stroke-linecap='round'/%3E%3Cpath d='M295 65 C270 32, 205 32, 185 88 C165 142, 205 188, 265 180 C280 177, 292 168, 300 156' fill='none' stroke='%23102A4C' stroke-width='32' stroke-linecap=' butt'/%3E%3C/svg%3E">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 360 220'%3E%3Cpath d='M85 20 L120 20 L185 198 L146 198 L132 156 L68 156 L54 198 L16 198 Z M79 124 L121 124 L100 58 Z' fill='%23102A4C'/%3E%3Cpath d='M218 44 C182 18, 128 28, 124 68 C120 110, 224 104, 216 160 C210 194, 166 200, 138 176' fill='none' stroke='%23737B84' stroke-width='30' stroke-linecap='round'/%3E%3Cpath d='M304 64 C272 22, 192 26, 178 90 C164 152, 216 198, 280 182 C294 178, 306 170, 316 156' fill='none' stroke='%23102A4C' stroke-width='34' stroke-linecap='butt'/%3E%3C/svg%3E">
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -140,60 +140,162 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(255, 255, 255, 0.72);
+            background: rgba(255, 255, 255, 0.78);
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);
             border: 1px solid var(--glass-border);
-            box-shadow: 0 4px 14px rgba(16, 42, 76, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9);
-            border-radius: 13px;
-            padding: 5px 9px;
+            box-shadow: 0 4px 14px rgba(16, 42, 76, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.95);
+            border-radius: 14px;
+            padding: 6px 10px;
             flex-shrink: 0;
         }
         body.dark-mode .asc-logo-badge {
             background: rgba(255, 255, 255, 0.92);
         }
         
-        /* LOGIN SCREEN - APPLE GLASS PANEL */
-        #login-screen { position: relative; z-index: 2; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 18px; box-sizing: border-box; }
+        /* LOGIN SCREEN - REFINED APPLE GLASS ENTERPRISE PORTAL */
+        #login-screen { position: relative; z-index: 2; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .modern-login-wrapper { 
-            display: flex; width: 100%; max-width: 980px; min-height: 560px; 
-            border-radius: 26px; overflow: hidden; 
+            display: flex; width: 100%; max-width: 1000px; min-height: 580px; 
+            border-radius: 28px; overflow: hidden; 
             background: var(--card-bg);
-            backdrop-filter: blur(28px) saturate(190%);
-            -webkit-backdrop-filter: blur(28px) saturate(190%);
+            backdrop-filter: blur(30px) saturate(195%);
+            -webkit-backdrop-filter: blur(30px) saturate(195%);
             border: 1px solid var(--glass-border);
-            box-shadow: var(--glass-shadow), var(--glass-inner-glow);
+            box-shadow: 0 24px 48px -12px rgba(15, 23, 42, 0.16), var(--glass-inner-glow);
         }
         .brand-panel { 
-            flex: 1.05; 
-            background: linear-gradient(145deg, rgba(16, 42, 76, 0.94) 0%, rgba(0, 122, 255, 0.88) 55%, rgba(51, 65, 85, 0.95) 100%);
-            padding: 44px; position: relative; color: #FFFFFF; 
-            display: flex; flex-direction: column; justify-content: center; overflow: hidden; 
+            flex: 1.08; 
+            background: 
+                radial-gradient(at 15% 15%, rgba(56, 189, 248, 0.32) 0px, transparent 55%),
+                radial-gradient(at 90% 85%, rgba(0, 122, 255, 0.35) 0px, transparent 50%),
+                linear-gradient(145deg, #0D223F 0%, #16365F 50%, #1E293B 100%);
+            padding: 48px 44px; position: relative; color: #FFFFFF; 
+            display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; 
         }
-        .quote-mark { font-size: 64px; font-family: Georgia, serif; line-height: 0; margin-top: 30px; color: rgba(255,255,255,0.45); }
-        .brand-quote { font-size: 25px; font-weight: 600; line-height: 1.38; margin-bottom: 30px; position: relative; z-index: 2; letter-spacing: -0.3px; }
-        .testimonial { display: flex; align-items: center; gap: 15px; position: relative; z-index: 2; background: rgba(255, 255, 255, 0.14); padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.22); backdrop-filter: blur(10px); }
-        .testimonial .avatar { width: 44px; height: 44px; background: rgba(255, 255, 255, 0.25); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .bg-watermark-panel { position: absolute; bottom: -25px; right: -25px; width: 320px; opacity: 0.12; z-index: 1; transform: rotate(-8deg); pointer-events: none; filter: brightness(2.2); }
+        .brand-pill-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            align-self: flex-start;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.24);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 700;
+            letter-spacing: 0.7px;
+            text-transform: uppercase;
+            color: #E0F2FE;
+            z-index: 2;
+        }
+        .pulse-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #38BDF8;
+            box-shadow: 0 0 10px #38BDF8;
+        }
+        .brand-hero-content {
+            position: relative;
+            z-index: 2;
+            margin: 24px 0;
+        }
+        .brand-quote { 
+            font-size: 28px; 
+            font-weight: 700; 
+            line-height: 1.28; 
+            margin: 0 0 14px 0; 
+            letter-spacing: -0.5px;
+            color: #FFFFFF;
+        }
+        .brand-description {
+            font-size: 14px;
+            line-height: 1.6;
+            color: rgba(226, 232, 240, 0.86);
+            margin: 0;
+            max-width: 92%;
+        }
+        .feature-glass-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            z-index: 2;
+        }
+        .feature-glass-item {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(255, 255, 255, 0.09);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.25);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            padding: 12px 16px;
+            border-radius: 16px;
+            transition: transform 0.2s ease, background 0.2s ease;
+        }
+        .feature-glass-item:hover {
+            transform: translateX(4px);
+            background: rgba(255, 255, 255, 0.14);
+        }
+        .feature-glass-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 11px;
+            background: rgba(56, 189, 248, 0.2);
+            border: 1px solid rgba(56, 189, 248, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #38BDF8;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .feature-glass-text strong {
+            display: block;
+            font-size: 13.5px;
+            font-weight: 600;
+            color: #FFFFFF;
+            margin-bottom: 2px;
+        }
+        .feature-glass-text span {
+            font-size: 12px;
+            color: rgba(203, 213, 225, 0.85);
+        }
+        .bg-watermark-panel { 
+            position: absolute; 
+            bottom: -35px; 
+            right: -35px; 
+            width: 340px; 
+            opacity: 0.11; 
+            z-index: 1; 
+            transform: rotate(-8deg); 
+            pointer-events: none; 
+            filter: brightness(2.4); 
+        }
         
-        .form-panel { flex: 1.2; padding: 44px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
-        .logo-header { display: flex; align-items: center; margin-bottom: 25px; gap: 12px; }
+        .form-panel { flex: 1.12; padding: 48px 44px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+        .logo-header { display: flex; align-items: center; margin-bottom: 28px; gap: 14px; }
         .brand-title-wrap { display: flex; flex-direction: column; }
-        .brand-title-main { font-weight: 800; font-size: 20px; color: var(--text-main); letter-spacing: -0.4px; line-height: 1.15; }
-        .brand-title-sub { font-size: 11.5px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px; }
+        .brand-title-main { font-weight: 800; font-size: 21px; color: var(--text-main); letter-spacing: -0.5px; line-height: 1.15; }
+        .brand-title-sub { font-size: 11.5px; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px; margin-top: 2px; }
 
-        .form-title { font-size: 24px; margin: 0 0 5px 0; color: var(--text-main); font-weight: 700; letter-spacing: -0.4px; }
-        .form-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
-        .z-input { width: 100%; padding: 13px 16px; margin-bottom: 12px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; box-sizing: border-box; font-size: 14px; color: var(--text-main); backdrop-filter: blur(12px); transition: all 0.2s; }
+        .form-title { font-size: 24px; margin: 0 0 6px 0; color: var(--text-main); font-weight: 700; letter-spacing: -0.4px; }
+        .form-subtitle { font-size: 13.5px; color: var(--text-muted); margin-bottom: 24px; }
+        .z-input { width: 100%; padding: 13.5px 16px; margin-bottom: 14px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 13px; box-sizing: border-box; font-size: 14px; color: var(--text-main); backdrop-filter: blur(12px); transition: all 0.2s; }
         .z-input:focus { background: var(--card-bg-strong); border-color: var(--primary); outline: none; box-shadow: 0 0 0 4px var(--primary-light); }
-        .z-btn-primary { background: linear-gradient(135deg, #007AFF 0%, #0284C7 100%); color: white; border: none; width: 100%; padding: 13px; border-radius: 12px; font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 122, 255, 0.28); transition: transform 0.15s ease, box-shadow 0.2s ease; }
+        .z-btn-primary { background: linear-gradient(135deg, #007AFF 0%, #0284C7 100%); color: white; border: 1px solid rgba(255,255,255,0.25); width: 100%; padding: 13.5px; border-radius: 13px; font-weight: 600; font-size: 15px; cursor: pointer; box-shadow: 0 6px 18px rgba(0, 122, 255, 0.28), inset 0 1px 0.5px rgba(255,255,255,0.35); transition: transform 0.15s ease, box-shadow 0.2s ease; }
         .z-btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 22px rgba(0, 122, 255, 0.38); }
-        .divider { text-align: center; margin: 20px 0; position: relative; }
+        .divider { text-align: center; margin: 22px 0; position: relative; }
         .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); z-index: 1; }
-        .divider span { background: transparent; padding: 0 15px; color: var(--text-muted); font-size: 12px; position: relative; z-index: 2; font-weight: 500; }
-        .social-btn { background: var(--input-bg); border: 1px solid var(--glass-border); padding: 12px; width: 100%; border-radius: 12px; cursor: pointer; color: var(--text-main); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; backdrop-filter: blur(12px); transition: 0.2s; }
+        .divider span { background: transparent; padding: 0 15px; color: var(--text-muted); font-size: 12px; position: relative; z-index: 2; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .social-btn { background: var(--input-bg); border: 1px solid var(--glass-border); padding: 12.5px; width: 100%; border-radius: 13px; cursor: pointer; color: var(--text-main); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; backdrop-filter: blur(12px); box-shadow: var(--glass-inner-glow); transition: 0.2s; }
         .social-btn:hover { background: var(--primary-light); border-color: var(--primary); color: var(--primary); }
-        .switch-form { text-align: center; font-size: 13px; margin-top: 20px; color: var(--text-muted); }
+        .switch-form { text-align: center; font-size: 13.5px; margin-top: 22px; color: var(--text-muted); }
         .switch-form span { color: var(--primary); font-weight: 600; cursor: pointer; }
 
         /* TOP GLASS NAVBAR & SEGMENTED PILL TABS */
@@ -396,9 +498,10 @@
             .menu-toggle-btn { display: block; }
             .navbar { padding: 0 16px; }
             .dashboard-layout, .grid-2, .kpi-grid { grid-template-columns: 1fr; }
-            .modern-login-wrapper { flex-direction: column; height: auto; max-width: 100%; border-radius: 22px; }
-            .brand-panel { display: none; }
-            .form-panel { padding: 28px 20px; }
+            .modern-login-wrapper { flex-direction: column; height: auto; max-width: 520px; border-radius: 24px; }
+            .brand-panel { padding: 32px 26px; }
+            .feature-glass-list { display: none; }
+            .form-panel { padding: 32px 24px; }
             #user-greeting { display: none; }
             table { display: block; overflow-x: auto; white-space: nowrap; }
             .wm-1 { width: 360px; }
@@ -412,11 +515,11 @@
     <defs>
         <g id="asc-logo-transparent">
             <!-- Interwoven Gray 'S' -->
-            <path d="M 226 42 C 192 14, 130 22, 122 68 C 114 114, 224 106, 214 162 C 206 196, 162 202, 134 176" 
-                  fill="none" stroke="#6E7681" stroke-width="34" stroke-linecap="round" />
-            <!-- White/Cutout gap separation for interlocking effect -->
-            <path d="M 298 62 C 264 20, 186 26, 172 90 C 158 152, 212 198, 274 182 C 288 178, 300 170, 310 156" 
-                  fill="none" stroke="#102A4C" stroke-width="36" stroke-linecap="butt" />
+            <path d="M 222 40 C 186 14, 128 24, 122 68 C 116 112, 226 106, 214 162 C 206 196, 162 202, 134 176" 
+                  fill="none" stroke="#737B84" stroke-width="33" stroke-linecap="round" />
+            <!-- Navy 'C' -->
+            <path d="M 300 62 C 266 20, 188 26, 174 90 C 160 152, 214 198, 276 182 C 290 178, 302 170, 312 156" 
+                  fill="none" stroke="#102A4C" stroke-width="35" stroke-linecap="butt" />
             <!-- Bold Navy 'A' -->
             <path d="M 82 20 L 118 20 L 184 198 L 144 198 L 130 158 L 66 158 L 52 198 L 12 198 Z M 77 126 L 119 126 L 98 62 Z" 
                   fill="#102A4C" />
@@ -463,25 +566,54 @@
     </div>
 </div>
 
+<!-- UPGRADED ENTERPRISE LOGIN SCREEN FOR ARVIND STONE CRUSHER -->
 <div id="login-screen">
     <div class="modern-login-wrapper">
         <div class="brand-panel">
-            <div class="quote-mark">“</div>
-            <h2 class="brand-quote">With Arvind Stone Crusher, you can seamlessly track, manage, and scale your entire operations.</h2>
-            <div class="testimonial">
-                <div class="avatar"><i class="fa-solid fa-user"></i></div>
-                <div>
-                    <strong>Anant Jaiswal</strong><br>
-                    <span style="font-size: 13px; opacity: 0.85;">Director, Arvind Stone Crusher</span>
+            <div class="brand-pill-tag">
+                <span class="pulse-dot"></span>
+                Arvind Stone Crusher • Enterprise ERP
+            </div>
+
+            <div class="brand-hero-content">
+                <h2 class="brand-quote">Smart Inventory & Crusher Operations Intelligence.</h2>
+                <p class="brand-description">
+                    A dedicated cloud platform built for <strong>Arvind Stone Crusher</strong> to monitor fuel, spare parts, raw materials, and machinery consumption in real time.
+                </p>
+            </div>
+
+            <div class="feature-glass-list">
+                <div class="feature-glass-item">
+                    <div class="feature-glass-icon"><i class="fa-solid fa-chart-pie"></i></div>
+                    <div class="feature-glass-text">
+                        <strong>Live Stock & Financial Valuation</strong>
+                        <span>Track procurement spend, burn rate, and active inventory worth.</span>
+                    </div>
+                </div>
+                <div class="feature-glass-item">
+                    <div class="feature-glass-icon"><i class="fa-solid fa-qrcode"></i></div>
+                    <div class="feature-glass-text">
+                        <strong>Instant Barcode & QR Scanning</strong>
+                        <span>Log incoming purchases and daily site usage in seconds.</span>
+                    </div>
+                </div>
+                <div class="feature-glass-item">
+                    <div class="feature-glass-icon"><i class="fa-brands fa-whatsapp"></i></div>
+                    <div class="feature-glass-text">
+                        <strong>Automated Low-Stock Alerts</strong>
+                        <span>Instant WhatsApp notifications before critical supplies run low.</span>
+                    </div>
                 </div>
             </div>
+
             <!-- Transparent ASC Watermark inside Login Brand Panel -->
             <svg class="bg-watermark-panel" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
         </div>
+
         <div class="form-panel">
             <div class="logo-header">
-                <div class="asc-logo-badge" style="padding: 7px 11px; border-radius: 15px;">
-                    <svg width="46" height="30" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
+                <div class="asc-logo-badge" style="padding: 8px 12px; border-radius: 16px;">
+                    <svg width="48" height="32" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
                 </div>
                 <div class="brand-title-wrap">
                     <span class="brand-title-main">Arvind Stone Crusher</span>
@@ -493,26 +625,26 @@
                 <p class="form-subtitle">Sign in to your Arvind Stone Crusher staff workspace</p>
                 <input type="text" id="staff-user" class="z-input" placeholder="Username">
                 <input type="password" id="staff-pass" class="z-input" placeholder="Password">
-                <button class="z-btn-primary" onclick="attemptLogin('staff')">Log in</button>
+                <button class="z-btn-primary" onclick="attemptLogin('staff')">Sign In to Workspace</button>
                 <div class="divider"><span>or switch portal</span></div>
-                <button class="social-btn" onclick="toggleForm('admin')"><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Admin Portal</button>
-                <p class="switch-form">Don't have an account? <span onclick="toggleForm('register')">Create one</span></p>
+                <button class="social-btn" onclick="toggleForm('admin')"><i class="fa-solid fa-shield-halved" style="color: var(--primary);"></i> Administrator Portal</button>
+                <p class="switch-form">New staff member? <span onclick="toggleForm('register')">Create an account</span></p>
             </div>
             <div id="staff-register-box" style="display: none;">
-                <h3 class="form-title">Let's get started</h3>
-                <p class="form-subtitle">Your Arvind Stone Crusher data is synced securely in the cloud.</p>
+                <h3 class="form-title">Create Staff Account</h3>
+                <p class="form-subtitle">Register for Arvind Stone Crusher inventory access</p>
                 <input type="text" id="reg-user" class="z-input" placeholder="Choose Username">
                 <input type="password" id="reg-pass" class="z-input" placeholder="Choose Password">
-                <button class="z-btn-primary" onclick="registerStaff()">Create your account</button>
-                <p class="switch-form">Already have an account? <span onclick="toggleForm('staff')">Log in</span></p>
+                <button class="z-btn-primary" onclick="registerStaff()">Register Account</button>
+                <p class="switch-form">Already registered? <span onclick="toggleForm('staff')">Back to Sign In</span></p>
             </div>
             <div id="admin-login-box" style="display: none;">
-                <h3 class="form-title">Admin Access</h3>
-                <p class="form-subtitle">Requires elevated system privileges</p>
+                <h3 class="form-title">Administrator Access</h3>
+                <p class="form-subtitle">Elevated privileges for Arvind Stone Crusher management</p>
                 <input type="text" id="admin-user" class="z-input" placeholder="Admin Username">
                 <input type="password" id="admin-pass" class="z-input" placeholder="Password">
-                <button class="z-btn-primary" onclick="attemptLogin('admin')">Verify & Login</button>
-                <p class="switch-form">Not an admin? <span onclick="toggleForm('staff')">Back to Staff Login</span></p>
+                <button class="z-btn-primary" onclick="attemptLogin('admin')">Verify & Enter Admin Portal</button>
+                <p class="switch-form">Not an administrator? <span onclick="toggleForm('staff')">Back to Staff Login</span></p>
             </div>
         </div>
     </div>
