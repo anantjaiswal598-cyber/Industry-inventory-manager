@@ -108,6 +108,45 @@ def create_admin():
     save_data(data)
     return jsonify({"success": True, "message": "Admin account created successfully!"})
 
+@app.route('/api/users_list', methods=['POST'])
+def get_users_list():
+    data = load_data()
+    req = request.json
+    if req.get("role") != "admin": 
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    user_list = [{"username": k, "role": v["role"]} for k, v in data["users"].items()]
+    return jsonify(user_list)
+
+@app.route('/api/activity_log', methods=['POST'])
+def get_activity_log():
+    data = load_data()
+    req = request.json
+    if req.get("role") != "admin": 
+        return jsonify({"error": "Unauthorized"}), 403
+    
+    log = []
+    # Fetch purchases
+    for p in data["purchases"]:
+        log.append({
+            "type": "Purchase",
+            "date": p.get("date", ""),
+            "item": p.get("item", ""),
+            "qty": f"{p.get('quantity', 0)} {p.get('unit', '')}",
+            "user": p.get("user", "System/Legacy")
+        })
+    # Fetch usage
+    for u in data["usage"]:
+        log.append({
+            "type": "Usage",
+            "date": u.get("date", ""),
+            "item": u.get("item", ""),
+            "qty": str(u.get("quantity", 0)),
+            "user": u.get("user", "System/Legacy")
+        })
+    
+    return jsonify(log)
+
 @app.route('/api/resolve_barcode', methods=['GET'])
 def resolve_barcode():
     data = load_data()
@@ -221,6 +260,7 @@ def add_purchase():
         "quantity": float(req.get("quantity", 0)),
         "unit": req.get("unit"),
         "price": float(req.get("price", 0)),
+        "user": req.get("user", "Unknown")
     })
     save_data(data)
     return jsonify({"message": "Purchase saved."})
@@ -234,6 +274,7 @@ def add_usage():
         "item": req.get("item"),
         "quantity": float(req.get("quantity", 0)),
         "purpose": req.get("purpose"),
+        "user": req.get("user", "Unknown")
     })
     save_data(data)
     return jsonify({"message": "Usage saved."})
