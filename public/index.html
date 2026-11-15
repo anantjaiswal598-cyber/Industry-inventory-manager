@@ -59,7 +59,6 @@
         .switch-form { text-align: center; font-size: 13px; margin-top: 20px; color: var(--text-muted); }
         .switch-form span { color: var(--primary); font-weight: 600; cursor: pointer; }
 
-        /* APP SCREEN & NAVBAR */
         #app-screen { display: none; }
         .navbar { background: var(--card-bg); padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; height: 70px; }
         .navbar h1 { color: var(--primary); font-size: 20px; margin: 0; display: flex; align-items: center; gap: 10px; font-weight: 700; }
@@ -93,7 +92,7 @@
 
         .dashboard-layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 24px; align-items: start; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .card { background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 24px; box-sizing: border-box; }
+        .card { background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 24px; box-sizing: border-box; overflow-x: auto; }
         .card h2 { margin-top: 0; font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
 
         input, select { width: 100%; padding: 12px 14px; margin-bottom: 14px; background-color: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 14px; color: var(--text-main); }
@@ -167,6 +166,7 @@
         <button class="drawer-item" onclick="selectTabMobile('tab-stock')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-cubes"></i> Stock</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
         <button class="drawer-item admin-only" onclick="selectTabMobile('tab-analytics')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-chart-line"></i> Analytics</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
         <button class="drawer-item admin-only" onclick="selectTabMobile('tab-history')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-clock-rotate-left"></i> History</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-users')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-users"></i> Users & Logs</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
         <button class="drawer-item admin-only" onclick="selectTabMobile('tab-suppliers')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-truck-field"></i> Suppliers & Settings</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
     </div>
     <div style="padding: 20px; border-top: 1px solid var(--border);">
@@ -235,7 +235,8 @@
             <button class="tab-btn" onclick="openTab('tab-stock', this)"><i class="fa-solid fa-cubes"></i> Stock</button>
             <button class="tab-btn admin-only" onclick="openTab('tab-analytics', this)"><i class="fa-solid fa-chart-line"></i> Analytics</button>
             <button class="tab-btn admin-only" onclick="openTab('tab-history', this)"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
-            <button class="tab-btn admin-only" onclick="openTab('tab-suppliers', this)"><i class="fa-solid fa-truck-field"></i> Suppliers</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-users', this)"><i class="fa-solid fa-users"></i> Users & Logs</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-suppliers', this)"><i class="fa-solid fa-truck-field"></i> Suppliers & Settings</button>
         </div>
 
         <div style="display: flex; align-items: center; gap: 10px;">
@@ -349,10 +350,29 @@
             </div>
         </div>
 
-        <div id="tab-suppliers" class="tab-content">
-            
+        <!-- NEW USERS & LOGS TAB -->
+        <div id="tab-users" class="tab-content">
             <div class="grid-2">
-                <!-- Admin WhatsApp Config -->
+                <div class="card">
+                    <h2><i class="fa-solid fa-users"></i> Registered Users</h2>
+                    <button class="btn-blue" onclick="loadUsersAndLogs()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    <table>
+                        <thead><tr><th>Username</th><th>Role</th></tr></thead>
+                        <tbody id="users-table"></tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <h2><i class="fa-solid fa-list-check"></i> System Activity Log</h2>
+                    <table>
+                        <thead><tr><th>Action</th><th>Item</th><th>Qty</th><th>User</th><th>Date</th></tr></thead>
+                        <tbody id="activity-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div id="tab-suppliers" class="tab-content">
+            <div class="grid-2">
                 <div class="card" style="background: var(--input-bg);">
                     <h2><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> WhatsApp Alerts</h2>
                     <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Set the number to receive automated low stock alerts.</p>
@@ -361,8 +381,6 @@
                         <button class="btn-green" onclick="saveAdminWhatsApp()" style="width: 140px;"><i class="fa-solid fa-check"></i> Save</button>
                     </div>
                 </div>
-
-                <!-- Create New Admin Account -->
                 <div class="card" style="background: var(--input-bg);">
                     <h2><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Add Admin</h2>
                     <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Create a new administrator account.</p>
@@ -373,13 +391,11 @@
                     <button class="btn-blue" onclick="createAdminAccount()" style="width: 100%;"><i class="fa-solid fa-user-plus"></i> Create Admin</button>
                 </div>
             </div>
-
             <div class="card" style="background: var(--input-bg);">
                 <h2><i class="fa-solid fa-plus"></i> Add New Supplier</h2>
                 <div class="grid-2"><input type="text" id="new-sup-name" placeholder="Supplier Name"><input type="text" id="new-sup-loc" placeholder="Location"></div>
                 <button class="btn-green" onclick="addSupplierBtn()" style="width: 200px;"><i class="fa-solid fa-check"></i> Add Supplier</button>
             </div>
-            
             <div class="card">
                 <h2><i class="fa-solid fa-building-user"></i> Supplier List</h2>
                 <button class="btn-blue" onclick="loadSuppliers()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
@@ -407,6 +423,7 @@
             if(tabId === 'tab-history') loadHistory(); 
             if(tabId === 'tab-suppliers') { loadSuppliers(); loadAdminWhatsApp(); }
             if(tabId === 'tab-analytics') loadAnalyticsCharts();
+            if(tabId === 'tab-users') loadUsersAndLogs();
         }
     }
 
@@ -507,7 +524,12 @@
         if(!u || !p) return showNotification("Please enter username and password.", true);
         let res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p, portal: portalType }) });
         let data = await res.json();
-        if(data.success) { localStorage.setItem('userRole', data.role); showNotification(`Welcome back!`); checkAuth(); } 
+        if(data.success) { 
+            localStorage.setItem('userRole', data.role); 
+            localStorage.setItem('username', u); // SAVE USERNAME
+            showNotification(`Welcome back!`); 
+            checkAuth(); 
+        } 
         else showNotification(data.message, true);
     }
 
@@ -516,10 +538,13 @@
         if(!u || !p) return showNotification("Missing fields.", true);
         let res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
         let data = await res.json();
-        if(data.success) { showNotification("Account created!"); toggleForm('staff'); } else showNotification(data.message, true);
+        if(data.success) { 
+            localStorage.setItem('username', u); // SAVE USERNAME
+            showNotification("Account created!"); 
+            toggleForm('staff'); 
+        } else showNotification(data.message, true);
     }
 
-    // Function to create a new admin from the dashboard
     async function createAdminAccount() {
         let u = document.getElementById('new-admin-user').value;
         let p = document.getElementById('new-admin-pass').value;
@@ -542,7 +567,14 @@
         }
     }
 
-    function logout() { localStorage.removeItem('userRole'); currentRole = null; document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); openTab('tab-dashboard', document.querySelector('.tab-btn')); checkAuth(); }
+    function logout() { 
+        localStorage.removeItem('userRole'); 
+        localStorage.removeItem('username'); 
+        currentRole = null; 
+        document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); 
+        openTab('tab-dashboard', document.querySelector('.tab-btn')); 
+        checkAuth(); 
+    }
     
     function openTab(tabId, btn) {
         document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
@@ -552,6 +584,7 @@
         if(tabId === 'tab-history') loadHistory(); 
         if(tabId === 'tab-suppliers') { loadSuppliers(); loadAdminWhatsApp(); }
         if(tabId === 'tab-analytics') loadAnalyticsCharts();
+        if(tabId === 'tab-users') loadUsersAndLogs();
     }
 
     function toggleOtherPurpose() { document.getElementById('u-purpose-other').style.display = document.getElementById('u-purpose-select').value === 'Other' ? 'block' : 'none'; }
@@ -650,9 +683,44 @@
         });
     }
 
+    // NEW FUNCTION TO LOAD USERS AND LOGS
+    async function loadUsersAndLogs() {
+        if(currentRole !== 'admin') return;
+
+        // Fetch User List
+        let uRes = await fetch('/api/users_list', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: currentRole })
+        });
+        let uData = await uRes.json();
+        if(!uData.error) {
+            document.getElementById('users-table').innerHTML = uData.map(u => `<tr>
+                <td><strong>${u.username}</strong></td>
+                <td><span class="badge ${u.role === 'admin' ? 'badge-danger' : 'badge-success'}">${u.role.toUpperCase()}</span></td>
+            </tr>`).join('');
+        }
+
+        // Fetch Activity Logs
+        let logRes = await fetch('/api/activity_log', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: currentRole })
+        });
+        let logData = await logRes.json();
+        if(!logData.error) {
+            document.getElementById('activity-table').innerHTML = logData.reverse().map(l => `<tr>
+                <td><span class="badge ${l.type === 'Purchase' ? 'badge-success' : 'badge-warning'}">${l.type}</span></td>
+                <td>${l.item}</td>
+                <td>${l.qty}</td>
+                <td><i class="fa-solid fa-user-pen" style="color:var(--text-muted); margin-right:4px;"></i> ${l.user}</td>
+                <td>${l.date}</td>
+            </tr>`).join('');
+        }
+    }
+
     async function addPurchase() {
+        let currentUser = localStorage.getItem('username') || 'Unknown';
         let sup = document.getElementById('p-supplier-select').value; if(sup === 'Other') sup = document.getElementById('p-supplier-other').value;
-        let payload = { category: document.getElementById('p-category').value, item: document.getElementById('p-item').value, supplier: sup, source: document.getElementById('p-source').value, quantity: document.getElementById('p-qty').value, unit: document.getElementById('p-unit').value, price: document.getElementById('p-price').value };
+        let payload = { category: document.getElementById('p-category').value, item: document.getElementById('p-item').value, supplier: sup, source: document.getElementById('p-source').value, quantity: document.getElementById('p-qty').value, unit: document.getElementById('p-unit').value, price: document.getElementById('p-price').value, user: currentUser };
         if(!payload.item || !payload.supplier) return showNotification("Missing data.", true);
 
         await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -662,8 +730,9 @@
     }
 
     async function addUsage() {
+        let currentUser = localStorage.getItem('username') || 'Unknown';
         let purp = document.getElementById('u-purpose-select').value; if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
-        let payload = { item: document.getElementById('u-item').value, quantity: document.getElementById('u-qty').value, purpose: purp };
+        let payload = { item: document.getElementById('u-item').value, quantity: document.getElementById('u-qty').value, purpose: purp, user: currentUser };
         if(!payload.item || !payload.quantity) return showNotification("Missing data.", true);
 
         await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
