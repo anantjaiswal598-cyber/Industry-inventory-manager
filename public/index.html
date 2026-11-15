@@ -3,8 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
-    <title>Industry Inventory Manager</title>
+    <title>Arvind Stone Crusher | Inventory Manager</title>
     
+    <!-- Transparent ASC Logo Favicon -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 340 220'%3E%3Cpath d='M85 20 L118 20 L182 195 L146 195 L133 156 L69 156 L56 195 L20 195 Z M80 126 L122 126 L101 60 Z' fill='%23102A4C'/%3E%3Cpath d='M210 52 C178 24, 128 32, 122 68 C116 105, 222 100, 216 155 C210 190, 165 198, 136 176' fill='none' stroke='%236C757D' stroke-width='28' stroke-linecap='round'/%3E%3Cpath d='M295 65 C270 32, 205 32, 185 88 C165 142, 205 188, 265 180 C280 177, 292 168, 300 156' fill='none' stroke='%23102A4C' stroke-width='32' stroke-linecap=' butt'/%3E%3C/svg%3E">
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -16,6 +19,8 @@
             --primary: #007AFF;
             --primary-hover: #0056B3;
             --primary-light: rgba(0, 122, 255, 0.14);
+            --brand-navy: #102A4C;
+            --brand-slate: #6C757D;
             --accent-blue: #38BDF8;
             --success: #34C759;
             --danger: #FF3B30;
@@ -26,17 +31,18 @@
             --bg-mesh: 
                 radial-gradient(at 12% 15%, rgba(0, 122, 255, 0.18) 0px, transparent 50%),
                 radial-gradient(at 88% 10%, rgba(56, 189, 248, 0.18) 0px, transparent 45%),
-                radial-gradient(at 50% 85%, rgba(100, 116, 139, 0.20) 0px, transparent 55%),
+                radial-gradient(at 50% 85%, rgba(100, 116, 139, 0.22) 0px, transparent 55%),
                 linear-gradient(135deg, #F1F5F9 0%, #E2E8F0 50%, #CBD5E1 100%);
             --card-bg: rgba(255, 255, 255, 0.62);
             --card-bg-strong: rgba(255, 255, 255, 0.78);
-            --glass-border: rgba(255, 255, 255, 0.75);
-            --glass-inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.9);
+            --glass-border: rgba(255, 255, 255, 0.78);
+            --glass-inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.92);
             --glass-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.07), 0 4px 12px -2px rgba(0, 122, 255, 0.05);
             --text-main: #0F172A;
             --text-muted: #475569;
             --border: rgba(148, 163, 184, 0.28);
             --input-bg: rgba(241, 245, 249, 0.68);
+            --watermark-opacity: 0.055;
         }
 
         body.dark-mode { 
@@ -44,6 +50,8 @@
             --primary: #0A84FF;
             --primary-hover: #38BDF8;
             --primary-light: rgba(10, 132, 255, 0.22);
+            --brand-navy: #60A5FA;
+            --brand-slate: #94A3B8;
             --bg-base: #0B1120;
             --bg-mesh: 
                 radial-gradient(at 15% 15%, rgba(10, 132, 255, 0.22) 0px, transparent 50%),
@@ -59,6 +67,7 @@
             --text-muted: #94A3B8;
             --border: rgba(148, 163, 184, 0.16);
             --input-bg: rgba(15, 23, 42, 0.58);
+            --watermark-opacity: 0.045;
         }
         
         html {
@@ -79,12 +88,75 @@
             touch-action: pan-x pan-y;
             overscroll-behavior-y: none;
             -webkit-font-smoothing: antialiased;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* AMBIENT FLOATING TRANSPARENT ASC WATERMARK LOGOS IN BACKGROUND */
+        .ambient-watermark-layer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 0;
+            overflow: hidden;
+        }
+        .wm-logo {
+            position: absolute;
+            opacity: var(--watermark-opacity);
+            filter: drop-shadow(0 10px 25px rgba(0, 122, 255, 0.15));
+            user-select: none;
+            animation: floatWatermark 22s ease-in-out infinite alternate;
+        }
+        .wm-1 {
+            width: 680px;
+            top: 52%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-4deg);
+        }
+        .wm-2 {
+            width: 420px;
+            top: -50px;
+            right: -70px;
+            transform: rotate(12deg);
+            animation-delay: -6s;
+        }
+        .wm-3 {
+            width: 380px;
+            bottom: -60px;
+            left: -50px;
+            transform: rotate(-10deg);
+            animation-delay: -12s;
+        }
+        @keyframes floatWatermark {
+            0% { transform: translateY(0px) rotate(-4deg) scale(1); }
+            100% { transform: translateY(-18px) rotate(-1deg) scale(1.03); }
+        }
+
+        /* ASC TRANSPARENT LOGO STYLING */
+        .asc-logo-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.72);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 14px rgba(16, 42, 76, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.9);
+            border-radius: 13px;
+            padding: 5px 9px;
+            flex-shrink: 0;
+        }
+        body.dark-mode .asc-logo-badge {
+            background: rgba(255, 255, 255, 0.92);
         }
         
         /* LOGIN SCREEN - APPLE GLASS PANEL */
-        #login-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 18px; box-sizing: border-box; }
+        #login-screen { position: relative; z-index: 2; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 18px; box-sizing: border-box; }
         .modern-login-wrapper { 
-            display: flex; width: 100%; max-width: 960px; min-height: 560px; 
+            display: flex; width: 100%; max-width: 980px; min-height: 560px; 
             border-radius: 26px; overflow: hidden; 
             background: var(--card-bg);
             backdrop-filter: blur(28px) saturate(190%);
@@ -93,26 +165,23 @@
             box-shadow: var(--glass-shadow), var(--glass-inner-glow);
         }
         .brand-panel { 
-            flex: 1; 
-            background: linear-gradient(145deg, rgba(0, 122, 255, 0.88) 0%, rgba(2, 132, 199, 0.90) 55%, rgba(30, 58, 138, 0.94) 100%);
+            flex: 1.05; 
+            background: linear-gradient(145deg, rgba(16, 42, 76, 0.94) 0%, rgba(0, 122, 255, 0.88) 55%, rgba(51, 65, 85, 0.95) 100%);
             padding: 44px; position: relative; color: #FFFFFF; 
             display: flex; flex-direction: column; justify-content: center; overflow: hidden; 
         }
         .quote-mark { font-size: 64px; font-family: Georgia, serif; line-height: 0; margin-top: 30px; color: rgba(255,255,255,0.45); }
-        .brand-quote { font-size: 26px; font-weight: 600; line-height: 1.35; margin-bottom: 30px; position: relative; z-index: 2; letter-spacing: -0.3px; }
+        .brand-quote { font-size: 25px; font-weight: 600; line-height: 1.38; margin-bottom: 30px; position: relative; z-index: 2; letter-spacing: -0.3px; }
         .testimonial { display: flex; align-items: center; gap: 15px; position: relative; z-index: 2; background: rgba(255, 255, 255, 0.14); padding: 12px 16px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.22); backdrop-filter: blur(10px); }
         .testimonial .avatar { width: 44px; height: 44px; background: rgba(255, 255, 255, 0.25); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
-        .bg-boxes { position: absolute; bottom: -40px; right: -20px; font-size: 270px; color: rgba(255, 255, 255, 0.08); z-index: 1; transform: rotate(-8deg); }
+        .bg-watermark-panel { position: absolute; bottom: -25px; right: -25px; width: 320px; opacity: 0.12; z-index: 1; transform: rotate(-8deg); pointer-events: none; filter: brightness(2.2); }
         
         .form-panel { flex: 1.2; padding: 44px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
-        .logo-header { display: flex; align-items: center; margin-bottom: 25px; }
-        .logo-icon-glass {
-            width: 42px; height: 42px; border-radius: 12px;
-            background: linear-gradient(135deg, #007AFF, #38BDF8);
-            display: flex; align-items: center; justify-content: center;
-            color: white; font-size: 20px;
-            box-shadow: 0 6px 16px rgba(0, 122, 255, 0.35);
-        }
+        .logo-header { display: flex; align-items: center; margin-bottom: 25px; gap: 12px; }
+        .brand-title-wrap { display: flex; flex-direction: column; }
+        .brand-title-main { font-weight: 800; font-size: 20px; color: var(--text-main); letter-spacing: -0.4px; line-height: 1.15; }
+        .brand-title-sub { font-size: 11.5px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px; }
+
         .form-title { font-size: 24px; margin: 0 0 5px 0; color: var(--text-main); font-weight: 700; letter-spacing: -0.4px; }
         .form-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 22px; }
         .z-input { width: 100%; padding: 13px 16px; margin-bottom: 12px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 12px; box-sizing: border-box; font-size: 14px; color: var(--text-main); backdrop-filter: blur(12px); transition: all 0.2s; }
@@ -128,7 +197,7 @@
         .switch-form span { color: var(--primary); font-weight: 600; cursor: pointer; }
 
         /* TOP GLASS NAVBAR & SEGMENTED PILL TABS */
-        #app-screen { display: none; }
+        #app-screen { display: none; position: relative; z-index: 2; }
         .navbar { 
             background: var(--card-bg);
             backdrop-filter: blur(25px) saturate(190%);
@@ -137,9 +206,9 @@
             box-shadow: var(--glass-shadow);
             display: flex; align-items: center; justify-content: space-between; 
             border-bottom: 1px solid var(--glass-border); 
-            position: sticky; top: 0; z-index: 100; height: 72px; 
+            position: sticky; top: 0; z-index: 100; height: 74px; 
         }
-        .navbar h1 { color: var(--text-main); font-size: 19px; margin: 0; display: flex; align-items: center; gap: 10px; font-weight: 700; letter-spacing: -0.4px; }
+        .navbar h1 { color: var(--text-main); font-size: 18px; margin: 0; display: flex; align-items: center; gap: 11px; font-weight: 700; letter-spacing: -0.4px; }
         
         .nav-links-desktop { 
             display: flex; align-items: center; gap: 6px; 
@@ -167,7 +236,7 @@
         /* MOBILE FROSTED DRAWER */
         .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.45); z-index: 1000; backdrop-filter: blur(6px); }
         .mobile-drawer { 
-            position: fixed; top: 0; right: -310px; width: 285px; height: 100%; 
+            position: fixed; top: 0; right: -310px; width: 290px; height: 100%; 
             background: var(--card-bg-strong);
             backdrop-filter: blur(30px) saturate(190%);
             -webkit-backdrop-filter: blur(30px) saturate(190%);
@@ -185,7 +254,7 @@
         .logout-btn { background: rgba(255, 59, 48, 0.14); color: var(--danger); border: 1px solid rgba(255, 59, 48, 0.28); padding: 8px 14px; border-radius: 12px; cursor: pointer; font-weight: 600; font-size: 13px; transition: 0.2s; }
         .logout-btn:hover { background: var(--danger); color: white; }
 
-        .container { max-width: 1280px; margin: 28px auto; padding: 0 24px; box-sizing: border-box; }
+        .container { max-width: 1280px; margin: 28px auto; padding: 0 24px; box-sizing: border-box; position: relative; z-index: 2; }
         .tab-content { display: none; }
         .tab-content.active { display: block; animation: fadeIn 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px) scale(0.995); } to { opacity: 1; transform: translateY(0) scale(1); } }
@@ -202,6 +271,8 @@
             box-shadow: var(--glass-shadow), var(--glass-inner-glow);
             display: flex; align-items: center; justify-content: space-between;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
+            position: relative;
+            overflow: hidden;
         }
         .kpi-card:hover {
             transform: translateY(-3px);
@@ -232,6 +303,7 @@
             margin-bottom: 24px; 
             box-sizing: border-box; 
             overflow-x: auto; 
+            position: relative;
         }
         .card h2 { margin-top: 0; font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600; letter-spacing: -0.2px; }
 
@@ -319,7 +391,7 @@
         }
         #reader { width: 100%; margin-bottom: 15px; border-radius: 14px; overflow: hidden; }
 
-        @media (max-width: 960px) {
+        @media (max-width: 1020px) {
             .nav-links-desktop { display: none; }
             .menu-toggle-btn { display: block; }
             .navbar { padding: 0 16px; }
@@ -329,10 +401,35 @@
             .form-panel { padding: 28px 20px; }
             #user-greeting { display: none; }
             table { display: block; overflow-x: auto; white-space: nowrap; }
+            .wm-1 { width: 360px; }
         }
     </style>
 </head>
 <body>
+
+<!-- MASTER REUSABLE TRANSPARENT VECTOR DEFINITION OF THE PROVIDED "ASC" LOGO (ONLY LETTERS VISIBLE) -->
+<svg width="0" height="0" style="position:absolute; visibility:hidden;" aria-hidden="true">
+    <defs>
+        <g id="asc-logo-transparent">
+            <!-- Interwoven Gray 'S' -->
+            <path d="M 226 42 C 192 14, 130 22, 122 68 C 114 114, 224 106, 214 162 C 206 196, 162 202, 134 176" 
+                  fill="none" stroke="#6E7681" stroke-width="34" stroke-linecap="round" />
+            <!-- White/Cutout gap separation for interlocking effect -->
+            <path d="M 298 62 C 264 20, 186 26, 172 90 C 158 152, 212 198, 274 182 C 288 178, 300 170, 310 156" 
+                  fill="none" stroke="#102A4C" stroke-width="36" stroke-linecap="butt" />
+            <!-- Bold Navy 'A' -->
+            <path d="M 82 20 L 118 20 L 184 198 L 144 198 L 130 158 L 66 158 L 52 198 L 12 198 Z M 77 126 L 119 126 L 98 62 Z" 
+                  fill="#102A4C" />
+        </g>
+    </defs>
+</svg>
+
+<!-- BACKGROUND TRANSPARENT WATERMARK LOGOS LAYER -->
+<div class="ambient-watermark-layer" aria-hidden="true">
+    <svg class="wm-logo wm-1" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
+    <svg class="wm-logo wm-2" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
+    <svg class="wm-logo wm-3" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
+</div>
 
 <div id="scanner-modal">
     <div class="scanner-box">
@@ -345,7 +442,12 @@
 <div id="drawer-overlay" class="mobile-drawer-overlay" onclick="toggleMobileDrawer()"></div>
 <div id="mobile-drawer" class="mobile-drawer">
     <div class="drawer-header">
-        <h2 style="margin: 0; font-size: 18px; color: var(--primary); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-boxes-stacked"></i> Industry Menu</h2>
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="asc-logo-badge">
+                <svg width="36" height="24" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
+            </span>
+            <h2 style="margin: 0; font-size: 15.5px; color: var(--text-main); font-weight: 700;">Arvind Stone Crusher</h2>
+        </div>
         <button onclick="toggleMobileDrawer()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
     </div>
     <div class="drawer-links">
@@ -365,24 +467,30 @@
     <div class="modern-login-wrapper">
         <div class="brand-panel">
             <div class="quote-mark">“</div>
-            <h2 class="brand-quote">With Industry, you can actually organize your entire business.</h2>
+            <h2 class="brand-quote">With Arvind Stone Crusher, you can seamlessly track, manage, and scale your entire operations.</h2>
             <div class="testimonial">
                 <div class="avatar"><i class="fa-solid fa-user"></i></div>
                 <div>
                     <strong>Anant Jaiswal</strong><br>
-                    <span style="font-size: 13px; opacity: 0.85;">Director, Industry Operations</span>
+                    <span style="font-size: 13px; opacity: 0.85;">Director, Arvind Stone Crusher</span>
                 </div>
             </div>
-            <div class="bg-boxes"><i class="fa-solid fa-boxes-stacked"></i></div>
+            <!-- Transparent ASC Watermark inside Login Brand Panel -->
+            <svg class="bg-watermark-panel" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
         </div>
         <div class="form-panel">
             <div class="logo-header">
-                <div class="logo-icon-glass"><i class="fa-solid fa-boxes-stacked"></i></div>
-                <span style="font-weight: 700; font-size: 22px; margin-left: 12px; color: var(--text-main); letter-spacing: -0.5px;">Industry</span>
+                <div class="asc-logo-badge" style="padding: 7px 11px; border-radius: 15px;">
+                    <svg width="46" height="30" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
+                </div>
+                <div class="brand-title-wrap">
+                    <span class="brand-title-main">Arvind Stone Crusher</span>
+                    <span class="brand-title-sub">Inventory & Operations Portal</span>
+                </div>
             </div>
             <div id="staff-login-box">
                 <h3 class="form-title">Welcome back</h3>
-                <p class="form-subtitle">Sign in to your staff workspace</p>
+                <p class="form-subtitle">Sign in to your Arvind Stone Crusher staff workspace</p>
                 <input type="text" id="staff-user" class="z-input" placeholder="Username">
                 <input type="password" id="staff-pass" class="z-input" placeholder="Password">
                 <button class="z-btn-primary" onclick="attemptLogin('staff')">Log in</button>
@@ -392,7 +500,7 @@
             </div>
             <div id="staff-register-box" style="display: none;">
                 <h3 class="form-title">Let's get started</h3>
-                <p class="form-subtitle">Your inventory data is synced securely in the cloud.</p>
+                <p class="form-subtitle">Your Arvind Stone Crusher data is synced securely in the cloud.</p>
                 <input type="text" id="reg-user" class="z-input" placeholder="Choose Username">
                 <input type="password" id="reg-pass" class="z-input" placeholder="Choose Password">
                 <button class="z-btn-primary" onclick="registerStaff()">Create your account</button>
@@ -415,10 +523,10 @@
         <div style="display: flex; align-items: center; gap: 14px;">
             <button class="menu-toggle-btn" onclick="toggleMobileDrawer()"><i class="fa-solid fa-bars"></i></button>
             <h1>
-                <span class="logo-icon-glass" style="width: 34px; height: 34px; font-size: 16px; border-radius: 10px;">
-                    <i class="fa-solid fa-boxes-stacked"></i>
+                <span class="asc-logo-badge">
+                    <svg width="38" height="25" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
                 </span>
-                Industry
+                <span>Arvind Stone Crusher</span>
             </h1>
         </div>
 
@@ -497,7 +605,7 @@
         <div id="tab-analytics" class="tab-content">
             <div class="card" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h2 style="font-size: 18px; border: none; padding: 0; margin: 0 0 6px 0;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Stock History & Financial Analytics</h2>
+                    <h2 style="font-size: 18px; border: none; padding: 0; margin: 0 0 6px 0;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Arvind Stone Crusher — Stock & Financial Analytics</h2>
                     <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Real-time valuation, consumption velocity, and category spend breakdown.</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
@@ -515,7 +623,7 @@
                         <option value="Other">Other</option>
                     </select>
                     <button class="btn-blue" onclick="loadAnalyticsCharts()" style="padding: 10px 14px;"><i class="fa-solid fa-rotate-right"></i></button>
-                    <button class="btn-green" onclick="exportToCSV('analytics-breakdown-table', 'Analytics_Valuation_Report')" style="width: auto; padding: 10px 16px;"><i class="fa-solid fa-file-csv"></i> Export Report</button>
+                    <button class="btn-green" onclick="exportToCSV('analytics-breakdown-table', 'Arvind_Stone_Crusher_Valuation_Report')" style="width: auto; padding: 10px 16px;"><i class="fa-solid fa-file-csv"></i> Export Report</button>
                 </div>
             </div>
 
@@ -608,7 +716,7 @@
                     <input type="text" id="history-search" class="search-bar" onkeyup="filterHistory()" placeholder="🔍 Search history...">
                     <div>
                         <button class="btn-blue" onclick="loadHistory()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
-                        <button class="btn-green" onclick="exportToCSV('history-table', 'History')" style="width: auto; display: inline-block; padding: 11px 16px;"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                        <button class="btn-green" onclick="exportToCSV('history-table', 'Arvind_Stone_Crusher_History')" style="width: auto; display: inline-block; padding: 11px 16px;"><i class="fa-solid fa-file-csv"></i> CSV</button>
                     </div>
                 </div>
                 <table><thead><tr><th>Date</th><th>Category</th><th>Item</th><th>Supplier</th><th>Location</th><th>Qty</th><th>Total (Rs)</th></tr></thead><tbody id="history-table"></tbody></table>
@@ -641,7 +749,7 @@
             <div class="grid-2">
                 <div class="card">
                     <h2><i class="fa-brands fa-whatsapp" style="color: #007AFF;"></i> WhatsApp Alerts</h2>
-                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Set the number to receive automated low stock alerts.</p>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Set the number to receive automated low stock alerts for Arvind Stone Crusher.</p>
                     <div class="input-group">
                         <input type="text" id="admin-wa-input" placeholder="whatsapp:+919876543210">
                         <button class="btn-green" onclick="saveAdminWhatsApp()" style="width: 140px;"><i class="fa-solid fa-check"></i> Save</button>
@@ -778,7 +886,7 @@
             document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
             document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'staff' ? 'none' : 'flex');
             
-            if (window.innerWidth > 960) { document.querySelector('.desktop-logout').style.display = 'block'; }
+            if (window.innerWidth > 1020) { document.querySelector('.desktop-logout').style.display = 'block'; }
             
             loadDashboardData(); loadSuppliers(); loadStockKPI(); loadAdminWhatsApp();
         } else {
@@ -794,7 +902,7 @@
         if(data.success) { 
             localStorage.setItem('userRole', data.role); 
             localStorage.setItem('username', u);
-            showNotification(`Welcome back!`); 
+            showNotification(`Welcome to Arvind Stone Crusher!`); 
             checkAuth(); 
         } 
         else showNotification(data.message, true);
@@ -1056,7 +1164,7 @@
                     labels: catLabels.length ? catLabels : ['No Spend Data'],
                     datasets: [{
                         data: catLabels.length ? Object.values(catSpend) : [1],
-                        backgroundColor: ['#007AFF', '#38BDF8', '#475569', '#1D4ED8', '#94A3B8', '#0284C7'],
+                        backgroundColor: ['#007AFF', '#38BDF8', '#475569', '#102A4C', '#94A3B8', '#0284C7'],
                         borderWidth: 2,
                         borderColor: 'rgba(255,255,255,0.6)'
                     }]
