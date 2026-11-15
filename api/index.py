@@ -31,7 +31,7 @@ def check_low_stock_and_alert(data):
     low_stock_items = [item for item, qty in stock.items() if qty < 50]
     admin_phone = data.get("admin_whatsapp")
     if low_stock_items and admin_phone:
-        msg = f"🚨 *Industry Alert: Low Stock Warning!*\n\nThe following items have dropped below 50 units:\n• " + "\n• ".join(low_stock_items) + "\n\nPlease restock soon!"
+        msg = f"🚨 *Arvind Stone Crusher: Low Stock Warning!*\n\nThe following items have dropped below 50 units:\n• " + "\n• ".join(low_stock_items) + "\n\nPlease restock soon!"
         send_whatsapp_alert(msg, admin_phone)
 
 def load_data():
