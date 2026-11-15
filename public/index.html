@@ -18,7 +18,6 @@
             --text-main: #0F172A; --text-muted: #64748B; --border: #E2E8F0; --input-bg: #F8FAFC;
         }
         
-        /* Fixed html & body background sync to prevent white gaps at the bottom in dark mode */
         html {
             height: 100%;
             background: var(--bg);
@@ -168,7 +167,7 @@
         <button class="drawer-item" onclick="selectTabMobile('tab-stock')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-cubes"></i> Stock</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
         <button class="drawer-item admin-only" onclick="selectTabMobile('tab-analytics')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-chart-line"></i> Analytics</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
         <button class="drawer-item admin-only" onclick="selectTabMobile('tab-history')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-clock-rotate-left"></i> History</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
-        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-suppliers')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-truck-field"></i> Suppliers</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-suppliers')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-truck-field"></i> Suppliers & Settings</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
     </div>
     <div style="padding: 20px; border-top: 1px solid var(--border);">
         <button class="logout-btn" onclick="logout()" style="width: 100%; padding: 12px;"><i class="fa-solid fa-power-off"></i> Logout</button>
@@ -351,19 +350,36 @@
         </div>
 
         <div id="tab-suppliers" class="tab-content">
-            <div class="card" style="background: var(--input-bg);">
-                <h2><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> WhatsApp Alert Configuration</h2>
-                <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Set the WhatsApp number to receive automated low stock alerts (format: whatsapp:+919876543210)</p>
-                <div class="input-group">
-                    <input type="text" id="admin-wa-input" placeholder="whatsapp:+919876543210">
-                    <button class="btn-green" onclick="saveAdminWhatsApp()" style="width: 220px;"><i class="fa-solid fa-check"></i> Save Number</button>
+            
+            <div class="grid-2">
+                <!-- Admin WhatsApp Config -->
+                <div class="card" style="background: var(--input-bg);">
+                    <h2><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> WhatsApp Alerts</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Set the number to receive automated low stock alerts.</p>
+                    <div class="input-group">
+                        <input type="text" id="admin-wa-input" placeholder="whatsapp:+919876543210">
+                        <button class="btn-green" onclick="saveAdminWhatsApp()" style="width: 140px;"><i class="fa-solid fa-check"></i> Save</button>
+                    </div>
+                </div>
+
+                <!-- Create New Admin Account -->
+                <div class="card" style="background: var(--input-bg);">
+                    <h2><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Add Admin</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Create a new administrator account.</p>
+                    <div class="input-group">
+                        <input type="text" id="new-admin-user" placeholder="Username">
+                        <input type="password" id="new-admin-pass" placeholder="Password">
+                    </div>
+                    <button class="btn-blue" onclick="createAdminAccount()" style="width: 100%;"><i class="fa-solid fa-user-plus"></i> Create Admin</button>
                 </div>
             </div>
+
             <div class="card" style="background: var(--input-bg);">
                 <h2><i class="fa-solid fa-plus"></i> Add New Supplier</h2>
                 <div class="grid-2"><input type="text" id="new-sup-name" placeholder="Supplier Name"><input type="text" id="new-sup-loc" placeholder="Location"></div>
                 <button class="btn-green" onclick="addSupplierBtn()" style="width: 200px;"><i class="fa-solid fa-check"></i> Add Supplier</button>
             </div>
+            
             <div class="card">
                 <h2><i class="fa-solid fa-building-user"></i> Supplier List</h2>
                 <button class="btn-blue" onclick="loadSuppliers()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
@@ -501,6 +517,29 @@
         let res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
         let data = await res.json();
         if(data.success) { showNotification("Account created!"); toggleForm('staff'); } else showNotification(data.message, true);
+    }
+
+    // Function to create a new admin from the dashboard
+    async function createAdminAccount() {
+        let u = document.getElementById('new-admin-user').value;
+        let p = document.getElementById('new-admin-pass').value;
+        
+        if(!u || !p) return showNotification("Please enter a username and password.", true);
+        
+        let res = await fetch('/api/create_admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p, role: currentRole })
+        });
+        
+        let data = await res.json();
+        if(data.success) {
+            showNotification(data.message || "Admin account created successfully!");
+            document.getElementById('new-admin-user').value = '';
+            document.getElementById('new-admin-pass').value = '';
+        } else {
+            showNotification(data.message || "Failed to create admin.", true);
+        }
     }
 
     function logout() { localStorage.removeItem('userRole'); currentRole = null; document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); openTab('tab-dashboard', document.querySelector('.tab-btn')); checkAuth(); }
