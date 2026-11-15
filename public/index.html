@@ -247,6 +247,7 @@
     </div>
 
     <div class="container">
+        <!-- DASHBOARD TAB -->
         <div id="tab-dashboard" class="tab-content active">
             <div class="kpi-grid">
                 <div class="kpi-card">
@@ -300,23 +301,99 @@
             </div>
         </div>
 
+        <!-- UPGRADED ANALYTICS TAB -->
         <div id="tab-analytics" class="tab-content">
-            <div class="card" style="margin-bottom: 24px;">
-                <h2 style="font-size: 18px;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Stock History & Advanced Analytics</h2>
-                <p style="font-size: 13px; color: var(--text-muted); margin-top: -10px;">Comprehensive breakdown of consumption patterns and inventory category distribution.</p>
+            <!-- Header & Controls -->
+            <div class="card" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h2 style="font-size: 18px; border: none; padding: 0; margin: 0 0 6px 0;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Stock History & Financial Analytics</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Real-time valuation, consumption velocity, and category spend breakdown.</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="analytics-time-filter" onchange="loadAnalyticsCharts()" style="width: auto; margin: 0; padding: 10px 14px;">
+                        <option value="all">All Time</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="7">Last 7 Days</option>
+                    </select>
+                    <select id="analytics-cat-filter" onchange="loadAnalyticsCharts()" style="width: auto; margin: 0; padding: 10px 14px;">
+                        <option value="all">All Categories</option>
+                        <option value="Fuel">Fuel</option>
+                        <option value="Spare Parts">Spare Parts</option>
+                        <option value="Raw Material">Raw Material</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <button class="btn-blue" onclick="loadAnalyticsCharts()" style="padding: 10px 14px;"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button class="btn-green" onclick="exportToCSV('analytics-breakdown-table', 'Analytics_Valuation_Report')" style="width: auto; padding: 10px 16px;"><i class="fa-solid fa-file-csv"></i> Export Report</button>
+                </div>
             </div>
+
+            <!-- Analytics KPI Row -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Total Procurement Spend</h4><h2 id="an-total-spend">Rs 0</h2></div>
+                    <div class="kpi-icon" style="background: #EEF2FF; color: #4F46E5;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Est. Active Stock Value</h4><h2 id="an-stock-value" style="color: var(--success);">Rs 0</h2></div>
+                    <div class="kpi-icon" style="background: #ECFDF5; color: var(--success);"><i class="fa-solid fa-vault"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Stock Utilization Rate</h4><h2 id="an-burn-rate">0%</h2></div>
+                    <div class="kpi-icon" style="background: #FFFBEB; color: var(--warning);"><i class="fa-solid fa-fire-flame-curved"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Most Used Item</h4><h2 id="an-top-item" style="font-size: 18px;">N/A</h2></div>
+                    <div class="kpi-icon" style="background: #FEF2F2; color: var(--danger);"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                </div>
+            </div>
+
+            <!-- Row 1 Charts: Timeline & Category Spend -->
             <div class="grid-2">
                 <div class="card">
-                    <h2><i class="fa-solid fa-wave-square"></i> Monthly Consumption Trend</h2>
+                    <h2><i class="fa-solid fa-arrows-left-right"></i> Stock Inflow vs. Usage Over Time (Units)</h2>
                     <div class="chart-container"><canvas id="analyticsLineChart"></canvas></div>
                 </div>
                 <div class="card">
-                    <h2><i class="fa-solid fa-chart-pie"></i> Stock by Category</h2>
+                    <h2><i class="fa-solid fa-chart-pie"></i> Spend Distribution by Category (Rs)</h2>
                     <div class="chart-container"><canvas id="analyticsDonutChart"></canvas></div>
                 </div>
             </div>
+
+            <!-- Row 2 Charts: Purpose Breakdown & Top Items -->
+            <div class="grid-2">
+                <div class="card">
+                    <h2><i class="fa-solid fa-industry"></i> Usage Breakdown by Purpose / Sector</h2>
+                    <div class="chart-container"><canvas id="analyticsPurposeChart"></canvas></div>
+                </div>
+                <div class="card">
+                    <h2><i class="fa-solid fa-ranking-star"></i> Top Items by Remaining Quantity</h2>
+                    <div class="chart-container"><canvas id="analyticsTopItemsChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Row 3: Detailed Item Burn-Rate & Valuation Table -->
+            <div class="card">
+                <h2><i class="fa-solid fa-table-list"></i> Item-Level Consumption & Valuation Breakdown</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Purchased</th>
+                            <th>Consumed</th>
+                            <th>Remaining</th>
+                            <th>Utilization %</th>
+                            <th>Avg Unit Cost</th>
+                            <th>Est. Stock Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analytics-breakdown-table"></tbody>
+                </table>
+            </div>
         </div>
 
+        <!-- STOCK TAB -->
         <div id="tab-stock" class="tab-content">
             <div class="card">
                 <h2><i class="fa-solid fa-layer-group"></i> Current Stock</h2>
@@ -336,6 +413,7 @@
             </div>
         </div>
 
+        <!-- HISTORY TAB -->
         <div id="tab-history" class="tab-content">
             <div class="card">
                 <h2><i class="fa-solid fa-file-invoice"></i> Purchase History</h2>
@@ -350,7 +428,7 @@
             </div>
         </div>
 
-        <!-- NEW USERS & LOGS TAB -->
+        <!-- USERS & LOGS TAB -->
         <div id="tab-users" class="tab-content">
             <div class="grid-2">
                 <div class="card">
@@ -371,6 +449,7 @@
             </div>
         </div>
 
+        <!-- SUPPLIERS & SETTINGS TAB -->
         <div id="tab-suppliers" class="tab-content">
             <div class="grid-2">
                 <div class="card" style="background: var(--input-bg);">
@@ -503,7 +582,8 @@
         if (formType === 'admin') document.getElementById('admin-login-box').style.display = 'block';
     }
 
-    let currentRole = null, usageChartInstance = null, analyticsLineInstance = null, analyticsDonutInstance = null;
+    let currentRole = null, usageChartInstance = null, analyticsLineInstance = null, analyticsDonutInstance = null, analyticsPurposeInstance = null, analyticsTopItemsInstance = null;
+    
     function checkAuth() {
         let role = localStorage.getItem('userRole');
         if (role) {
@@ -526,7 +606,7 @@
         let data = await res.json();
         if(data.success) { 
             localStorage.setItem('userRole', data.role); 
-            localStorage.setItem('username', u); // SAVE USERNAME
+            localStorage.setItem('username', u);
             showNotification(`Welcome back!`); 
             checkAuth(); 
         } 
@@ -539,7 +619,7 @@
         let res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
         let data = await res.json();
         if(data.success) { 
-            localStorage.setItem('username', u); // SAVE USERNAME
+            localStorage.setItem('username', u);
             showNotification("Account created!"); 
             toggleForm('staff'); 
         } else showNotification(data.message, true);
@@ -658,36 +738,229 @@
     }
 
     async function loadAnalyticsCharts() {
-        let usageRes = await fetch('/api/monthly_usage'), usageData = await usageRes.json();
-        let lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
-        if (analyticsLineInstance) analyticsLineInstance.destroy();
-        analyticsLineInstance = new Chart(lineCtx, {
-            type: 'line',
-            data: {
-                labels: usageData.labels.length ? usageData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
-                datasets: [{ label: 'Current Consumption', data: usageData.data.length ? usageData.data : [12, 19, 8, 15], borderColor: '#4F46E5', backgroundColor: 'rgba(79, 70, 229, 0.1)', fill: true, tension: 0.3 }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
+        try {
+            let [histRes, logRes] = await Promise.all([
+                fetch('/api/history'),
+                fetch('/api/activity_log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: currentRole || 'admin' })
+                })
+            ]);
 
-        let catRes = await fetch('/api/category_distribution'), catData = await catRes.json();
-        let donutCtx = document.getElementById('analyticsDonutChart').getContext('2d');
-        if (analyticsDonutInstance) analyticsDonutInstance.destroy();
-        analyticsDonutInstance = new Chart(donutCtx, {
-            type: 'doughnut',
-            data: {
-                labels: catData.labels.length ? catData.labels : ['Fuel', 'Spare Parts', 'Raw Material', 'Tools'],
-                datasets: [{ data: catData.data.length ? catData.data : [35, 25, 20, 20], backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'] }]
-            },
-            options: { responsive: true, maintainAspectRatio: false }
-        });
+            let purchases = await histRes.json();
+            let allLogs = await logRes.json();
+            let usages = Array.isArray(allLogs) ? allLogs.filter(l => l.type === 'Usage') : [];
+
+            let daysFilter = document.getElementById('analytics-time-filter')?.value || 'all';
+            let catFilter = document.getElementById('analytics-cat-filter')?.value || 'all';
+            let cutoffDate = null;
+            if (daysFilter !== 'all') {
+                cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - parseInt(daysFilter));
+            }
+
+            let itemMeta = {};
+            purchases.forEach(p => {
+                let name = (p.item || 'Unknown').trim();
+                if (!itemMeta[name]) itemMeta[name] = { category: p.category || 'Uncategorized', unit: p.unit || 'units', totalCost: 0, totalQty: 0 };
+                itemMeta[name].totalCost += parseFloat(p.price || 0);
+                itemMeta[name].totalQty += parseFloat(p.quantity || 0);
+            });
+
+            let filteredPurchases = purchases.filter(p => {
+                let passDate = !cutoffDate || (p.date && new Date(p.date) >= cutoffDate);
+                let passCat = catFilter === 'all' || (p.category || 'Uncategorized') === catFilter;
+                return passDate && passCat;
+            });
+
+            let filteredUsages = usages.filter(u => {
+                let itemCat = itemMeta[u.item]?.category || 'Uncategorized';
+                let passDate = !cutoffDate || (u.date && new Date(u.date) >= cutoffDate);
+                let passCat = catFilter === 'all' || itemCat === catFilter;
+                return passDate && passCat;
+            });
+
+            let totalSpend = 0, totalPurchasedUnits = 0, totalUsedUnits = 0;
+            let itemStats = {};
+
+            filteredPurchases.forEach(p => {
+                let name = p.item || 'Unknown';
+                let qty = parseFloat(p.quantity || 0);
+                let price = parseFloat(p.price || 0);
+                totalSpend += price;
+                totalPurchasedUnits += qty;
+
+                if (!itemStats[name]) itemStats[name] = { purchased: 0, used: 0, spend: 0, category: p.category || 'Uncategorized', unit: p.unit || '' };
+                itemStats[name].purchased += qty;
+                itemStats[name].spend += price;
+            });
+
+            filteredUsages.forEach(u => {
+                let name = u.item || 'Unknown';
+                let qty = parseFloat(u.qty || 0);
+                totalUsedUnits += qty;
+
+                if (!itemStats[name]) {
+                    let meta = itemMeta[name] || { category: 'Uncategorized', unit: '' };
+                    itemStats[name] = { purchased: 0, used: 0, spend: 0, category: meta.category, unit: meta.unit };
+                }
+                itemStats[name].used += qty;
+            });
+
+            let estStockValue = 0, topUsedItem = 'None', maxUsedQty = 0;
+            Object.entries(itemStats).forEach(([name, st]) => {
+                let rem = Math.max(0, st.purchased - st.used);
+                let avgUnitCost = st.purchased > 0 ? (st.spend / st.purchased) : 0;
+                estStockValue += rem * avgUnitCost;
+                if (st.used > maxUsedQty) {
+                    maxUsedQty = st.used;
+                    topUsedItem = `${name} (${st.used} ${st.unit})`;
+                }
+            });
+
+            let utilizationRate = totalPurchasedUnits > 0 ? ((totalUsedUnits / totalPurchasedUnits) * 100).toFixed(1) : 0;
+
+            document.getElementById('an-total-spend').innerText = `Rs ${totalSpend.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+            document.getElementById('an-stock-value').innerText = `Rs ${estStockValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+            document.getElementById('an-burn-rate').innerText = `${utilizationRate}%`;
+            document.getElementById('an-top-item').innerText = topUsedItem;
+
+            // Chart 1: Date-wise Purchase vs Usage Timeline
+            let dateMap = {};
+            filteredPurchases.forEach(p => {
+                let d = p.date || 'Unknown';
+                if (!dateMap[d]) dateMap[d] = { bought: 0, used: 0 };
+                dateMap[d].bought += parseFloat(p.quantity || 0);
+            });
+            filteredUsages.forEach(u => {
+                let d = u.date || 'Unknown';
+                if (!dateMap[d]) dateMap[d] = { bought: 0, used: 0 };
+                dateMap[d].used += parseFloat(u.qty || 0);
+            });
+
+            let sortedDates = Object.keys(dateMap).sort();
+            let lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
+            if (analyticsLineInstance) analyticsLineInstance.destroy();
+            analyticsLineInstance = new Chart(lineCtx, {
+                type: 'bar',
+                data: {
+                    labels: sortedDates.length ? sortedDates : ['No Data'],
+                    datasets: [
+                        { label: 'Purchased (Inflow)', data: sortedDates.map(d => dateMap[d].bought), backgroundColor: '#10B981', borderRadius: 6 },
+                        { label: 'Consumed (Outflow)', data: sortedDates.map(d => dateMap[d].used), backgroundColor: '#EF4444', borderRadius: 6 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Chart 2: Spend by Category (Rs)
+            let catSpend = {};
+            filteredPurchases.forEach(p => {
+                let c = p.category || 'Uncategorized';
+                catSpend[c] = (catSpend[c] || 0) + parseFloat(p.price || 0);
+            });
+            let catLabels = Object.keys(catSpend);
+            let donutCtx = document.getElementById('analyticsDonutChart').getContext('2d');
+            if (analyticsDonutInstance) analyticsDonutInstance.destroy();
+            analyticsDonutInstance = new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels.length ? catLabels : ['No Spend Data'],
+                    datasets: [{
+                        data: catLabels.length ? Object.values(catSpend) : [1],
+                        backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: { label: ctx => ` ${ctx.label}: Rs ${Number(ctx.raw).toLocaleString('en-IN')}` }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Usage by Purpose
+            let usageRes = await fetch('/api/monthly_usage'), usageByPurpose = await usageRes.json();
+            let purposeCtx = document.getElementById('analyticsPurposeChart').getContext('2d');
+            if (analyticsPurposeInstance) analyticsPurposeInstance.destroy();
+            analyticsPurposeInstance = new Chart(purposeCtx, {
+                type: 'bar',
+                data: {
+                    labels: usageByPurpose.labels.length ? usageByPurpose.labels : ['No Usage Logged'],
+                    datasets: [{
+                        label: 'Units Consumed',
+                        data: usageByPurpose.data.length ? usageByPurpose.data : [0],
+                        backgroundColor: '#4F46E5',
+                        borderRadius: 6
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } } }
+            });
+
+            // Chart 4: Top Items by Remaining Stock
+            let itemEntries = Object.entries(itemStats).map(([name, st]) => ({
+                name,
+                remaining: Math.max(0, st.purchased - st.used)
+            })).sort((a, b) => b.remaining - a.remaining).slice(0, 6);
+
+            let topCtx = document.getElementById('analyticsTopItemsChart').getContext('2d');
+            if (analyticsTopItemsInstance) analyticsTopItemsInstance.destroy();
+            analyticsTopItemsInstance = new Chart(topCtx, {
+                type: 'bar',
+                data: {
+                    labels: itemEntries.length ? itemEntries.map(i => i.name) : ['No Stock'],
+                    datasets: [{
+                        label: 'Remaining Units',
+                        data: itemEntries.length ? itemEntries.map(i => i.remaining) : [0],
+                        backgroundColor: '#F59E0B',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Populate Item Breakdown Table
+            let tbody = document.getElementById('analytics-breakdown-table');
+            let rowsHtml = Object.entries(itemStats).map(([name, st]) => {
+                let rem = st.purchased - st.used;
+                let util = st.purchased > 0 ? Math.min(100, ((st.used / st.purchased) * 100)).toFixed(1) : 0;
+                let unitCost = st.purchased > 0 ? (st.spend / st.purchased) : 0;
+                let val = Math.max(0, rem) * unitCost;
+                let barColor = util > 80 ? '#EF4444' : (util > 50 ? '#F59E0B' : '#10B981');
+
+                return `<tr>
+                    <td><strong>${name}</strong></td>
+                    <td><span style="background:var(--input-bg); border:1px solid var(--border); padding:3px 8px; border-radius:10px; font-size:12px;">${st.category}</span></td>
+                    <td>${st.purchased.toFixed(2)} ${st.unit}</td>
+                    <td>${st.used.toFixed(2)} ${st.unit}</td>
+                    <td style="font-weight:600; color:${rem <= 0 ? 'var(--danger)' : 'inherit'}">${rem.toFixed(2)} ${st.unit}</td>
+                    <td style="min-width:140px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden;">
+                                <div style="width:${util}%; height:100%; background:${barColor};"></div>
+                            </div>
+                            <span style="font-size:12px; font-weight:600;">${util}%</span>
+                        </div>
+                    </td>
+                    <td>Rs ${unitCost.toFixed(2)}</td>
+                    <td><strong>Rs ${val.toFixed(2)}</strong></td>
+                </tr>`;
+            }).join('');
+
+            tbody.innerHTML = rowsHtml || `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No inventory data matching the current filter.</td></tr>`;
+
+        } catch (err) {
+            console.error("Analytics Load Error:", err);
+        }
     }
 
-    // NEW FUNCTION TO LOAD USERS AND LOGS
     async function loadUsersAndLogs() {
         if(currentRole !== 'admin') return;
 
-        // Fetch User List
         let uRes = await fetch('/api/users_list', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role: currentRole })
@@ -700,7 +973,6 @@
             </tr>`).join('');
         }
 
-        // Fetch Activity Logs
         let logRes = await fetch('/api/activity_log', {
             method: 'POST', headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ role: currentRole })
