@@ -1,323 +1,1059 @@
-from flask import Flask, request, jsonify
-import json
-import urllib.request
-from datetime import datetime
-import os
-from twilio.rest import Client
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, viewport-fit=cover">
+    <title>Industry Inventory Manager</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-app = Flask(__name__)
+    <style>
+        :root { 
+            --primary: #4F46E5; --primary-hover: #4338CA; --success: #10B981; 
+            --danger: #EF4444; --warning: #F59E0B; --bg: #F8FAFC; --card-bg: #FFFFFF; 
+            --text-main: #0F172A; --text-muted: #64748B; --border: #E2E8F0; --input-bg: #F8FAFC;
+        }
+        
+        html {
+            height: 100%;
+            background: var(--bg);
+            transition: background 0.3s;
+        }
 
-FIREBASE_URL = "https://industry-e1b0b-default-rtdb.firebaseio.com/.json"
+        body {
+            font-family: 'Inter', system-ui, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 0; 
+            min-height: 100%;
+            color: var(--text-main); 
+            transition: background 0.3s, color 0.3s;
+            touch-action: pan-x pan-y;
+            overscroll-behavior-y: none;
+        }
+        
+        #login-screen { background: inherit; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 15px; box-sizing: border-box; }
+        .modern-login-wrapper { display: flex; width: 100%; max-width: 950px; min-height: 550px; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.05); border: 1px solid var(--border); background: var(--card-bg); }
+        .brand-panel { flex: 1; background: linear-gradient(135deg, #F6C844 0%, #F59E0B 100%); padding: 40px; position: relative; color: #1F2937; display: flex; flex-direction: column; justify-content: center; overflow: hidden; }
+        .quote-mark { font-size: 60px; font-family: Georgia, serif; line-height: 0; margin-top: 30px; color: #374151; }
+        .brand-quote { font-size: 26px; font-weight: 500; line-height: 1.3; margin-bottom: 30px; position: relative; z-index: 2; font-family: Georgia, serif; }
+        .testimonial { display: flex; align-items: center; gap: 15px; position: relative; z-index: 2; }
+        .testimonial .avatar { width: 48px; height: 48px; background: #1F2937; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+        .bg-boxes { position: absolute; bottom: -40px; right: -20px; font-size: 280px; color: rgba(0,0,0,0.06); z-index: 1; transform: rotate(-5deg); }
+        .form-panel { flex: 1.2; background: var(--card-bg); padding: 40px; display: flex; flex-direction: column; justify-content: center; overflow-y: auto; }
+        .logo-header { display: flex; align-items: center; margin-bottom: 25px; }
+        .form-title { font-size: 24px; margin: 0 0 5px 0; color: var(--text-main); font-weight: 700; }
+        .form-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; }
+        .z-input { width: 100%; padding: 12px 16px; margin-bottom: 12px; background: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 14px; color: var(--text-main); }
+        .z-input:focus { background: var(--card-bg); border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+        .z-btn-primary { background: #E1261C; color: white; border: none; width: 100%; padding: 12px; border-radius: 8px; font-weight: 600; font-size: 15px; cursor: pointer; }
+        .z-btn-primary:hover { background: #C81E15; }
+        .divider { text-align: center; margin: 20px 0; position: relative; }
+        .divider::before { content: ""; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: var(--border); z-index: 1; }
+        .divider span { background: var(--card-bg); padding: 0 15px; color: var(--text-muted); font-size: 12px; position: relative; z-index: 2; }
+        .social-btn { background: var(--card-bg); border: 1px solid var(--border); padding: 12px; width: 100%; border-radius: 8px; cursor: pointer; color: var(--text-main); font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .switch-form { text-align: center; font-size: 13px; margin-top: 20px; color: var(--text-muted); }
+        .switch-form span { color: var(--primary); font-weight: 600; cursor: pointer; }
 
-TWILIO_ACCOUNT_SID = os.environ.get("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
-TWILIO_WHATSAPP_FROM = "whatsapp:+14155238886"
+        #app-screen { display: none; }
+        .navbar { background: var(--card-bg); padding: 0 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100; height: 70px; }
+        .navbar h1 { color: var(--primary); font-size: 20px; margin: 0; display: flex; align-items: center; gap: 10px; font-weight: 700; }
+        
+        .nav-links-desktop { display: flex; gap: 5px; height: 100%; }
+        .menu-toggle-btn { display: none; background: none; border: none; font-size: 22px; color: var(--text-main); cursor: pointer; }
 
-def send_whatsapp_alert(message_body, phone_number):
-    if not phone_number: return
-    try:
-        client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-        client.messages.create(body=message_body, from_=TWILIO_WHATSAPP_FROM, to=phone_number)
-    except Exception as e:
-        print(f"Twilio WhatsApp Error: {e}")
+        .mobile-drawer-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.5); z-index: 1000; backdrop-filter: blur(2px); }
+        .mobile-drawer { position: fixed; top: 0; right: -300px; width: 280px; height: 100%; background: var(--card-bg); z-index: 1001; box-shadow: -5px 0 25px rgba(0,0,0,0.1); transition: right 0.3s ease-in-out; display: flex; flex-direction: column; }
+        .mobile-drawer.open { right: 0; }
+        .drawer-header { padding: 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .drawer-links { display: flex; flex-direction: column; padding: 10px 0; overflow-y: auto; flex: 1; }
+        .drawer-item { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; color: var(--text-main); text-decoration: none; font-size: 15px; font-weight: 600; border-bottom: 1px solid var(--border); background: none; width: 100%; text-align: left; cursor: pointer; transition: 0.2s; }
+        .drawer-item:hover { background: var(--bg); color: var(--primary); }
+        .drawer-item i { width: 24px; color: var(--primary); }
 
-def check_low_stock_and_alert(data):
-    stock = {}
-    for p in data["purchases"]:
-        stock[p["item"]] = stock.get(p["item"], 0) + p["quantity"]
-    for u in data["usage"]:
-        if u["item"] in stock: stock[u["item"]] -= u["quantity"]
-            
-    low_stock_items = [item for item, qty in stock.items() if qty < 50]
-    admin_phone = data.get("admin_whatsapp")
-    if low_stock_items and admin_phone:
-        msg = f"🚨 *Industry Alert: Low Stock Warning!*\n\nThe following items have dropped below 50 units:\n• " + "\n• ".join(low_stock_items) + "\n\nPlease restock soon!"
-        send_whatsapp_alert(msg, admin_phone)
+        .tab-btn { background: none; border: none; padding: 0 18px; font-size: 14px; font-weight: 600; color: var(--text-muted); cursor: pointer; border-bottom: 3px solid transparent; display: flex; align-items: center; gap: 8px; height: 100%; }
+        .tab-btn:hover, .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); }
+        .logout-btn { background: var(--danger); color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 13px; }
 
-def load_data():
-    default_data = {
-        "purchases": [], "usage": [], "suppliers": [], "barcodes": {},
-        "admin_whatsapp": "",
-        "users": {"admin": {"password": "admin123", "role": "admin"}}
+        .container { max-width: 1280px; margin: 30px auto; padding: 0 24px; box-sizing: border-box; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 24px; }
+        .kpi-card { background: var(--card-bg); padding: 20px 24px; border-radius: 14px; border: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+        .kpi-info h4 { margin: 0; font-size: 13px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; }
+        .kpi-info h2 { margin: 6px 0 0 0; font-size: 24px; color: var(--text-main); font-weight: 700; }
+        .kpi-icon { width: 48px; height: 48px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+
+        .dashboard-layout { display: grid; grid-template-columns: 1.8fr 1fr; gap: 24px; align-items: start; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .card { background: var(--card-bg); padding: 24px; border-radius: 16px; border: 1px solid var(--border); margin-bottom: 24px; box-sizing: border-box; overflow-x: auto; }
+        .card h2 { margin-top: 0; font-size: 16px; border-bottom: 1px solid var(--border); padding-bottom: 14px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
+
+        input, select { width: 100%; padding: 12px 14px; margin-bottom: 14px; background-color: var(--input-bg); border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 14px; color: var(--text-main); }
+        input:focus, select:focus { background-color: var(--card-bg); border-color: var(--primary); outline: none; box-shadow: 0 0 0 3px rgba(79,70,229,0.12); }
+        .btn-green { background: linear-gradient(135deg, #10B981, #059669); color: white; border: none; padding: 12px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; width: 100%; }
+        .btn-blue { background: linear-gradient(135deg, #4F46E5, #4338CA); color: white; cursor: pointer; font-weight: 600; padding: 11px 16px; border: none; border-radius: 8px; }
+        .btn-red { background: var(--danger); color: white; cursor: pointer; font-weight: 600; padding: 6px 12px; border: none; border-radius: 6px; font-size: 12px; }
+        .input-group { display: flex; gap: 10px; align-items: flex-start; margin-bottom: 14px; }
+        .input-group input { margin-bottom: 0; }
+        .search-bar { padding: 10px 16px; border-radius: 8px; width: 100%; max-width: 320px; border: 1px solid var(--border); background: var(--input-bg); margin-bottom: 20px; color: var(--text-main); }
+
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th, td { border-bottom: 1px solid var(--border); padding: 14px 16px; text-align: left; }
+        th { color: var(--text-muted); font-weight: 600; background: var(--input-bg); text-transform: uppercase; font-size: 11px; }
+        tr:hover { background: var(--input-bg); }
+        
+        #u-purpose-other, #p-supplier-other { display: none; }
+        .chart-container { position: relative; height: 260px; width: 100%; }
+        .stat-box { background: var(--input-bg); padding: 16px; border-radius: 10px; text-align: center; margin-top: 15px; border: 1px solid var(--border); }
+        .stat-box h3 { margin: 0; color: var(--primary); font-size: 24px; font-weight: 700; }
+        .stat-box p { margin: 4px 0 0 0; color: var(--text-muted); font-size: 12px; font-weight: 600; text-transform: uppercase; }
+        .badge { padding: 5px 10px; border-radius: 20px; font-size: 11px; font-weight: 700; color: white; text-transform: uppercase; }
+        .badge-warning { background: var(--warning); }
+        .badge-danger { background: var(--danger); }
+        .badge-success { background: var(--success); }
+
+        #scanner-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,23,42,0.6); z-index: 1000; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
+        .scanner-box { background: var(--card-bg); padding: 24px; border-radius: 16px; width: 90%; max-width: 400px; text-align: center; }
+        #reader { width: 100%; margin-bottom: 15px; border-radius: 8px; overflow: hidden; }
+
+        @media (max-width: 900px) {
+            .nav-links-desktop { display: none; }
+            .menu-toggle-btn { display: block; }
+            .navbar { padding: 0 16px; }
+            .dashboard-layout, .grid-2, .kpi-grid { grid-template-columns: 1fr; }
+            .modern-login-wrapper { flex-direction: column; height: auto; max-width: 100%; border-radius: 0; box-shadow: none; border: none; }
+            .brand-panel { display: none; }
+            .form-panel { padding: 20px 15px; }
+            #user-greeting { display: none; }
+            table { display: block; overflow-x: auto; white-space: nowrap; }
+        }
+
+        body.dark-mode { 
+            --bg: #0F172A; 
+            --card-bg: #1E293B; 
+            --text-main: #F8FAFC; 
+            --text-muted: #94A3B8; 
+            --border: #334155; 
+            --input-bg: #0F172A; 
+        }
+    </style>
+</head>
+<body>
+
+<div id="scanner-modal">
+    <div class="scanner-box">
+        <h2 style="margin-top: 0; color: var(--primary); font-size: 18px;"><i class="fa-solid fa-qrcode"></i> Scan Barcode/QR</h2>
+        <div id="reader"></div>
+        <button class="btn-red" onclick="closeScanner()" style="width: 100%; font-size: 14px; padding: 10px;"><i class="fa-solid fa-xmark"></i> Cancel</button>
+    </div>
+</div>
+
+<div id="drawer-overlay" class="mobile-drawer-overlay" onclick="toggleMobileDrawer()"></div>
+<div id="mobile-drawer" class="mobile-drawer">
+    <div class="drawer-header">
+        <h2 style="margin: 0; font-size: 18px; color: var(--primary); display: flex; align-items: center; gap: 8px;"><i class="fa-solid fa-boxes-stacked"></i> Industry Menu</h2>
+        <button onclick="toggleMobileDrawer()" style="background: none; border: none; font-size: 20px; cursor: pointer; color: var(--text-muted);"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="drawer-links">
+        <button class="drawer-item" onclick="selectTabMobile('tab-dashboard')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-house"></i> Dashboard</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item" onclick="selectTabMobile('tab-stock')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-cubes"></i> Stock</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-analytics')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-chart-line"></i> Analytics</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-history')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-clock-rotate-left"></i> History</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-users')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-users"></i> Users & Logs</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+        <button class="drawer-item admin-only" onclick="selectTabMobile('tab-suppliers')"><span style="display: flex; align-items: center; gap: 12px;"><i class="fa-solid fa-truck-field"></i> Suppliers & Settings</span> <i class="fa-solid fa-chevron-right" style="font-size: 12px; color: var(--text-muted);"></i></button>
+    </div>
+    <div style="padding: 20px; border-top: 1px solid var(--border);">
+        <button class="logout-btn" onclick="logout()" style="width: 100%; padding: 12px;"><i class="fa-solid fa-power-off"></i> Logout</button>
+    </div>
+</div>
+
+<div id="login-screen">
+    <div class="modern-login-wrapper">
+        <div class="brand-panel">
+            <div class="quote-mark">“</div>
+            <h2 class="brand-quote">With Industry, you can actually organize your entire business.</h2>
+            <div class="testimonial">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div>
+                    <strong>Anant Jaiswal</strong><br>
+                    <span>Director, Industry Operations</span>
+                </div>
+            </div>
+            <div class="bg-boxes"><i class="fa-solid fa-boxes-stacked"></i></div>
+        </div>
+        <div class="form-panel">
+            <div class="logo-header">
+                <i class="fa-solid fa-boxes-stacked" style="color: #E1261C; font-size: 26px;"></i> 
+                <span style="font-weight: 700; font-size: 22px; margin-left: 10px; color: var(--text-main);">Industry</span>
+            </div>
+            <div id="staff-login-box">
+                <h3 class="form-title">Welcome back</h3>
+                <p class="form-subtitle">Login to your staff account</p>
+                <input type="text" id="staff-user" class="z-input" placeholder="Username">
+                <input type="password" id="staff-pass" class="z-input" placeholder="Password">
+                <button class="z-btn-primary" onclick="attemptLogin('staff')">Log in</button>
+                <div class="divider"><span>or switch view</span></div>
+                <button class="social-btn" onclick="toggleForm('admin')"><i class="fa-solid fa-shield-halved"></i> Admin Portal</button>
+                <p class="switch-form">Don't have an account? <span onclick="toggleForm('register')">Create one</span></p>
+            </div>
+            <div id="staff-register-box" style="display: none;">
+                <h3 class="form-title">Let's get started</h3>
+                <p class="form-subtitle">Your data is stored securely in the cloud.</p>
+                <input type="text" id="reg-user" class="z-input" placeholder="Choose Username">
+                <input type="password" id="reg-pass" class="z-input" placeholder="Choose Password">
+                <button class="z-btn-primary" onclick="registerStaff()">Create your account</button>
+                <p class="switch-form">Already have an account? <span onclick="toggleForm('staff')">Log in</span></p>
+            </div>
+            <div id="admin-login-box" style="display: none;">
+                <h3 class="form-title">Admin Access</h3>
+                <p class="form-subtitle">Requires elevated system privileges</p>
+                <input type="text" id="admin-user" class="z-input" placeholder="Admin Username">
+                <input type="password" id="admin-pass" class="z-input" placeholder="Password">
+                <button class="z-btn-primary" onclick="attemptLogin('admin')">Verify & Login</button>
+                <p class="switch-form">Not an admin? <span onclick="toggleForm('staff')">Back to Staff Login</span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="app-screen">
+    <div class="navbar">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <button class="menu-toggle-btn" onclick="toggleMobileDrawer()"><i class="fa-solid fa-bars"></i></button>
+            <h1><i class="fa-solid fa-boxes-stacked" style="color: #E1261C;"></i> Industry</h1>
+        </div>
+
+        <div class="nav-links-desktop">
+            <button class="tab-btn active" onclick="openTab('tab-dashboard', this)"><i class="fa-solid fa-house"></i> Dashboard</button>
+            <button class="tab-btn" onclick="openTab('tab-stock', this)"><i class="fa-solid fa-cubes"></i> Stock</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-analytics', this)"><i class="fa-solid fa-chart-line"></i> Analytics</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-history', this)"><i class="fa-solid fa-clock-rotate-left"></i> History</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-users', this)"><i class="fa-solid fa-users"></i> Users & Logs</button>
+            <button class="tab-btn admin-only" onclick="openTab('tab-suppliers', this)"><i class="fa-solid fa-truck-field"></i> Suppliers & Settings</button>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="user-greeting" style="font-weight: 600; font-size: 13px; color: var(--text-muted); background: var(--input-bg); padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border);"></span>
+            <button class="btn-blue" onclick="toggleDarkMode()" style="padding: 8px 12px; font-size: 13px;"><i class="fa-solid fa-moon"></i></button>
+            <button class="logout-btn desktop-logout" onclick="logout()" style="display: none;"><i class="fa-solid fa-power-off"></i></button>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- DASHBOARD TAB -->
+        <div id="tab-dashboard" class="tab-content active">
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Total Inventory Items</h4><h2 id="kpi-total-items">0</h2></div>
+                    <div class="kpi-icon" style="background: #EEF2FF; color: #4F46E5;"><i class="fa-solid fa-boxes-stacked"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Low Stock Alerts</h4><h2 id="kpi-low-stock" style="color: var(--danger);">0</h2></div>
+                    <div class="kpi-icon" style="background: #FEF2F2; color: var(--danger);"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Active Suppliers</h4><h2 id="kpi-suppliers">0</h2></div>
+                    <div class="kpi-icon" style="background: #ECFDF5; color: var(--success);"><i class="fa-solid fa-truck-field"></i></div>
+                </div>
+            </div>
+
+            <div class="dashboard-layout">
+                <div class="grid-2">
+                    <div class="card">
+                        <h2><i class="fa-solid fa-cart-plus" style="color:var(--success);"></i> Add Purchase</h2>
+                        <select id="p-category"><option value="" disabled selected>Category...</option><option value="Fuel">Fuel</option><option value="Spare Parts">Spare Parts</option><option value="Raw Material">Raw Material</option><option value="Tools">Tools</option><option value="Other">Other</option></select>
+                        <div class="input-group">
+                            <input type="text" id="p-item" placeholder="Product name or Barcode">
+                            <button class="btn-blue" onclick="openScanner('p-item')" style="padding: 12px 14px;"><i class="fa-solid fa-camera"></i></button>
+                        </div>
+                        <select id="p-supplier-select" onchange="toggleOtherSupplier()"><option value="" disabled selected>Select Supplier...</option><option value="Other">Other</option></select>
+                        <input type="text" id="p-supplier-other" placeholder="Enter New Supplier Name">
+                        <input type="text" id="p-source" placeholder="Source (city / place)">
+                        <input type="number" id="p-qty" placeholder="Quantity">
+                        <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
+                        <input type="number" id="p-price" placeholder="Total Price (Rs)">
+                        <button class="btn-green" onclick="addPurchase()"><i class="fa-solid fa-check"></i> Save Purchase</button>
+                    </div>
+                    <div class="card">
+                        <h2><i class="fa-solid fa-clipboard-user" style="color:var(--primary);"></i> Record Usage</h2>
+                        <div class="input-group">
+                            <input type="text" id="u-item" placeholder="Product used or Barcode">
+                            <button class="btn-blue" onclick="openScanner('u-item')" style="padding: 12px 14px;"><i class="fa-solid fa-camera"></i></button>
+                        </div>
+                        <input type="number" id="u-qty" placeholder="Quantity">
+                        <select id="u-purpose-select" onchange="toggleOtherPurpose()"><option value="" disabled selected>Purpose...</option><option value="Crusher">Crusher</option><option value="Road construction">Road construction</option><option value="Vehicles">Vehicles</option><option value="Other">Other</option></select>
+                        <input type="text" id="u-purpose-other" placeholder="Please specify purpose...">
+                        <button class="btn-green" onclick="addUsage()"><i class="fa-solid fa-check"></i> Save Usage</button>
+                    </div>
+                </div>
+                <div class="card">
+                    <h2><i class="fa-solid fa-chart-simple"></i> Monthly Usage Trend</h2>
+                    <div class="chart-container"><canvas id="monthlyChart"></canvas></div>
+                    <div class="stat-box"><h3 id="avg-usage">0</h3><p>Average Items Used</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- UPGRADED ANALYTICS TAB -->
+        <div id="tab-analytics" class="tab-content">
+            <!-- Header & Controls -->
+            <div class="card" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h2 style="font-size: 18px; border: none; padding: 0; margin: 0 0 6px 0;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Stock History & Financial Analytics</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin: 0;">Real-time valuation, consumption velocity, and category spend breakdown.</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                    <select id="analytics-time-filter" onchange="loadAnalyticsCharts()" style="width: auto; margin: 0; padding: 10px 14px;">
+                        <option value="all">All Time</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="7">Last 7 Days</option>
+                    </select>
+                    <select id="analytics-cat-filter" onchange="loadAnalyticsCharts()" style="width: auto; margin: 0; padding: 10px 14px;">
+                        <option value="all">All Categories</option>
+                        <option value="Fuel">Fuel</option>
+                        <option value="Spare Parts">Spare Parts</option>
+                        <option value="Raw Material">Raw Material</option>
+                        <option value="Tools">Tools</option>
+                        <option value="Other">Other</option>
+                    </select>
+                    <button class="btn-blue" onclick="loadAnalyticsCharts()" style="padding: 10px 14px;"><i class="fa-solid fa-rotate-right"></i></button>
+                    <button class="btn-green" onclick="exportToCSV('analytics-breakdown-table', 'Analytics_Valuation_Report')" style="width: auto; padding: 10px 16px;"><i class="fa-solid fa-file-csv"></i> Export Report</button>
+                </div>
+            </div>
+
+            <!-- Analytics KPI Row -->
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Total Procurement Spend</h4><h2 id="an-total-spend">Rs 0</h2></div>
+                    <div class="kpi-icon" style="background: #EEF2FF; color: #4F46E5;"><i class="fa-solid fa-indian-rupee-sign"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Est. Active Stock Value</h4><h2 id="an-stock-value" style="color: var(--success);">Rs 0</h2></div>
+                    <div class="kpi-icon" style="background: #ECFDF5; color: var(--success);"><i class="fa-solid fa-vault"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Stock Utilization Rate</h4><h2 id="an-burn-rate">0%</h2></div>
+                    <div class="kpi-icon" style="background: #FFFBEB; color: var(--warning);"><i class="fa-solid fa-fire-flame-curved"></i></div>
+                </div>
+                <div class="kpi-card">
+                    <div class="kpi-info"><h4>Most Used Item</h4><h2 id="an-top-item" style="font-size: 18px;">N/A</h2></div>
+                    <div class="kpi-icon" style="background: #FEF2F2; color: var(--danger);"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                </div>
+            </div>
+
+            <!-- Row 1 Charts: Timeline & Category Spend -->
+            <div class="grid-2">
+                <div class="card">
+                    <h2><i class="fa-solid fa-arrows-left-right"></i> Stock Inflow vs. Usage Over Time (Units)</h2>
+                    <div class="chart-container"><canvas id="analyticsLineChart"></canvas></div>
+                </div>
+                <div class="card">
+                    <h2><i class="fa-solid fa-chart-pie"></i> Spend Distribution by Category (Rs)</h2>
+                    <div class="chart-container"><canvas id="analyticsDonutChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Row 2 Charts: Purpose Breakdown & Top Items -->
+            <div class="grid-2">
+                <div class="card">
+                    <h2><i class="fa-solid fa-industry"></i> Usage Breakdown by Purpose / Sector</h2>
+                    <div class="chart-container"><canvas id="analyticsPurposeChart"></canvas></div>
+                </div>
+                <div class="card">
+                    <h2><i class="fa-solid fa-ranking-star"></i> Top Items by Remaining Quantity</h2>
+                    <div class="chart-container"><canvas id="analyticsTopItemsChart"></canvas></div>
+                </div>
+            </div>
+
+            <!-- Row 3: Detailed Item Burn-Rate & Valuation Table -->
+            <div class="card">
+                <h2><i class="fa-solid fa-table-list"></i> Item-Level Consumption & Valuation Breakdown</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item Name</th>
+                            <th>Category</th>
+                            <th>Purchased</th>
+                            <th>Consumed</th>
+                            <th>Remaining</th>
+                            <th>Utilization %</th>
+                            <th>Avg Unit Cost</th>
+                            <th>Est. Stock Value</th>
+                        </tr>
+                    </thead>
+                    <tbody id="analytics-breakdown-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- STOCK TAB -->
+        <div id="tab-stock" class="tab-content">
+            <div class="card">
+                <h2><i class="fa-solid fa-layer-group"></i> Current Stock</h2>
+                <button class="btn-blue" onclick="loadStock()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh Stock</button>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product / Barcode</th>
+                            <th>Remaining</th>
+                            <th>Unit</th>
+                            <th>Status</th>
+                            <th id="stock-action-th" style="display:none;">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-table"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- HISTORY TAB -->
+        <div id="tab-history" class="tab-content">
+            <div class="card">
+                <h2><i class="fa-solid fa-file-invoice"></i> Purchase History</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <input type="text" id="history-search" class="search-bar" onkeyup="filterHistory()" placeholder="🔍 Search history...">
+                    <div>
+                        <button class="btn-blue" onclick="loadHistory()"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                        <button class="btn-green" onclick="exportToCSV('history-table', 'History')" style="width: auto; display: inline-block; padding: 11px 16px;"><i class="fa-solid fa-file-csv"></i> CSV</button>
+                    </div>
+                </div>
+                <table><thead><tr><th>Date</th><th>Category</th><th>Item</th><th>Supplier</th><th>Location</th><th>Qty</th><th>Total (Rs)</th></tr></thead><tbody id="history-table"></tbody></table>
+            </div>
+        </div>
+
+        <!-- USERS & LOGS TAB -->
+        <div id="tab-users" class="tab-content">
+            <div class="grid-2">
+                <div class="card">
+                    <h2><i class="fa-solid fa-users"></i> Registered Users</h2>
+                    <button class="btn-blue" onclick="loadUsersAndLogs()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                    <table>
+                        <thead><tr><th>Username</th><th>Role</th></tr></thead>
+                        <tbody id="users-table"></tbody>
+                    </table>
+                </div>
+                <div class="card">
+                    <h2><i class="fa-solid fa-list-check"></i> System Activity Log</h2>
+                    <table>
+                        <thead><tr><th>Action</th><th>Item</th><th>Qty</th><th>User</th><th>Date</th></tr></thead>
+                        <tbody id="activity-table"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- SUPPLIERS & SETTINGS TAB -->
+        <div id="tab-suppliers" class="tab-content">
+            <div class="grid-2">
+                <div class="card" style="background: var(--input-bg);">
+                    <h2><i class="fa-brands fa-whatsapp" style="color: #25D366;"></i> WhatsApp Alerts</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Set the number to receive automated low stock alerts.</p>
+                    <div class="input-group">
+                        <input type="text" id="admin-wa-input" placeholder="whatsapp:+919876543210">
+                        <button class="btn-green" onclick="saveAdminWhatsApp()" style="width: 140px;"><i class="fa-solid fa-check"></i> Save</button>
+                    </div>
+                </div>
+                <div class="card" style="background: var(--input-bg);">
+                    <h2><i class="fa-solid fa-user-shield" style="color: var(--primary);"></i> Add Admin</h2>
+                    <p style="font-size: 13px; color: var(--text-muted); margin-bottom: 15px;">Create a new administrator account.</p>
+                    <div class="input-group">
+                        <input type="text" id="new-admin-user" placeholder="Username">
+                        <input type="password" id="new-admin-pass" placeholder="Password">
+                    </div>
+                    <button class="btn-blue" onclick="createAdminAccount()" style="width: 100%;"><i class="fa-solid fa-user-plus"></i> Create Admin</button>
+                </div>
+            </div>
+            <div class="card" style="background: var(--input-bg);">
+                <h2><i class="fa-solid fa-plus"></i> Add New Supplier</h2>
+                <div class="grid-2"><input type="text" id="new-sup-name" placeholder="Supplier Name"><input type="text" id="new-sup-loc" placeholder="Location"></div>
+                <button class="btn-green" onclick="addSupplierBtn()" style="width: 200px;"><i class="fa-solid fa-check"></i> Add Supplier</button>
+            </div>
+            <div class="card">
+                <h2><i class="fa-solid fa-building-user"></i> Supplier List</h2>
+                <button class="btn-blue" onclick="loadSuppliers()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
+                <table><thead><tr><th>Supplier Name</th><th>Location</th><th>Purchases</th><th>Total Spent</th><th>Action</th></tr></thead><tbody id="supplier-table"></tbody></table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function toggleDarkMode() { document.body.classList.toggle('dark-mode'); }
+    
+    function toggleMobileDrawer() {
+        document.getElementById('mobile-drawer').classList.toggle('open');
+        document.getElementById('drawer-overlay').style.display = document.getElementById('mobile-drawer').classList.contains('open') ? 'block' : 'none';
     }
-    try:
-        req = urllib.request.Request(FIREBASE_URL)
-        with urllib.request.urlopen(req) as response:
-            data = json.loads(response.read().decode())
-            if data is None: return default_data
-            if "purchases" not in data or data["purchases"] is None: data["purchases"] = []
-            if "usage" not in data or data["usage"] is None: data["usage"] = []
-            if "suppliers" not in data or data["suppliers"] is None: data["suppliers"] = []
-            if "barcodes" not in data or data["barcodes"] is None: data["barcodes"] = {}
-            if "admin_whatsapp" not in data: data["admin_whatsapp"] = ""
-            if "users" not in data or data["users"] is None: data["users"] = default_data["users"]
-            return data
-    except Exception as e:
-        print(f"Error loading from Firebase: {e}")
-        return default_data
+    function selectTabMobile(tabId) {
+        toggleMobileDrawer();
+        let btn = document.querySelector(`.tab-btn[onclick*="${tabId}"]`);
+        if(btn) openTab(tabId, btn);
+        else {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            if(tabId === 'tab-stock') loadStock(); 
+            if(tabId === 'tab-history') loadHistory(); 
+            if(tabId === 'tab-suppliers') { loadSuppliers(); loadAdminWhatsApp(); }
+            if(tabId === 'tab-analytics') loadAnalyticsCharts();
+            if(tabId === 'tab-users') loadUsersAndLogs();
+        }
+    }
 
-def save_data(data):
-    try:
-        req = urllib.request.Request(FIREBASE_URL, data=json.dumps(data).encode(), method='PUT')
-        req.add_header('Content-Type', 'application/json')
-        urllib.request.urlopen(req)
-        check_low_stock_and_alert(data)
-    except Exception as e:
-        print(f"Error saving to Firebase: {e}")
+    function exportToCSV(tableId, filename) {
+        let rows = document.getElementById(tableId).parentNode.querySelectorAll('tr'), csvData = [];
+        for (let i = 0; i < rows.length; i++) {
+            let row = [], cols = rows[i].querySelectorAll('td, th');
+            for (let j = 0; j < cols.length; j++) row.push('"' + cols[j].innerText.replace(/"/g, '""') + '"');
+            if(row.length > 0) csvData.push(row.join(','));
+        }
+        let link = document.createElement('a');
+        link.href = 'data:text/csv;charset=utf-8,' + encodeURI(csvData.join('\n'));
+        link.download = filename + '.csv'; link.click();
+    }
+    function showNotification(msg, isError = false) {
+        Toastify({ text: msg, duration: 3000, gravity: "bottom", position: "right", style: { background: isError ? "#EF4444" : "#10B981", borderRadius: "8px", fontWeight: "bold" } }).showToast();
+    }
+    function filterHistory() {
+        let input = document.getElementById("history-search").value.toLowerCase(), rows = document.querySelectorAll("#history-table tr");
+        rows.forEach(r => r.style.display = r.innerText.toLowerCase().includes(input) ? "" : "none");
+    }
 
-@app.route('/api/login', methods=['POST'])
-def login():
-    data = load_data()
-    req = request.json
-    username = req.get("username", "").lower()
-    password = req.get("password", "")
-    portal = req.get("portal", "") 
-    user = data["users"].get(username)
-    if user and user["password"] == password:
-        if portal == "admin" and user["role"] != "admin":
-            return jsonify({"success": False, "message": "Admin privileges required."}), 403
-        return jsonify({"success": True, "role": user["role"]})
-    return jsonify({"success": False, "message": "Invalid username or password."}), 401
-
-@app.route('/api/register', methods=['POST'])
-def register():
-    data = load_data()
-    req = request.json
-    username = req.get("username", "").lower()
-    password = req.get("password", "")
-    if not username or not password: return jsonify({"success": False, "message": "Missing fields"}), 400
-    if username in data["users"]: return jsonify({"success": False, "message": "Username already exists."}), 409
-    data["users"][username] = {"password": password, "role": "staff"}
-    save_data(data)
-    return jsonify({"success": True})
-
-@app.route('/api/create_admin', methods=['POST'])
-def create_admin():
-    data = load_data()
-    req = request.json
-    if req.get("role") != "admin": 
-        return jsonify({"success": False, "message": "Unauthorized. Admin privileges required."}), 403
+    let html5QrcodeScanner = null, currentScanTarget = ''; 
+    function openScanner(targetInputId) {
+        currentScanTarget = targetInputId; document.getElementById('scanner-modal').style.display = 'flex';
+        html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+        html5QrcodeScanner.render(onScanSuccess, () => {});
+    }
+    function closeScanner() { if (html5QrcodeScanner) html5QrcodeScanner.clear(); document.getElementById('scanner-modal').style.display = 'none'; }
+    
+    async function onScanSuccess(decodedText, decodedResult) {
+        closeScanner();
+        let res = await fetch(`/api/resolve_barcode?code=${decodedText}`);
+        let data = await res.json();
         
-    username = req.get("username", "").lower()
-    password = req.get("password", "")
-    
-    if not username or not password: return jsonify({"success": False, "message": "Missing fields"}), 400
-    if username in data["users"]: return jsonify({"success": False, "message": "Username already exists."}), 409
-    
-    data["users"][username] = {"password": password, "role": "admin"}
-    save_data(data)
-    return jsonify({"success": True, "message": "Admin account created successfully!"})
-
-@app.route('/api/users_list', methods=['POST'])
-def get_users_list():
-    data = load_data()
-    req = request.json
-    if req.get("role") != "admin": 
-        return jsonify({"error": "Unauthorized"}), 403
-    
-    user_list = [{"username": k, "role": v["role"]} for k, v in data["users"].items()]
-    return jsonify(user_list)
-
-@app.route('/api/activity_log', methods=['POST'])
-def get_activity_log():
-    data = load_data()
-    req = request.json
-    if req.get("role") != "admin": 
-        return jsonify({"error": "Unauthorized"}), 403
-    
-    log = []
-    # Fetch purchases
-    for p in data["purchases"]:
-        log.append({
-            "type": "Purchase",
-            "date": p.get("date", ""),
-            "item": p.get("item", ""),
-            "qty": f"{p.get('quantity', 0)} {p.get('unit', '')}",
-            "user": p.get("user", "System/Legacy")
-        })
-    # Fetch usage
-    for u in data["usage"]:
-        log.append({
-            "type": "Usage",
-            "date": u.get("date", ""),
-            "item": u.get("item", ""),
-            "qty": str(u.get("quantity", 0)),
-            "user": u.get("user", "System/Legacy")
-        })
-    
-    return jsonify(log)
-
-@app.route('/api/resolve_barcode', methods=['GET'])
-def resolve_barcode():
-    data = load_data()
-    code = request.args.get('code')
-    item_info = data["barcodes"].get(code)
-    
-    name, price, unit = "", 0, ""
-    if isinstance(item_info, dict):
-        name = item_info.get("name", "")
-        price = item_info.get("price", 0)
-        unit = item_info.get("unit", "")
-    elif isinstance(item_info, str):
-        name = item_info
-    
-    if name and price == 0:
-        for p in reversed(data["purchases"]):
-            if p.get("item", "").lower() == name.lower():
-                price = p.get("price", 0)
-                unit = p.get("unit", "")
-                break
+        if (data.name) {
+            if (currentScanTarget === 'p-item') {
+                document.getElementById('p-item').value = data.name;
+                if (data.price) document.getElementById('p-price').value = data.price;
+                if (data.unit) document.getElementById('p-unit').value = data.unit;
+                showNotification(`Barcode recognized: ${data.name} (Rs ${data.price})`);
+            } else {
+                document.getElementById(currentScanTarget).value = data.name;
+                showNotification(`Barcode recognized: ${data.name}`);
+            }
+        } else {
+            let itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's name?`);
+            if (itemName) {
+                let itemPrice = prompt("Enter standard unit price (Rs):", "0");
+                let itemUnit = prompt("Enter unit (e.g. litre, ton, pcs):", "pcs");
                 
-    return jsonify({"name": name, "price": price, "unit": unit})
+                await fetch('/api/link_barcode', { 
+                    method: 'POST', 
+                    headers: {'Content-Type': 'application/json'}, 
+                    body: JSON.stringify({ barcode: decodedText, name: itemName, price: parseFloat(itemPrice || 0), unit: itemUnit }) 
+                });
+                
+                document.getElementById(currentScanTarget).value = itemName;
+                if (currentScanTarget === 'p-item') {
+                    document.getElementById('p-price').value = itemPrice;
+                    document.getElementById('p-unit').value = itemUnit;
+                }
+                showNotification("Barcode linked with price and remembered!");
+            } else {
+                document.getElementById(currentScanTarget).value = decodedText;
+            }
+        }
+        if (navigator.vibrate) navigator.vibrate(100);
+    }
 
-@app.route('/api/link_barcode', methods=['POST'])
-def link_barcode():
-    data = load_data()
-    req = request.json
-    code = req.get("barcode")
-    name = req.get("name")
-    price = float(req.get("price", 0))
-    unit = req.get("unit", "")
-    data["barcodes"][code] = {"name": name, "price": price, "unit": unit}
-    save_data(data)
-    return jsonify({"success": True})
+    function toggleForm(formType) {
+        document.getElementById('staff-login-box').style.display = 'none';
+        document.getElementById('staff-register-box').style.display = 'none';
+        document.getElementById('admin-login-box').style.display = 'none';
+        if (formType === 'staff') document.getElementById('staff-login-box').style.display = 'block';
+        if (formType === 'register') document.getElementById('staff-register-box').style.display = 'block';
+        if (formType === 'admin') document.getElementById('admin-login-box').style.display = 'block';
+    }
 
-@app.route('/api/set_admin_whatsapp', methods=['POST'])
-def set_admin_whatsapp():
-    data = load_data()
-    req = request.json
-    if req.get("role") != "admin": return jsonify({"success": False, "message": "Unauthorized"}), 403
-    data["admin_whatsapp"] = req.get("whatsapp", "")
-    save_data(data)
-    return jsonify({"success": True})
-
-@app.route('/api/get_admin_whatsapp', methods=['GET'])
-def get_admin_whatsapp():
-    data = load_data()
-    return jsonify({"whatsapp": data.get("admin_whatsapp", "")})
-
-@app.route('/api/stock', methods=['GET'])
-def get_stock():
-    data = load_data()
-    stock, units = {}, {}
-    for p in data["purchases"]:
-        stock[p["item"]] = stock.get(p["item"], 0) + p["quantity"]
-        units[p["item"]] = p["unit"]
-    for u in data["usage"]:
-        if u["item"] in stock: stock[u["item"]] -= u["quantity"]
+    let currentRole = null, usageChartInstance = null, analyticsLineInstance = null, analyticsDonutInstance = null, analyticsPurposeInstance = null, analyticsTopItemsInstance = null;
     
-    stock_list = []
-    for k, v in stock.items():
-        status = "Normal"
-        if v < 50: status = "Low Stock"
-        if v <= 0: status = "Out of Stock"
-        stock_list.append({"item": k, "remaining": v, "unit": units.get(k, ""), "status": status})
-    return jsonify(stock_list)
+    function checkAuth() {
+        let role = localStorage.getItem('userRole');
+        if (role) {
+            currentRole = role; document.getElementById('login-screen').style.display = 'none'; document.getElementById('app-screen').style.display = 'block';
+            document.getElementById('user-greeting').innerText = `Role: ${role.toUpperCase()}`;
+            document.querySelectorAll('.admin-only').forEach(el => el.style.display = role === 'staff' ? 'none' : 'flex');
+            
+            if (window.innerWidth > 900) { document.querySelector('.desktop-logout').style.display = 'block'; }
+            
+            loadDashboardData(); loadSuppliers(); loadStockKPI(); loadAdminWhatsApp();
+        } else {
+            document.getElementById('login-screen').style.display = 'flex'; document.getElementById('app-screen').style.display = 'none';
+        }
+    }
 
-@app.route('/api/delete_stock_item', methods=['POST'])
-def delete_stock_item():
-    data = load_data()
-    req = request.json
-    item_name = req.get("item")
-    role = req.get("role")
-    
-    if role != "admin":
-        return jsonify({"success": False, "message": "Unauthorized. Admin privileges required."}), 403
+    async function attemptLogin(portalType) {
+        let u = document.getElementById(portalType+'-user').value, p = document.getElementById(portalType+'-pass').value;
+        if(!u || !p) return showNotification("Please enter username and password.", true);
+        let res = await fetch('/api/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p, portal: portalType }) });
+        let data = await res.json();
+        if(data.success) { 
+            localStorage.setItem('userRole', data.role); 
+            localStorage.setItem('username', u);
+            showNotification(`Welcome back!`); 
+            checkAuth(); 
+        } 
+        else showNotification(data.message, true);
+    }
+
+    async function registerStaff() {
+        let u = document.getElementById('reg-user').value, p = document.getElementById('reg-pass').value;
+        if(!u || !p) return showNotification("Missing fields.", true);
+        let res = await fetch('/api/register', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: u, password: p }) });
+        let data = await res.json();
+        if(data.success) { 
+            localStorage.setItem('username', u);
+            showNotification("Account created!"); 
+            toggleForm('staff'); 
+        } else showNotification(data.message, true);
+    }
+
+    async function createAdminAccount() {
+        let u = document.getElementById('new-admin-user').value;
+        let p = document.getElementById('new-admin-pass').value;
         
-    data["purchases"] = [p for p in data["purchases"] if p.get("item", "").lower() != item_name.lower()]
-    data["usage"] = [u for u in data["usage"] if u.get("item", "").lower() != item_name.lower()]
-    
-    codes_to_remove = [code for code, info in data["barcodes"].items() if (isinstance(info, dict) and info.get("name", "").lower() == item_name.lower()) or (isinstance(info, str) and info.lower() == item_name.lower())]
-    for code in codes_to_remove:
-        del data["barcodes"][code]
+        if(!u || !p) return showNotification("Please enter a username and password.", true);
         
-    save_data(data)
-    return jsonify({"success": True})
+        let res = await fetch('/api/create_admin', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ username: u, password: p, role: currentRole })
+        });
+        
+        let data = await res.json();
+        if(data.success) {
+            showNotification(data.message || "Admin account created successfully!");
+            document.getElementById('new-admin-user').value = '';
+            document.getElementById('new-admin-pass').value = '';
+        } else {
+            showNotification(data.message || "Failed to create admin.", true);
+        }
+    }
 
-@app.route('/api/category_distribution', methods=['GET'])
-def get_category_distribution():
-    data = load_data()
-    categories = {}
-    for p in data["purchases"]:
-        cat = p.get("category", "Uncategorized")
-        categories[cat] = categories.get(cat, 0) + p["quantity"]
-    return jsonify({"labels": list(categories.keys()), "data": list(categories.values())})
+    function logout() { 
+        localStorage.removeItem('userRole'); 
+        localStorage.removeItem('username'); 
+        currentRole = null; 
+        document.querySelectorAll('input[type="text"], input[type="password"]').forEach(i=>i.value=''); 
+        openTab('tab-dashboard', document.querySelector('.tab-btn')); 
+        checkAuth(); 
+    }
+    
+    function openTab(tabId, btn) {
+        document.querySelectorAll('.tab-content, .tab-btn').forEach(el => el.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active'); 
+        if(btn) btn.classList.add('active');
+        if(tabId === 'tab-stock') loadStock(); 
+        if(tabId === 'tab-history') loadHistory(); 
+        if(tabId === 'tab-suppliers') { loadSuppliers(); loadAdminWhatsApp(); }
+        if(tabId === 'tab-analytics') loadAnalyticsCharts();
+        if(tabId === 'tab-users') loadUsersAndLogs();
+    }
 
-@app.route('/api/purchase', methods=['POST'])
-def add_purchase():
-    data = load_data()
-    req = request.json
-    supplier_name = req.get("supplier")
-    source = req.get("source", "")
-    if supplier_name and not any(s["name"].lower() == supplier_name.lower() for s in data["suppliers"]):
-        data["suppliers"].append({"name": supplier_name, "location": source})
-    data["purchases"].append({
-        "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
-        "category": req.get("category", "Uncategorized"),
-        "item": req.get("item"),
-        "supplier": supplier_name,
-        "source": source,
-        "quantity": float(req.get("quantity", 0)),
-        "unit": req.get("unit"),
-        "price": float(req.get("price", 0)),
-        "user": req.get("user", "Unknown")
-    })
-    save_data(data)
-    return jsonify({"message": "Purchase saved."})
+    function toggleOtherPurpose() { document.getElementById('u-purpose-other').style.display = document.getElementById('u-purpose-select').value === 'Other' ? 'block' : 'none'; }
+    function toggleOtherSupplier() {
+        let sel = document.getElementById('p-supplier-select');
+        document.getElementById('p-supplier-other').style.display = sel.value === 'Other' ? 'block' : 'none';
+        if (sel.value !== 'Other') document.getElementById('p-source').value = sel.options[sel.selectedIndex]?.dataset.loc || '';
+    }
 
-@app.route('/api/usage', methods=['POST'])
-def add_usage():
-    data = load_data()
-    req = request.json
-    data["usage"].append({
-        "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
-        "item": req.get("item"),
-        "quantity": float(req.get("quantity", 0)),
-        "purpose": req.get("purpose"),
-        "user": req.get("user", "Unknown")
-    })
-    save_data(data)
-    return jsonify({"message": "Usage saved."})
+    async function loadAdminWhatsApp() {
+        let res = await fetch('/api/get_admin_whatsapp');
+        let data = await res.json();
+        if (data.whatsapp) document.getElementById('admin-wa-input').value = data.whatsapp;
+    }
 
-@app.route('/api/monthly_usage', methods=['GET'])
-def get_monthly_usage():
-    data = load_data()
-    monthly = {}
-    for u in data["usage"]:
-        purpose = u.get("purpose", "Other") 
-        monthly[purpose] = monthly.get(purpose, 0) + u["quantity"]
-    return jsonify({"labels": list(monthly.keys()), "data": list(monthly.values())})
+    async function saveAdminWhatsApp() {
+        let wa = document.getElementById('admin-wa-input').value;
+        if(!wa) return showNotification("Please enter a WhatsApp number.", true);
+        let res = await fetch('/api/set_admin_whatsapp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ whatsapp: wa, role: currentRole }) });
+        let data = await res.json();
+        if (data.success) showNotification("WhatsApp alert number saved successfully!");
+        else showNotification(data.message || "Failed to save", true);
+    }
 
-@app.route('/api/history', methods=['GET'])
-def get_history():
-    data = load_data()
-    return jsonify(data["purchases"])
+    async function loadStockKPI() {
+        try {
+            let res = await fetch('/api/stock'), stockData = await res.json();
+            let supRes = await fetch('/api/suppliers'), supData = await supRes.json();
+            document.getElementById('kpi-total-items').innerText = stockData.length;
+            let lowStockCount = stockData.filter(i => i.status === 'Low Stock' || i.status === 'Out of Stock').length;
+            document.getElementById('kpi-low-stock').innerText = lowStockCount;
+            document.getElementById('kpi-suppliers').innerText = supData.length;
+        } catch(e) { console.error(e); }
+    }
 
-@app.route('/api/suppliers', methods=['GET'])
-def get_suppliers():
-    data = load_data()
-    stats = {}
-    for p in data["purchases"]:
-        name = p.get("supplier", "Unknown")
-        stats.setdefault(name, {"count": 0, "total": 0})
-        stats[name]["count"] += 1
-        stats[name]["total"] += p.get("price", 0)
-    result = []
-    for s in data["suppliers"]:
-        name = s["name"]
-        result.append({"name": name, "location": s.get("location", ""), "count": stats.get(name, {}).get("count", 0), "total": stats.get(name, {}).get("total", 0)})
-    return jsonify(result)
+    async function loadSuppliers() {
+        let res = await fetch('/api/suppliers'), data = await res.json();
+        let drop = document.getElementById('p-supplier-select');
+        drop.innerHTML = '<option value="" disabled selected>Select...</option>' + data.map(s => `<option value="${s.name}" data-loc="${s.location}">${s.name}</option>`).join('') + '<option value="Other">Other</option>';
+        if (currentRole === 'admin') document.getElementById('supplier-table').innerHTML = data.map(s => `<tr><td>${s.name}</td><td>${s.location}</td><td>${s.count}</td><td>Rs ${s.total.toFixed(2)}</td><td><button class="btn-red" onclick="deleteSupplier('${s.name}')"><i class="fa-solid fa-trash"></i></button></td></tr>`).join('');
+    }
 
-@app.route('/api/supplier_action', methods=['POST'])
-def manage_supplier():
-    data = load_data()
-    req = request.json
-    action, name = req.get("action"), req.get("name")
-    if action == "add":
-        if not any(s["name"].lower() == name.lower() for s in data["suppliers"]):
-            data["suppliers"].append({"name": name, "location": req.get("location", "")})
-    elif action == "delete":
-        if req.get("role") != "admin": return jsonify({"error": "Unauthorized"}), 403
-        data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
-    save_data(data)
-    return jsonify({"message": "Success"})
+    async function loadStock() {
+        let res = await fetch('/api/stock'), data = await res.json();
+        let actionTh = document.getElementById('stock-action-th');
+        if (currentRole === 'admin') {
+            actionTh.style.display = '';
+            document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td><td><button class="btn-red" onclick="deleteStockItem('${i.item}')"><i class="fa-solid fa-trash"></i> Delete</button></td></tr>`).join('');
+        } else {
+            actionTh.style.display = 'none';
+            document.getElementById('stock-table').innerHTML = data.map(i => `<tr><td>${i.item}</td><td style="color: ${i.remaining < 0 ? 'red' : 'inherit'}">${i.remaining.toFixed(2)}</td><td>${i.unit}</td><td><span class="badge ${i.status === 'Normal' ? 'badge-success' : (i.status === 'Low Stock' ? 'badge-warning' : 'badge-danger')}">${i.status}</span></td></tr>`).join('');
+        }
+    }
+
+    async function deleteStockItem(itemName) {
+        if(confirm(`Are you sure you want to delete "${itemName}" and all its history/stock records?`)) {
+            let res = await fetch('/api/delete_stock_item', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ item: itemName, role: currentRole })
+            });
+            let data = await res.json();
+            if(data.success) {
+                showNotification(`Stock item "${itemName}" deleted successfully!`);
+                loadStock();
+                loadStockKPI();
+            } else {
+                showNotification(data.message || "Failed to delete item", true);
+            }
+        }
+    }
+
+    async function loadAnalyticsCharts() {
+        try {
+            let [histRes, logRes] = await Promise.all([
+                fetch('/api/history'),
+                fetch('/api/activity_log', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ role: currentRole || 'admin' })
+                })
+            ]);
+
+            let purchases = await histRes.json();
+            let allLogs = await logRes.json();
+            let usages = Array.isArray(allLogs) ? allLogs.filter(l => l.type === 'Usage') : [];
+
+            let daysFilter = document.getElementById('analytics-time-filter')?.value || 'all';
+            let catFilter = document.getElementById('analytics-cat-filter')?.value || 'all';
+            let cutoffDate = null;
+            if (daysFilter !== 'all') {
+                cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - parseInt(daysFilter));
+            }
+
+            let itemMeta = {};
+            purchases.forEach(p => {
+                let name = (p.item || 'Unknown').trim();
+                if (!itemMeta[name]) itemMeta[name] = { category: p.category || 'Uncategorized', unit: p.unit || 'units', totalCost: 0, totalQty: 0 };
+                itemMeta[name].totalCost += parseFloat(p.price || 0);
+                itemMeta[name].totalQty += parseFloat(p.quantity || 0);
+            });
+
+            let filteredPurchases = purchases.filter(p => {
+                let passDate = !cutoffDate || (p.date && new Date(p.date) >= cutoffDate);
+                let passCat = catFilter === 'all' || (p.category || 'Uncategorized') === catFilter;
+                return passDate && passCat;
+            });
+
+            let filteredUsages = usages.filter(u => {
+                let itemCat = itemMeta[u.item]?.category || 'Uncategorized';
+                let passDate = !cutoffDate || (u.date && new Date(u.date) >= cutoffDate);
+                let passCat = catFilter === 'all' || itemCat === catFilter;
+                return passDate && passCat;
+            });
+
+            let totalSpend = 0, totalPurchasedUnits = 0, totalUsedUnits = 0;
+            let itemStats = {};
+
+            filteredPurchases.forEach(p => {
+                let name = p.item || 'Unknown';
+                let qty = parseFloat(p.quantity || 0);
+                let price = parseFloat(p.price || 0);
+                totalSpend += price;
+                totalPurchasedUnits += qty;
+
+                if (!itemStats[name]) itemStats[name] = { purchased: 0, used: 0, spend: 0, category: p.category || 'Uncategorized', unit: p.unit || '' };
+                itemStats[name].purchased += qty;
+                itemStats[name].spend += price;
+            });
+
+            filteredUsages.forEach(u => {
+                let name = u.item || 'Unknown';
+                let qty = parseFloat(u.qty || 0);
+                totalUsedUnits += qty;
+
+                if (!itemStats[name]) {
+                    let meta = itemMeta[name] || { category: 'Uncategorized', unit: '' };
+                    itemStats[name] = { purchased: 0, used: 0, spend: 0, category: meta.category, unit: meta.unit };
+                }
+                itemStats[name].used += qty;
+            });
+
+            let estStockValue = 0, topUsedItem = 'None', maxUsedQty = 0;
+            Object.entries(itemStats).forEach(([name, st]) => {
+                let rem = Math.max(0, st.purchased - st.used);
+                let avgUnitCost = st.purchased > 0 ? (st.spend / st.purchased) : 0;
+                estStockValue += rem * avgUnitCost;
+                if (st.used > maxUsedQty) {
+                    maxUsedQty = st.used;
+                    topUsedItem = `${name} (${st.used} ${st.unit})`;
+                }
+            });
+
+            let utilizationRate = totalPurchasedUnits > 0 ? ((totalUsedUnits / totalPurchasedUnits) * 100).toFixed(1) : 0;
+
+            document.getElementById('an-total-spend').innerText = `Rs ${totalSpend.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+            document.getElementById('an-stock-value').innerText = `Rs ${estStockValue.toLocaleString('en-IN', { maximumFractionDigits: 0 })}`;
+            document.getElementById('an-burn-rate').innerText = `${utilizationRate}%`;
+            document.getElementById('an-top-item').innerText = topUsedItem;
+
+            // Chart 1: Date-wise Purchase vs Usage Timeline
+            let dateMap = {};
+            filteredPurchases.forEach(p => {
+                let d = p.date || 'Unknown';
+                if (!dateMap[d]) dateMap[d] = { bought: 0, used: 0 };
+                dateMap[d].bought += parseFloat(p.quantity || 0);
+            });
+            filteredUsages.forEach(u => {
+                let d = u.date || 'Unknown';
+                if (!dateMap[d]) dateMap[d] = { bought: 0, used: 0 };
+                dateMap[d].used += parseFloat(u.qty || 0);
+            });
+
+            let sortedDates = Object.keys(dateMap).sort();
+            let lineCtx = document.getElementById('analyticsLineChart').getContext('2d');
+            if (analyticsLineInstance) analyticsLineInstance.destroy();
+            analyticsLineInstance = new Chart(lineCtx, {
+                type: 'bar',
+                data: {
+                    labels: sortedDates.length ? sortedDates : ['No Data'],
+                    datasets: [
+                        { label: 'Purchased (Inflow)', data: sortedDates.map(d => dateMap[d].bought), backgroundColor: '#10B981', borderRadius: 6 },
+                        { label: 'Consumed (Outflow)', data: sortedDates.map(d => dateMap[d].used), backgroundColor: '#EF4444', borderRadius: 6 }
+                    ]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Chart 2: Spend by Category (Rs)
+            let catSpend = {};
+            filteredPurchases.forEach(p => {
+                let c = p.category || 'Uncategorized';
+                catSpend[c] = (catSpend[c] || 0) + parseFloat(p.price || 0);
+            });
+            let catLabels = Object.keys(catSpend);
+            let donutCtx = document.getElementById('analyticsDonutChart').getContext('2d');
+            if (analyticsDonutInstance) analyticsDonutInstance.destroy();
+            analyticsDonutInstance = new Chart(donutCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels.length ? catLabels : ['No Spend Data'],
+                    datasets: [{
+                        data: catLabels.length ? Object.values(catSpend) : [1],
+                        backgroundColor: ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#06B6D4']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        tooltip: {
+                            callbacks: { label: ctx => ` ${ctx.label}: Rs ${Number(ctx.raw).toLocaleString('en-IN')}` }
+                        }
+                    }
+                }
+            });
+
+            // Chart 3: Usage by Purpose
+            let usageRes = await fetch('/api/monthly_usage'), usageByPurpose = await usageRes.json();
+            let purposeCtx = document.getElementById('analyticsPurposeChart').getContext('2d');
+            if (analyticsPurposeInstance) analyticsPurposeInstance.destroy();
+            analyticsPurposeInstance = new Chart(purposeCtx, {
+                type: 'bar',
+                data: {
+                    labels: usageByPurpose.labels.length ? usageByPurpose.labels : ['No Usage Logged'],
+                    datasets: [{
+                        label: 'Units Consumed',
+                        data: usageByPurpose.data.length ? usageByPurpose.data : [0],
+                        backgroundColor: '#4F46E5',
+                        borderRadius: 6
+                    }]
+                },
+                options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } } }
+            });
+
+            // Chart 4: Top Items by Remaining Stock
+            let itemEntries = Object.entries(itemStats).map(([name, st]) => ({
+                name,
+                remaining: Math.max(0, st.purchased - st.used)
+            })).sort((a, b) => b.remaining - a.remaining).slice(0, 6);
+
+            let topCtx = document.getElementById('analyticsTopItemsChart').getContext('2d');
+            if (analyticsTopItemsInstance) analyticsTopItemsInstance.destroy();
+            analyticsTopItemsInstance = new Chart(topCtx, {
+                type: 'bar',
+                data: {
+                    labels: itemEntries.length ? itemEntries.map(i => i.name) : ['No Stock'],
+                    datasets: [{
+                        label: 'Remaining Units',
+                        data: itemEntries.length ? itemEntries.map(i => i.remaining) : [0],
+                        backgroundColor: '#F59E0B',
+                        borderRadius: 6
+                    }]
+                },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+            });
+
+            // Populate Item Breakdown Table
+            let tbody = document.getElementById('analytics-breakdown-table');
+            let rowsHtml = Object.entries(itemStats).map(([name, st]) => {
+                let rem = st.purchased - st.used;
+                let util = st.purchased > 0 ? Math.min(100, ((st.used / st.purchased) * 100)).toFixed(1) : 0;
+                let unitCost = st.purchased > 0 ? (st.spend / st.purchased) : 0;
+                let val = Math.max(0, rem) * unitCost;
+                let barColor = util > 80 ? '#EF4444' : (util > 50 ? '#F59E0B' : '#10B981');
+
+                return `<tr>
+                    <td><strong>${name}</strong></td>
+                    <td><span style="background:var(--input-bg); border:1px solid var(--border); padding:3px 8px; border-radius:10px; font-size:12px;">${st.category}</span></td>
+                    <td>${st.purchased.toFixed(2)} ${st.unit}</td>
+                    <td>${st.used.toFixed(2)} ${st.unit}</td>
+                    <td style="font-weight:600; color:${rem <= 0 ? 'var(--danger)' : 'inherit'}">${rem.toFixed(2)} ${st.unit}</td>
+                    <td style="min-width:140px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="flex:1; height:8px; background:var(--border); border-radius:4px; overflow:hidden;">
+                                <div style="width:${util}%; height:100%; background:${barColor};"></div>
+                            </div>
+                            <span style="font-size:12px; font-weight:600;">${util}%</span>
+                        </div>
+                    </td>
+                    <td>Rs ${unitCost.toFixed(2)}</td>
+                    <td><strong>Rs ${val.toFixed(2)}</strong></td>
+                </tr>`;
+            }).join('');
+
+            tbody.innerHTML = rowsHtml || `<tr><td colspan="8" style="text-align:center; color:var(--text-muted);">No inventory data matching the current filter.</td></tr>`;
+
+        } catch (err) {
+            console.error("Analytics Load Error:", err);
+        }
+    }
+
+    async function loadUsersAndLogs() {
+        if(currentRole !== 'admin') return;
+
+        let uRes = await fetch('/api/users_list', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: currentRole })
+        });
+        let uData = await uRes.json();
+        if(!uData.error) {
+            document.getElementById('users-table').innerHTML = uData.map(u => `<tr>
+                <td><strong>${u.username}</strong></td>
+                <td><span class="badge ${u.role === 'admin' ? 'badge-danger' : 'badge-success'}">${u.role.toUpperCase()}</span></td>
+            </tr>`).join('');
+        }
+
+        let logRes = await fetch('/api/activity_log', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ role: currentRole })
+        });
+        let logData = await logRes.json();
+        if(!logData.error) {
+            document.getElementById('activity-table').innerHTML = logData.reverse().map(l => `<tr>
+                <td><span class="badge ${l.type === 'Purchase' ? 'badge-success' : 'badge-warning'}">${l.type}</span></td>
+                <td>${l.item}</td>
+                <td>${l.qty}</td>
+                <td><i class="fa-solid fa-user-pen" style="color:var(--text-muted); margin-right:4px;"></i> ${l.user}</td>
+                <td>${l.date}</td>
+            </tr>`).join('');
+        }
+    }
+
+    async function addPurchase() {
+        let currentUser = localStorage.getItem('username') || 'Unknown';
+        let sup = document.getElementById('p-supplier-select').value; if(sup === 'Other') sup = document.getElementById('p-supplier-other').value;
+        let payload = { category: document.getElementById('p-category').value, item: document.getElementById('p-item').value, supplier: sup, source: document.getElementById('p-source').value, quantity: document.getElementById('p-qty').value, unit: document.getElementById('p-unit').value, price: document.getElementById('p-price').value, user: currentUser };
+        if(!payload.item || !payload.supplier) return showNotification("Missing data.", true);
+
+        await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        showNotification('✅ Saved to Cloud!');
+        document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-unit').value = '';
+        loadDashboardData(); loadSuppliers(); loadStockKPI();
+    }
+
+    async function addUsage() {
+        let currentUser = localStorage.getItem('username') || 'Unknown';
+        let purp = document.getElementById('u-purpose-select').value; if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
+        let payload = { item: document.getElementById('u-item').value, quantity: document.getElementById('u-qty').value, purpose: purp, user: currentUser };
+        if(!payload.item || !payload.quantity) return showNotification("Missing data.", true);
+
+        await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        showNotification('✅ Saved to Cloud!');
+        document.getElementById('u-item').value = ''; document.getElementById('u-qty').value = '';
+        loadDashboardData(); loadStockKPI();
+    }
+
+    async function addSupplierBtn() {
+        let n = document.getElementById('new-sup-name').value, l = document.getElementById('new-sup-loc').value;
+        if(!n) return showNotification("Name required.", true);
+        await fetch('/api/supplier_action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "add", name: n, location: l, role: currentRole }) });
+        document.getElementById('new-sup-name').value = ''; document.getElementById('new-sup-loc').value = ''; showNotification("Added!"); loadSuppliers(); loadStockKPI();
+    }
+    async function deleteSupplier(n) {
+        if(confirm(`Delete ${n}?`)) { await fetch('/api/supplier_action', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ action: "delete", name: n, role: currentRole }) }); loadSuppliers(); loadStockKPI(); }
+    }
+
+    async function loadDashboardData() {
+        let res = await fetch('/api/monthly_usage'), data = await res.json();
+        let total = data.data.reduce((a, b) => a + b, 0);
+        document.getElementById('avg-usage').innerText = data.data.length > 0 ? (total / data.data.length).toFixed(1) : 0;
+        let ctx = document.getElementById('monthlyChart').getContext('2d');
+        if (usageChartInstance) usageChartInstance.destroy();
+        usageChartInstance = new Chart(ctx, { type: 'bar', data: { labels: data.labels, datasets: [{ label: 'Items Used', data: data.data, backgroundColor: '#4F46E5', borderRadius: 4 }] }, options: { responsive: true, maintainAspectRatio: false } });
+        loadStockKPI();
+    }
+
+    async function loadHistory() {
+        let res = await fetch('/api/history'), data = await res.json();
+        document.getElementById('history-table').innerHTML = data.reverse().map(p => `<tr><td>${p.date}</td><td><span style="background:var(--input-bg); border: 1px solid var(--border); padding:2px 8px; border-radius:10px; font-size:12px;">${p.category || 'N/A'}</span></td><td>${p.item}</td><td>${p.supplier}</td><td>${p.source}</td><td>${p.quantity} ${p.unit}</td><td>Rs ${parseFloat(p.price).toFixed(2)}</td></tr>`).join('');
+    }
+
+    document.addEventListener('touchmove', function (event) {
+        if (event.touches.length > 1) { event.preventDefault(); }
+    }, { passive: false });
+
+    let lastTouchEnd = 0;
+    document.addEventListener('touchend', function (event) {
+        let now = (new Date()).getTime();
+        if (now - lastTouchEnd <= 300) { event.preventDefault(); }
+        lastTouchEnd = now;
+    }, { passive: false });
+
+    document.addEventListener('wheel', function (event) {
+        if (event.ctrlKey) { event.preventDefault(); }
+    }, { passive: false });
+
+    checkAuth();
+</script>
+</body>
+</html>
