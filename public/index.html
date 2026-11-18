@@ -862,7 +862,7 @@
                     <h2><i class="fa-solid fa-users" style="color:var(--primary);"></i> Registered Users</h2>
                     <button class="btn-blue" onclick="loadUsersAndLogs()" style="margin-bottom: 20px;"><i class="fa-solid fa-rotate-right"></i> Refresh</button>
                     <table>
-                        <thead><tr><th>Username</th><th>Role</th></tr></thead>
+                        <thead><tr><th>Username</th><th>Role</th><th>Action</th></tr></thead>
                         <tbody id="users-table"></tbody>
                     </table>
                 </div>
@@ -1069,8 +1069,31 @@
             showNotification(data.message || "Admin account created successfully!");
             document.getElementById('new-admin-user').value = '';
             document.getElementById('new-admin-pass').value = '';
+            loadUsersAndLogs();
         } else {
             showNotification(data.message || "Failed to create admin.", true);
+        }
+    }
+
+    // FUNCTION TO DELETE ADMIN/STAFF USER
+    async function deleteUser(usernameToDelete) {
+        if(confirm(`Are you sure you want to delete the user "${usernameToDelete}"? This action cannot be undone.`)) {
+            let res = await fetch('/api/delete_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    username_to_delete: usernameToDelete, 
+                    current_username: localStorage.getItem('username'),
+                    role: currentRole 
+                })
+            });
+            let data = await res.json();
+            if(data.success) {
+                showNotification(data.message);
+                loadUsersAndLogs();
+            } else {
+                showNotification(data.message || "Failed to delete user.", true);
+            }
         }
     }
 
@@ -1359,7 +1382,7 @@
                 let util = st.purchased > 0 ? Math.min(100, ((st.used / st.purchased) * 100)).toFixed(1) : 0;
                 let unitCost = st.purchased > 0 ? (st.spend / st.purchased) : 0;
                 let val = Math.max(0, rem) * unitCost;
-                let barColor = util > 80 ? '#FF3B30' : (util > 50 ? '#0284C7' : '#007AFF');
+                let barColor = util > 80 ? 'var(--danger)' : (util > 50 ? '#0284C7' : '#007AFF');
 
                 return `<tr>
                     <td><strong>${name}</strong></td>
@@ -1396,9 +1419,15 @@
         });
         let uData = await uRes.json();
         if(!uData.error) {
+            let currentUser = localStorage.getItem('username');
             document.getElementById('users-table').innerHTML = uData.map(u => `<tr>
                 <td><strong>${u.username}</strong></td>
                 <td><span class="badge ${u.role === 'admin' ? 'badge-danger' : 'badge-success'}">${u.role.toUpperCase()}</span></td>
+                <td>
+                    ${(u.username !== 'admin' && u.username !== currentUser) 
+                      ? `<button class="btn-red" onclick="deleteUser('${u.username}')"><i class="fa-solid fa-trash"></i></button>` 
+                      : `<span style="font-size: 11px; color: var(--text-muted);">(Root / Self)</span>`}
+                </td>
             </tr>`).join('');
         }
 
