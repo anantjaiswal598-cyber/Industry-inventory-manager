@@ -108,6 +108,32 @@ def create_admin():
     save_data(data)
     return jsonify({"success": True, "message": "Admin account created successfully!"})
 
+@app.route('/api/delete_user', methods=['POST'])
+def delete_user():
+    data = load_data()
+    req = request.json
+    if req.get("role") != "admin": 
+        return jsonify({"success": False, "message": "Unauthorized. Admin privileges required."}), 403
+        
+    username_to_delete = req.get("username_to_delete", "").lower()
+    current_username = req.get("current_username", "").lower()
+    
+    if not username_to_delete:
+        return jsonify({"success": False, "message": "Missing username to delete"}), 400
+        
+    if username_to_delete not in data["users"]:
+        return jsonify({"success": False, "message": "User not found."}), 404
+        
+    if username_to_delete == current_username:
+        return jsonify({"success": False, "message": "You cannot delete your own account."}), 403
+        
+    if username_to_delete == "admin":
+        return jsonify({"success": False, "message": "Cannot delete the primary root admin account."}), 403
+        
+    del data["users"][username_to_delete]
+    save_data(data)
+    return jsonify({"success": True, "message": f"User '{username_to_delete}' deleted successfully!"})
+
 @app.route('/api/users_list', methods=['POST'])
 def get_users_list():
     data = load_data()
@@ -319,3 +345,4 @@ def manage_supplier():
         data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
     save_data(data)
     return jsonify({"message": "Success"})
+
