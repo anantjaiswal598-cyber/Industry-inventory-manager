@@ -510,17 +510,14 @@
 </head>
 <body>
 
-<!-- MASTER REUSABLE TRANSPARENT VECTOR DEFINITION OF THE PROVIDED "ASC" LOGO (ONLY LETTERS VISIBLE) -->
+<!-- MASTER REUSABLE TRANSPARENT VECTOR DEFINITION OF THE PROVIDED "ASC" LOGO -->
 <svg width="0" height="0" style="position:absolute; visibility:hidden;" aria-hidden="true">
     <defs>
         <g id="asc-logo-transparent">
-            <!-- Interwoven Gray 'S' -->
             <path d="M 222 40 C 186 14, 128 24, 122 68 C 116 112, 226 106, 214 162 C 206 196, 162 202, 134 176" 
                   fill="none" stroke="#737B84" stroke-width="33" stroke-linecap="round" />
-            <!-- Navy 'C' -->
             <path d="M 300 62 C 266 20, 188 26, 174 90 C 160 152, 214 198, 276 182 C 290 178, 302 170, 312 156" 
                   fill="none" stroke="#102A4C" stroke-width="35" stroke-linecap="butt" />
-            <!-- Bold Navy 'A' -->
             <path d="M 82 20 L 118 20 L 184 198 L 144 198 L 130 158 L 66 158 L 52 198 L 12 198 Z M 77 126 L 119 126 L 98 62 Z" 
                   fill="#102A4C" />
         </g>
@@ -606,7 +603,6 @@
                 </div>
             </div>
 
-            <!-- Transparent ASC Watermark inside Login Brand Panel -->
             <svg class="bg-watermark-panel" viewBox="0 0 330 215"><use href="#asc-logo-transparent"></use></svg>
         </div>
 
@@ -708,9 +704,9 @@
                         <select id="p-supplier-select" onchange="toggleOtherSupplier()"><option value="" disabled selected>Select Supplier...</option><option value="Other">Other</option></select>
                         <input type="text" id="p-supplier-other" placeholder="Enter New Supplier Name">
                         <input type="text" id="p-source" placeholder="Source (city / place)">
-                        <input type="number" id="p-qty" placeholder="Quantity">
+                        <input type="number" id="p-qty" placeholder="Quantity" min="0" step="any" onkeydown="if(['-', 'e', 'E'].includes(event.key)) event.preventDefault();" oninput="if(this.value < 0) this.value = '';">
                         <input type="text" id="p-unit" placeholder="Unit (e.g. litre, ton)">
-                        <input type="number" id="p-price" placeholder="Total Price (Rs)">
+                        <input type="number" id="p-price" placeholder="Total Price (Rs)" min="0" step="any" onkeydown="if(['-', 'e', 'E'].includes(event.key)) event.preventDefault();" oninput="if(this.value < 0) this.value = '';">
                         <button class="btn-green" onclick="addPurchase()"><i class="fa-solid fa-check"></i> Save Purchase</button>
                     </div>
                     <div class="card">
@@ -719,7 +715,7 @@
                             <input type="text" id="u-item" placeholder="Product used or Barcode">
                             <button class="btn-blue" onclick="openScanner('u-item')" style="padding: 12px 14px;"><i class="fa-solid fa-camera"></i></button>
                         </div>
-                        <input type="number" id="u-qty" placeholder="Quantity">
+                        <input type="number" id="u-qty" placeholder="Quantity" min="0" step="any" onkeydown="if(['-', 'e', 'E'].includes(event.key)) event.preventDefault();" oninput="if(this.value < 0) this.value = '';">
                         <select id="u-purpose-select" onchange="toggleOtherPurpose()"><option value="" disabled selected>Purpose...</option><option value="Crusher">Crusher</option><option value="Road construction">Road construction</option><option value="Vehicles">Vehicles</option><option value="Other">Other</option></select>
                         <input type="text" id="u-purpose-other" placeholder="Please specify purpose...">
                         <button class="btn-green" onclick="addUsage()"><i class="fa-solid fa-check"></i> Save Usage</button>
@@ -978,13 +974,14 @@
         } else {
             let itemName = prompt(`New barcode scanned: ${decodedText}\nWhat is the product's name?`);
             if (itemName) {
-                let itemPrice = prompt("Enter standard unit price (Rs):", "0");
+                let rawPrice = prompt("Enter standard unit price (Rs):", "0");
+                let itemPrice = Math.max(0, parseFloat(rawPrice || 0) || 0);
                 let itemUnit = prompt("Enter unit (e.g. litre, ton, pcs):", "pcs");
                 
                 await fetch('/api/link_barcode', { 
                     method: 'POST', 
                     headers: {'Content-Type': 'application/json'}, 
-                    body: JSON.stringify({ barcode: decodedText, name: itemName, price: parseFloat(itemPrice || 0), unit: itemUnit }) 
+                    body: JSON.stringify({ barcode: decodedText, name: itemName, price: itemPrice, unit: itemUnit }) 
                 });
                 
                 document.getElementById(currentScanTarget).value = itemName;
@@ -1075,7 +1072,6 @@
         }
     }
 
-    // FUNCTION TO DELETE ADMIN/STAFF USER
     async function deleteUser(usernameToDelete) {
         if(confirm(`Are you sure you want to delete the user "${usernameToDelete}"? This action cannot be undone.`)) {
             let res = await fetch('/api/delete_user', {
@@ -1276,7 +1272,6 @@
             document.getElementById('an-burn-rate').innerText = `${utilizationRate}%`;
             document.getElementById('an-top-item').innerText = topUsedItem;
 
-            // Chart 1: Date-wise Purchase vs Usage Timeline (Blue & Cool Slate Palette)
             let dateMap = {};
             filteredPurchases.forEach(p => {
                 let d = p.date || 'Unknown';
@@ -1304,7 +1299,6 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
 
-            // Chart 2: Spend by Category (Apple Blues & Slate Shades)
             let catSpend = {};
             filteredPurchases.forEach(p => {
                 let c = p.category || 'Uncategorized';
@@ -1335,7 +1329,6 @@
                 }
             });
 
-            // Chart 3: Usage by Purpose
             let usageRes = await fetch('/api/monthly_usage'), usageByPurpose = await usageRes.json();
             let purposeCtx = document.getElementById('analyticsPurposeChart').getContext('2d');
             if (analyticsPurposeInstance) analyticsPurposeInstance.destroy();
@@ -1353,7 +1346,6 @@
                 options: { indexAxis: 'y', responsive: true, maintainAspectRatio: false, scales: { x: { beginAtZero: true } } }
             });
 
-            // Chart 4: Top Items by Remaining Stock
             let itemEntries = Object.entries(itemStats).map(([name, st]) => ({
                 name,
                 remaining: Math.max(0, st.purchased - st.used)
@@ -1375,7 +1367,6 @@
                 options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
             });
 
-            // Populate Item Breakdown Table
             let tbody = document.getElementById('analytics-breakdown-table');
             let rowsHtml = Object.entries(itemStats).map(([name, st]) => {
                 let rem = st.purchased - st.used;
@@ -1449,11 +1440,32 @@
 
     async function addPurchase() {
         let currentUser = localStorage.getItem('username') || 'Unknown';
-        let sup = document.getElementById('p-supplier-select').value; if(sup === 'Other') sup = document.getElementById('p-supplier-other').value;
-        let payload = { category: document.getElementById('p-category').value, item: document.getElementById('p-item').value, supplier: sup, source: document.getElementById('p-source').value, quantity: document.getElementById('p-qty').value, unit: document.getElementById('p-unit').value, price: document.getElementById('p-price').value, user: currentUser };
+        let sup = document.getElementById('p-supplier-select').value;
+        if(sup === 'Other') sup = document.getElementById('p-supplier-other').value;
+
+        let qty = parseFloat(document.getElementById('p-qty').value);
+        let price = parseFloat(document.getElementById('p-price').value);
+
+        if (isNaN(qty) || qty <= 0) return showNotification("Quantity must be greater than 0.", true);
+        if (isNaN(price) || price < 0) return showNotification("Price cannot be negative.", true);
+
+        let payload = {
+            category: document.getElementById('p-category').value,
+            item: document.getElementById('p-item').value,
+            supplier: sup,
+            source: document.getElementById('p-source').value,
+            quantity: qty,
+            unit: document.getElementById('p-unit').value,
+            price: price,
+            user: currentUser
+        };
         if(!payload.item || !payload.supplier) return showNotification("Missing data.", true);
 
-        await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        let res = await fetch('/api/purchase', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) {
+            let err = await res.json();
+            return showNotification(err.message || "Invalid input.", true);
+        }
         showNotification('✅ Saved to Cloud!');
         document.getElementById('p-item').value = ''; document.getElementById('p-qty').value = ''; document.getElementById('p-price').value = ''; document.getElementById('p-unit').value = '';
         loadDashboardData(); loadSuppliers(); loadStockKPI();
@@ -1461,11 +1473,20 @@
 
     async function addUsage() {
         let currentUser = localStorage.getItem('username') || 'Unknown';
-        let purp = document.getElementById('u-purpose-select').value; if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
-        let payload = { item: document.getElementById('u-item').value, quantity: document.getElementById('u-qty').value, purpose: purp, user: currentUser };
-        if(!payload.item || !payload.quantity) return showNotification("Missing data.", true);
+        let purp = document.getElementById('u-purpose-select').value;
+        if(purp === 'Other') purp = document.getElementById('u-purpose-other').value;
 
-        await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        let qty = parseFloat(document.getElementById('u-qty').value);
+        if (isNaN(qty) || qty <= 0) return showNotification("Quantity must be greater than 0.", true);
+
+        let payload = { item: document.getElementById('u-item').value, quantity: qty, purpose: purp, user: currentUser };
+        if(!payload.item) return showNotification("Missing data.", true);
+
+        let res = await fetch('/api/usage', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        if (!res.ok) {
+            let err = await res.json();
+            return showNotification(err.message || "Invalid input.", true);
+        }
         showNotification('✅ Saved to Cloud!');
         document.getElementById('u-item').value = ''; document.getElementById('u-qty').value = '';
         loadDashboardData(); loadStockKPI();
