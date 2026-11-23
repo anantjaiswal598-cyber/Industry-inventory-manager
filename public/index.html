@@ -1598,6 +1598,22 @@
         if (event.ctrlKey) { event.preventDefault(); }
     }, { passive: false });
 
+    // Enable Enter-key flow on Login & Register screens
+    function bindEnterFlow(userId, passId, submitFn) {
+        const userEl = document.getElementById(userId);
+        const passEl = document.getElementById(passId);
+        userEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') passEl.focus();
+        });
+        passEl.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') submitFn();
+        });
+    }
+
+    bindEnterFlow('staff-user', 'staff-pass', () => attemptLogin('staff'));
+    bindEnterFlow('admin-user', 'admin-pass', () => attemptLogin('admin'));
+    bindEnterFlow('reg-user', 'reg-pass', () => registerStaff());
+
     checkAuth();
 </script>
 </body>
