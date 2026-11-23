@@ -200,7 +200,7 @@ def link_barcode():
     req = request.json
     code = req.get("barcode")
     name = req.get("name")
-    price = float(req.get("price", 0))
+    price = max(0.0, float(req.get("price", 0)))
     unit = req.get("unit", "")
     data["barcodes"][code] = {"name": name, "price": price, "unit": unit}
     save_data(data)
@@ -271,6 +271,12 @@ def get_category_distribution():
 def add_purchase():
     data = load_data()
     req = request.json
+    qty = float(req.get("quantity", 0))
+    price = float(req.get("price", 0))
+
+    if qty <= 0 or price < 0:
+        return jsonify({"success": False, "message": "Quantity must be greater than 0 and price cannot be negative."}), 400
+
     supplier_name = req.get("supplier")
     source = req.get("source", "")
     if supplier_name and not any(s["name"].lower() == supplier_name.lower() for s in data["suppliers"]):
@@ -281,9 +287,9 @@ def add_purchase():
         "item": req.get("item"),
         "supplier": supplier_name,
         "source": source,
-        "quantity": float(req.get("quantity", 0)),
+        "quantity": qty,
         "unit": req.get("unit"),
-        "price": float(req.get("price", 0)),
+        "price": price,
         "user": req.get("user", "Unknown")
     })
     save_data(data)
@@ -293,10 +299,15 @@ def add_purchase():
 def add_usage():
     data = load_data()
     req = request.json
+    qty = float(req.get("quantity", 0))
+
+    if qty <= 0:
+        return jsonify({"success": False, "message": "Quantity must be greater than 0."}), 400
+
     data["usage"].append({
         "date": req.get("date") or datetime.now().strftime("%Y-%m-%d"),
         "item": req.get("item"),
-        "quantity": float(req.get("quantity", 0)),
+        "quantity": qty,
         "purpose": req.get("purpose"),
         "user": req.get("user", "Unknown")
     })
@@ -345,4 +356,3 @@ def manage_supplier():
         data["suppliers"] = [s for s in data["suppliers"] if s["name"].lower() != name.lower()]
     save_data(data)
     return jsonify({"message": "Success"})
-
